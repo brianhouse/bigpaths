@@ -11,7 +11,7 @@ db = client[mongo['database']]
 def make_indexes():
     db.entries.drop_indexes()
     try:
-        db.entries.create_index([("geometry", GEOSPHERE)])
+        db.entries.create_index([("location", GEOSPHERE)])
         db.entries.create_index([("t", ASCENDING)])
         db.entries.create_index([("user_id", ASCENDING)])
         db.entries.create_index([("t", ASCENDING), ("user_id", ASCENDING)], unique=True)

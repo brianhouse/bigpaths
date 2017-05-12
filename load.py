@@ -5,7 +5,11 @@ from housepy import timeutil, log, strings
 from geojson import Point
 from mongo import db
 
-FILENAME = os.path.join("..", "data", "w_id", sys.argv[1])
+try:
+    FILENAME = os.path.join("..", "data", "w_id", sys.argv[1])
+except IndexError:
+    print("[PATH]")
+    exit()
 
 fields = []
 data = []
