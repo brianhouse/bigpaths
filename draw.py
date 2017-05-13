@@ -9,13 +9,17 @@ from colors import colors
 from geojson import Feature, Point
 
 
+# PVD = Point((-71.4128, 41.8240, 0))
 NYC = Point((-74.0059, 40.7128, 0))
-PVD = Point((-71.4128, 41.8240, 0))
+LAX = Point((-118.2437, 34.0522))
+BER = Point((13.4050, 52.5200))
+LON = Point((-0.1278, 51.5074))
+SFO = Point((-122.4194, 37.7749))
 
-CITY = NYC
+CITY = SFO
 USER_ID = None
 
-MILES = 20
+MILES = 15
 SIZE = 1
 
 if USER_ID is not None:
