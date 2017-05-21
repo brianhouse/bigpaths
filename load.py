@@ -39,3 +39,6 @@ with open(FILENAME) as f:
             db.entries.insert(entry)
         except Exception as e:
             log.exc(log.warning(e))
+
+
+## NOTE: this all ends up labeling all local times as UTC without conversion
