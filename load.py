@@ -41,4 +41,5 @@ with open(FILENAME) as f:
             log.exc(log.warning(e))
 
 
-## NOTE: this all ends up labeling all local times as UTC without conversion
+## NOTE: this ends up labeling all local times as UTC without conversion
+## that's intended, because then we can just work naively

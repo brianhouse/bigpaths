@@ -27,7 +27,7 @@ def draw_sequence(s, sequence):
 
 
 log.info("Loading...")
-sequences = util.load("sequences.pkl")
+sequences = util.load("sequences_50.pkl")
 log.info("--> %d sequences" % len(sequences))
 
 for i in range(100):

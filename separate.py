@@ -8,6 +8,8 @@ from mongo import db
 from colors import colors
 from geojson import Feature, Point
 
+NPOINTS = 10
+
 LON_1, LAT_1 = -74.053573, 40.919423
 LON_2, LAT_2 = -73.699264, 40.538534
 min_x, max_y = geo.project((LON_1, LAT_1))
@@ -44,7 +46,7 @@ def draw_path(user_id, day, points):
         ps.append((x, y))
         ctx.arc(x, y, 3 / ctx.width, 3 / ctx.height, fill=(0., 0., 0., 1.), thickness=0.0)
     ctx.line(ps, stroke=(0., 0., 0., 1.), thickness=1.0)        
-    ctx.output("users/%d_%d_%d.png" % (t, day, user_id), open_file=False)
+    ctx.output("users/%d_%d_%d.png" % (t, day, user_id), open_file=True)
 
 
 def draw_sequence(user_id, s, sequence):
@@ -57,7 +59,7 @@ def draw_sequence(user_id, s, sequence):
         y1 = (y1 - min_y) / (max_y - min_y)
         x2 = (x2 - min_x) / (max_x - min_x)
         y2 = (y2 - min_y) / (max_y - min_y)
-        c = ((p/288) * 0.35) + .3
+        c = ((p/288) * 0.65) + .0
         ctx.arc(x1, y1, 5 / ctx.width, 5 / ctx.height, fill=(c, 1., 1., .5), thickness=0.0)
         ctx.line(x1, y1, x2, y2, stroke=(c, 1., 1., 1.), thickness=5.0)        
     ctx.output("users/%d_s%d_%d.png" % (t, s, user_id), open_file=True)
@@ -79,8 +81,7 @@ def main():
         points = [(point['location']['coordinates'][0], point['location']['coordinates'][1], point['t']) for point in points]
         log.info("--> %d points" % len(points))
 
-        # draw_points(user_id, points)
-        # break
+        draw_points(user_id, points)
 
         start_t = points[0][-1]
         stop_t = points[-1][-1]
@@ -102,9 +103,24 @@ def main():
             d_stop_t = timeutil.timestamp(day)
 
             day_points = [point for point in points if point[-1] >= d_start_t and point[-1] < d_stop_t]
-            if len(day_points) > 10:
+            log.debug(len(day_points))
+            if len(day_points) >= NPOINTS:
 
                 # draw_path(user_id, d, day_points)
+
+                # # filter out transportation
+                # marks = []
+                # for p, point in enumerate(day_points):
+                #     if p == 0 or p == len(day_points) - 1:
+                #         continue
+                #     prev = day_points[p-1]
+                #     next = day_points[p+1]
+                #     if point[-1] - prev[-1] < 10 * 60 and next[-1] - point[-1] < 10 * 60:
+                #         marks.append(p)
+                # print(marks)
+                # day_points = [point for (p, point) in enumerate(day_points) if p not in marks]
+
+                draw_path(user_id, d+1, day_points)
 
                 periods = np.array([point[-1] for point in day_points])
                 periods -= d_start_t
@@ -120,10 +136,9 @@ def main():
                     sequence.append(point[:2])
 
                 log.info("--> %s" % s)
-                # draw_sequence(user_id, s, sequence)
+                draw_sequence(user_id, s, sequence)
                 s += 1
                 sequences.append(sequence)
-
 
             d += 1
 
