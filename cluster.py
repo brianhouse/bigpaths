@@ -2,13 +2,11 @@
 
 import random, datetime
 import numpy as np
-from bson.son import SON
 from housepy import drawing, geo, config, log, util, timeutil
 from mongo import db
 from colors import colors
-from geojson import Feature, Point
-from separate import draw_points
 from cluster_tree import ClusterTree
+from sklearn.cluster import AgglomerativeClustering
 
 NPOINTS = 10
 
@@ -19,6 +17,19 @@ max_x, min_y = geo.project((LON_2, LAT_2))
 ratio = (max_x - min_x) / (max_y - min_y)
 
 location = {'$geoWithin': {'$geometry': {'type': "Polygon", 'coordinates': [[ [LON_1, LAT_1], [LON_2, LAT_1], [LON_2, LAT_2], [LON_1, LAT_2], [LON_1, LAT_1] ]]}}}
+
+
+def draw_points(user_id, points, labels):
+    log.info("DRAWING POINTS FOR USER %s" % user_id)
+    t = timeutil.timestamp()
+    ctx = drawing.Context(1000, int(1000 / ratio), relative=True, flip=True, hsv=True)
+    for p, point in enumerate(points):
+        x, y = geo.project((point[0], point[1]))
+        x = (x - min_x) / (max_x - min_x)
+        y = (y - min_y) / (max_y - min_y)
+        c = labels[p] / 10, 1., 1., 1.
+        ctx.arc(x, y, 3 / ctx.width, 3 / ctx.height, fill=c, thickness=0.0)
+    ctx.output("users/%d_%d.png" % (t, user_id))
 
 
 def main():
@@ -44,15 +55,26 @@ def main():
             next = points[p+1]
             if point[-1] - prev[-1] < 10 * 60 and next[-1] - point[-1] < 10 * 60:
                 marks.append(p)
-        points = [point for (p, point) in enumerate(points) if p not in marks]
+        points = [(point[0], point[1]) for (p, point) in enumerate(points) if p not in marks]
+        points = np.array(points)
 
-        draw_points(user_id, points)
 
-        ct = ClusterTree.build(points, geo.distance)
-        print("place clustertree:")
-        print(ct.draw())
-        clusters = ct.get_pruned(0.5)
+        ct = AgglomerativeClustering(n_clusters=20)
+        labels = ct.fit_predict(points, points.shape)
+        draw_points(user_id, points, labels)
 
+        exit()
+
+        # print("place clustertree:")
+        # print(ct.draw())
+        # clusters = ct.get_pruned(0.5)   # does this suggest a half-mile radius?
+
+
+        cluster_points = [cluster.vector for (c, cluster) in enumerate(clusters)]
+
+        # label in terms of frequency
+
+        # now we separate into days
 
 if __name__ == "__main__":
     main()
