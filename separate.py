@@ -25,6 +25,7 @@ def save_users():
 
 
 def draw_points(user_id, points):
+    log.info("DRAWING POINTS FOR USER %s" % user_id)
     t = timeutil.timestamp()
     ctx = drawing.Context(1000, int(1000 / ratio), relative=True, flip=True, hsv=True)
     for point in points:
@@ -36,6 +37,7 @@ def draw_points(user_id, points):
 
 
 def draw_path(user_id, day, points):
+    log.info("DRAWING PATH FOR USER %s, DAY %s" % (user_id, day))
     t = timeutil.timestamp()
     ctx = drawing.Context(1000, int(1000 / ratio), relative=True, flip=True, hsv=True)
     ps = []
@@ -46,7 +48,7 @@ def draw_path(user_id, day, points):
         ps.append((x, y))
         ctx.arc(x, y, 3 / ctx.width, 3 / ctx.height, fill=(0., 0., 0., 1.), thickness=0.0)
     ctx.line(ps, stroke=(0., 0., 0., 1.), thickness=1.0)        
-    ctx.output("users/%d_%d_%d.png" % (t, day, user_id), open_file=True)
+    ctx.output("users/%d_%d_%d.png" % (t, day, user_id), open_file=False)
 
 
 def draw_sequence(user_id, s, sequence):
@@ -62,7 +64,7 @@ def draw_sequence(user_id, s, sequence):
         c = ((p/288) * 0.65) + .0
         ctx.arc(x1, y1, 5 / ctx.width, 5 / ctx.height, fill=(c, 1., 1., .5), thickness=0.0)
         ctx.line(x1, y1, x2, y2, stroke=(c, 1., 1., 1.), thickness=5.0)        
-    ctx.output("users/%d_s%d_%d.png" % (t, s, user_id), open_file=True)
+    ctx.output("users/%d_s%d_%d.png" % (t, s, user_id), open_file=False)
 
 
 def main():
@@ -75,13 +77,16 @@ def main():
     sequences = []
 
     for u, user_id in enumerate(user_ids):
+
+        user_id = 1
         
         log.info("USER %s..." % user_id)
         points = db.entries.find({'user_id': user_id, 'location': location}).sort('t')
         points = [(point['location']['coordinates'][0], point['location']['coordinates'][1], point['t']) for point in points]
         log.info("--> %d points" % len(points))
 
-        draw_points(user_id, points)
+        # draw_points(user_id, points)
+        # break
 
         start_t = points[0][-1]
         stop_t = points[-1][-1]
@@ -106,8 +111,6 @@ def main():
             log.debug(len(day_points))
             if len(day_points) >= NPOINTS:
 
-                # draw_path(user_id, d, day_points)
-
                 # # filter out transportation
                 # marks = []
                 # for p, point in enumerate(day_points):
@@ -120,7 +123,7 @@ def main():
                 # print(marks)
                 # day_points = [point for (p, point) in enumerate(day_points) if p not in marks]
 
-                draw_path(user_id, d+1, day_points)
+                draw_path(user_id, d, day_points)
 
                 periods = np.array([point[-1] for point in day_points])
                 periods -= d_start_t
@@ -141,6 +144,8 @@ def main():
                 sequences.append(sequence)
 
             d += 1
+
+        break
 
     log.info("--> generated %d sequences" % len(sequences))
 

@@ -27,10 +27,22 @@ def draw_sequence(s, sequence):
 
 
 log.info("Loading...")
-sequences = util.load("sequences_50.pkl")
+sequences = util.load("sequences_house_10.pkl")
 log.info("--> %d sequences" % len(sequences))
 
 for i in range(100):
     index = random.choice(range(len(sequences)))
     sequence = sequences[index]
     draw_sequence(index, sequence)
+
+
+
+"""
+
+Characteristics of a well-ordered path:
+
+
+returns to its starting point
+
+
+"""
