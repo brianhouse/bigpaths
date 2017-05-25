@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-import random, datetime
+import random, datetime, json
 import numpy as np
 from housepy import drawing, geo, config, log, util, timeutil
 from mongo import db
 from colors import colors
-from cluster_tree import ClusterTree
 from sklearn.cluster import AgglomerativeClustering
+from sklearn.cluster import DBSCAN
 
 NPOINTS = 10
 
@@ -19,7 +19,7 @@ ratio = (max_x - min_x) / (max_y - min_y)
 location = {'$geoWithin': {'$geometry': {'type': "Polygon", 'coordinates': [[ [LON_1, LAT_1], [LON_2, LAT_1], [LON_2, LAT_2], [LON_1, LAT_2], [LON_1, LAT_1] ]]}}}
 
 
-def draw_points(user_id, points, labels):
+def draw_points(user_id, points, labels, centroids):
     log.info("DRAWING POINTS FOR USER %s" % user_id)
     t = timeutil.timestamp()
     ctx = drawing.Context(1000, int(1000 / ratio), relative=True, flip=True, hsv=True)
@@ -28,7 +28,19 @@ def draw_points(user_id, points, labels):
         x = (x - min_x) / (max_x - min_x)
         y = (y - min_y) / (max_y - min_y)
         c = labels[p] / 10, 1., 1., 1.
-        ctx.arc(x, y, 3 / ctx.width, 3 / ctx.height, fill=c, thickness=0.0)
+        c = colors[labels[p] % len(colors)]
+        # size = 10 if p in centroids else 3
+        size = 1
+
+        ctx.arc(x, y, size / ctx.width, size / ctx.height, fill=c, thickness=0.0)
+
+        if labels[p] != -1:
+            centroid = centroids[labels[p]]
+            cx, cy = geo.project((centroid[0], centroid[1]))
+            cx = (cx - min_x) / (max_x - min_x)
+            cy = (cy - min_y) / (max_y - min_y)
+            ctx.line(x, y, cx, cy, stroke=c, thickness=1.0)
+
     ctx.output("users/%d_%d.png" % (t, user_id))
 
 
@@ -58,10 +70,29 @@ def main():
         points = [(point[0], point[1]) for (p, point) in enumerate(points) if p not in marks]
         points = np.array(points)
 
+        print(points[0])
 
-        ct = AgglomerativeClustering(n_clusters=20)
-        labels = ct.fit_predict(points, points.shape)
-        draw_points(user_id, points, labels)
+        # ct = AgglomerativeClustering(n_clusters=20)
+        ct = DBSCAN(metric=geo.distance, eps=0.1, min_samples=5)    # eps is distance
+        labels = ct.fit_predict(points, points.shape)        
+        print(list(labels))
+        print(len(labels))
+        print(list(ct.core_sample_indices_))
+        print(len(ct.core_sample_indices_))
+
+        clusters = {}
+        for core_sample_index in ct.core_sample_indices_:
+            if labels[core_sample_index] not in clusters:
+                clusters[labels[core_sample_index]] = []
+            clusters[labels[core_sample_index]].append(points[core_sample_index])
+        for c, core_samples in clusters.items():
+            lon = np.sum(np.array(core_samples)[:, 0]) / len(core_samples)
+            lat = np.sum(np.array(core_samples)[:, 1]) / len(core_samples)
+            clusters[c] = lon, lat
+
+        print(clusters)
+
+        draw_points(user_id, points, labels, clusters)
 
         exit()
 
