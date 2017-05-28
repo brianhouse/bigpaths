@@ -10,7 +10,8 @@ from geojson import Feature, Point
 ctx = drawing.Context(1000, 250, relative=True, flip=True, hsv=True)
 
 for x in range(288):
-    c = ((x/288) * 0.35) + .3
+    # c = ((x/288) * 0.35) + .3
+    # c = ((x/288) * 0.35) + .0
     c = ((x/288) * 0.65) + .0
     ctx.line(x / 288, 0, x / 288, 1, stroke=(c, 1., 1., .5), thickness=7)
 
