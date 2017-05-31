@@ -5,7 +5,7 @@ from housepy import timeutil, log, strings
 from geojson import Point
 from mongo import db
 
-FILENAME = "openpaths_house.json"
+FILENAME = ""
 
 with open(FILENAME) as f:
     data = json.loads(f.read())
