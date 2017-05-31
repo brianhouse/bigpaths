@@ -18,16 +18,19 @@ location = {'$geoWithin': {'$geometry': {'type': "Polygon", 'coordinates': [[ [L
 def main():
 
     user_ids = util.load("user_ids.pkl")
-    user_ids = [1]
+    # user_ids = [1]
 
     for u, user_id in enumerate(user_ids):
+
+        if u == 20:
+            break
 
         sequences = []
         
         # retrieve all user points
         log.info("USER %s..." % user_id)
-        # points = db.entries.find({'user_id': user_id, 'location': location}).sort('t')
-        points = db.entries.find({'user_id': user_id, 'location': location, 't': {'$gt': 1293840000, '$lt': 1325289600}}).sort('t')
+        points = db.entries.find({'user_id': user_id, 'location': location}).sort('t')
+        # points = db.entries.find({'user_id': user_id, 'location': location, 't': {'$gt': 1293840000, '$lt': 1325289600}}).sort('t')
         points = [(point['location']['coordinates'][0], point['location']['coordinates'][1], point['t']) for point in points]
         log.info("--> %d points" % len(points))
 
@@ -41,10 +44,9 @@ def main():
             next = points[p+1]
             if point[-1] - prev[-1] <= 10 * 60 and next[-1] - point[-1] <= 10 * 60 and geo.distance(point, prev) > 1/20 and geo.distance(point, next) > 1/20:
                 marks.append(p)
-        log.info("--> removed %d transients" % len(marks))
-        points = [point for (p, point) in enumerate(points) if p not in marks]
-
-        ## need to keep transients somehow
+        log.info("--> marked %d transients" % len(marks))
+        transients = [point for (p, point) in enumerate(points) if p in marks]
+        points = [point for (p, point) in enumerate(points) if p not in marks]        
 
         # find clusters within ~100ft
         ct = Birch(n_clusters=None, threshold=0.01)   ## calculate this (used .5mi)
@@ -68,6 +70,7 @@ def main():
         for c, cluster_label in enumerate(cluster_labels):
             clusters[cluster_label] = centroids[c], cluster_order[c]
         draw_points(user_id, points, labels, clusters)
+        continue
 
         # -- get 255 step daily sequences of clusters (identified by frequency) -- #
 
@@ -91,23 +94,31 @@ def main():
 
             # get point and index for this day
             day_points = [(point, p) for (p, point) in enumerate(points) if point[-1] >= d_start_t and point[-1] < d_stop_t]
+            day_transients = [(point, p) for (p, point) in enumerate(transients) if point[-1] >= d_start_t and point[-1] < d_stop_t]
             if len(day_points) == 0:
                 continue
 
             # get the daily period for each of these points
-            periods = np.array([point[0][-1] for point in day_points])
-            periods -= d_start_t
-            periods //= 60
-            periods //= 5
-            periods = list(periods)
+            def get_periods(points):            
+                periods = np.array([point[0][-1] for point in points])
+                periods -= d_start_t
+                periods //= 60
+                periods //= 5
+                periods = list(periods)
+                return periods
+
+            point_periods = get_periods(day_points)
+            transient_periods = get_periods(day_transients)
 
             # add the order index of the cluster of this point to the sequence
             sequence = []
             for i in range(288):
-                if i in periods:
-                    point_index = day_points[periods.index(i)][1]
-                    current_cluster = cluster_order[cluster_labels[labels[point_index]]]
-                sequence.append(current_cluster)
+                if i in point_periods:
+                    point_index = day_points[point_periods.index(i)][1]
+                    current_cluster = cluster_order[cluster_labels[labels[point_index]]]                    
+                elif i in transient_periods:    # prioritize the destination
+                    current_cluster = None
+                sequence.append(current_cluster)                    
             sequences.append(sequence)
 
         log.info("--> generated %s sequences" % len(sequences))
@@ -134,20 +145,20 @@ def draw_points(user_id, points, labels, clusters):
         ctx.line(x, y, cx, cy, stroke=.5, thickness=0.5)
         ctx.arc(x, y, 3 / ctx.width, 3 / ctx.height, fill=c, thickness=0.0)
 
-    ctx.output("users/%d_%d.png" % (t, user_id))
+    ctx.output("clusters/%d_%d.png" % (t, user_id))
 
 
 def draw_strips(user_id, sequences):
     t = timeutil.timestamp()
     log.info("Drawing %d sequences..." % len(sequences))
-    ctx = drawing.Context(1000, len(sequences) * 4, relative=True, flip=True, hsv=False)
+    ctx = drawing.Context(1000, len(sequences) * 4, relative=True, flip=True, hsv=False, background=(0., 0., 0., 1.))
     for q, sequence in enumerate(sequences):
         for p, cluster in enumerate(sequence):
             if cluster is None:
                 continue
             color = colors[cluster % len(colors)]
             ctx.line(p/288, q/len(sequences), (p+1)/288, q/len(sequences), stroke=color, thickness=4)
-    ctx.output("users/%d_%d.png" % (t, user_id), open_file=True)
+    ctx.output("strips/%d_%d.png" % (t, user_id))
 
 
 if __name__ == "__main__":
