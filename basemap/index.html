@@ -1,0 +1,55 @@
+<html>
+    <head>
+        <title>NYC</title>
+        <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
+        <style type="text/css">
+            body {
+                margin: 0px;
+                padding: 0px;
+                background-color: black;
+            }
+            #map {
+                width: 1000px;
+                height: 1413px;                 
+                
+/*                width: 10000px;
+                height: 14130px;
+*/                margin: 0px;
+                padding: 0px;
+                background-color: white;
+            }     
+        </style>
+        <script type="text/javascript">
+
+            function initMap() {
+                map = new L.map('map', {        // 'map' here refers to the <div> in our HTML
+                    layers: new L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiYnJpYW5ob3VzZSIsImEiOiJXcER4MEl3In0.5EayMxFZ4h8v4_UGP20MjQ"),
+                    zoomControl: true,
+                    attributionControl: false,
+                    doubleClickZoom: false,
+                    scrollWheelZoom: false,
+                    boxZoom: false,
+                    touchZoom: false,
+                    dragging: false,
+                    keyboard: false,
+                    zoom: 5,
+                    // minZoom: 3,                    
+                    // maxZoom: 17
+                });     
+                bounds = [
+                    [40.919423, -74.053573],
+                    [40.538534, -73.699264] 
+                ]
+                map.fitBounds(bounds);
+                var boundingBox = L.rectangle(bounds, {color: "#000000", weight: 1, fill: false});
+                map.addLayer(boundingBox);                
+            }
+
+        </script>
+    </head>
+    <body>
+         <div id="map"></div>
+         <script>initMap();</script>
+    </body>
+</html>

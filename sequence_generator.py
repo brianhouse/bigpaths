@@ -18,11 +18,11 @@ location = {'$geoWithin': {'$geometry': {'type': "Polygon", 'coordinates': [[ [L
 def main():
 
     user_ids = util.load("user_ids.pkl")
-    # user_ids = [1]
+    user_ids = [1]
 
     for u, user_id in enumerate(user_ids):
 
-        if u == 20:
+        if u == 1:
             break
 
         sequences = []
@@ -31,7 +31,12 @@ def main():
         log.info("USER %s..." % user_id)
         points = db.entries.find({'user_id': user_id, 'location': location}).sort('t')
         # points = db.entries.find({'user_id': user_id, 'location': location, 't': {'$gt': 1293840000, '$lt': 1325289600}}).sort('t')
-        points = [(point['location']['coordinates'][0], point['location']['coordinates'][1], point['t']) for point in points]
+        def scale(lon, lat):
+            x, y = geo.project((lon, lat))
+            x = (x - min_x) / (max_x - min_x)
+            y = (y - min_y) / (max_y - min_y)
+            return x, y            
+        points = [(*scale(point['location']['coordinates'][0], point['location']['coordinates'][1]), point['t']) for point in points]
         log.info("--> %d points" % len(points))
 
         # filter out transient points: greater than 1/20mi (1 city block) covered in 10mins on both sides
@@ -70,7 +75,6 @@ def main():
         for c, cluster_label in enumerate(cluster_labels):
             clusters[cluster_label] = centroids[c], cluster_order[c]
         draw_points(user_id, points, labels, clusters)
-        continue
 
         # -- get 255 step daily sequences of clusters (identified by frequency) -- #
 
@@ -129,22 +133,14 @@ def draw_points(user_id, points, labels, clusters):
     log.info("DRAWING POINTS FOR USER %s" % user_id)
     t = timeutil.timestamp()
     ctx = drawing.Context(1000, int(1000 / ratio), relative=True, flip=True, hsv=False)
+    ctx.image("basemap/basemap.png")
     for p, point in enumerate(points):
-
-        x, y = geo.project((point[0], point[1]))
-        x = (x - min_x) / (max_x - min_x)
-        y = (y - min_y) / (max_y - min_y)
-
+        x, y = point[:2]
         centroid, cluster = clusters[labels[p]]
-        cx, cy = geo.project((centroid[0], centroid[1]))
-        cx = (cx - min_x) / (max_x - min_x)
-        cy = (cy - min_y) / (max_y - min_y)
-
+        cx, cy = centroid[:2]
         c = colors[cluster % len(colors)]
-
         ctx.line(x, y, cx, cy, stroke=.5, thickness=0.5)
         ctx.arc(x, y, 3 / ctx.width, 3 / ctx.height, fill=c, thickness=0.0)
-
     ctx.output("clusters/%d_%d.png" % (t, user_id))
 
 
