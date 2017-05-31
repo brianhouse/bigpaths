@@ -18,7 +18,7 @@ location = {'$geoWithin': {'$geometry': {'type': "Polygon", 'coordinates': [[ [L
 def main():
 
     user_ids = util.load("user_ids.pkl")
-    user_ids = [1]
+    user_ids = [1]  # me
 
     for u, user_id in enumerate(user_ids):
 
@@ -54,7 +54,7 @@ def main():
         points = [point for (p, point) in enumerate(points) if p not in marks]        
 
         # find clusters within ~100ft
-        ct = Birch(n_clusters=None, threshold=0.01)   ## calculate this (used .5mi)
+        ct = Birch(n_clusters=None, threshold=0.01)
         ct.fit(np.array([(point[0], point[1]) for point in points]))
         centroids = ct.subcluster_centers_
         cluster_labels = ct.subcluster_labels_ # just consecutive
@@ -81,11 +81,11 @@ def main():
         # get our start and stop
         start_t = points[0][-1]
         stop_t = points[-1][-1]
-        start_dt = timeutil.t_to_dt(start_t, tz="America/New_York")
+        start_dt = timeutil.t_to_dt(start_t, tz="America/New_York")  ## why.
         stop_dt = timeutil.t_to_dt(stop_t, tz="America/New_York")
         delta = stop_dt - start_dt
-        log.info("--> start_t %d %s" % (start_t, timeutil.t_to_string(start_t, tz='UTC')))
-        log.info("--> stop_t  %d %s" % (stop_t, timeutil.t_to_string(stop_t, tz='UTC')))
+        log.info("--> start_t %d %s" % (start_t, timeutil.t_to_string(start_t)))
+        log.info("--> stop_t  %d %s" % (stop_t, timeutil.t_to_string(stop_t)))
         log.info("--> %s" % delta)
 
         # iterate through days
@@ -127,12 +127,13 @@ def main():
 
         log.info("--> generated %s sequences" % len(sequences))
         draw_strips(user_id, sequences)
+        log.info("--> done")
 
 
 def draw_points(user_id, points, labels, clusters):
-    log.info("DRAWING POINTS FOR USER %s" % user_id)
+    log.info("Drawing clusters for user %s..." % user_id)
     t = timeutil.timestamp()
-    ctx = drawing.Context(1000, int(1000 / ratio), relative=True, flip=True, hsv=False)
+    ctx = drawing.Context(10000, int(10000 / ratio), relative=True, flip=True, hsv=False)
     ctx.image("basemap/basemap.png")
     for p, point in enumerate(points):
         x, y = point[:2]
@@ -146,14 +147,14 @@ def draw_points(user_id, points, labels, clusters):
 
 def draw_strips(user_id, sequences):
     t = timeutil.timestamp()
-    log.info("Drawing %d sequences..." % len(sequences))
-    ctx = drawing.Context(1000, len(sequences) * 4, relative=True, flip=True, hsv=False, background=(0., 0., 0., 1.))
+    log.info("Drawing %d sequences for user %s..." % (len(sequences), user_id))
+    ctx = drawing.Context(1000, len(sequences), relative=True, flip=True, hsv=False, background=(0., 0., 0., 1.))
     for q, sequence in enumerate(sequences):
         for p, cluster in enumerate(sequence):
             if cluster is None:
                 continue
             color = colors[cluster % len(colors)]
-            ctx.line(p/288, q/len(sequences), (p+1)/288, q/len(sequences), stroke=color, thickness=4)
+            ctx.line(p/288, q/len(sequences), (p+1)/288, q/len(sequences), stroke=color, thickness=2)
     ctx.output("strips/%d_%d.png" % (t, user_id))
 
 
