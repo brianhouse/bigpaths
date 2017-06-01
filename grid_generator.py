@@ -7,6 +7,9 @@ from mongo import db
 from colors import colors
 from sklearn.cluster import Birch
 
+START_DATE = "2012-01-01"
+STOP_DATE  = "2015-01-01"
+
 PERIODS = 144   # 10min
 # PERIODS = 288   # 5min
 
@@ -39,6 +42,7 @@ def main():
 
     user_ids = util.load("user_ids.pkl")
     user_ids = [1]  # me
+    user_ids = [8093]
 
     for u, user_id in enumerate(user_ids):
 
@@ -47,7 +51,7 @@ def main():
 
         # retrieve all user points
         log.info("USER %s..." % user_id)
-        cursor = db.entries.find({'user_id': user_id, 'location': location, 't': {'$gt': timeutil.timestamp(timeutil.string_to_dt("2012-01-01", tz="America/New_York")), '$lt': timeutil.timestamp(timeutil.string_to_dt("2015-01-01", tz="America/New_York"))}}).sort('t')
+        cursor = db.entries.find({'user_id': user_id, 'location': location, 't': {'$gt': timeutil.timestamp(timeutil.string_to_dt(START_DATE, tz="America/New_York")), '$lt': timeutil.timestamp(timeutil.string_to_dt(STOP_DATE, tz="America/New_York"))}}).sort('t')
         points = [Point(point['location']['coordinates'][0], point['location']['coordinates'][1], point['t']) for point in cursor]
         log.info("--> %d points" % len(points))
 
@@ -78,7 +82,6 @@ def main():
         # iterate through days
         day = start_dt.replace(hour=0, minute=0, second=0) + datetime.timedelta(days=1)
         current_grid = None
-        d = 0
         while day < stop_dt - datetime.timedelta(days=1):
             d_start_t = timeutil.timestamp(day)
             day += datetime.timedelta(days=1)
@@ -88,8 +91,8 @@ def main():
             day_points = [point for point in points if point.t >= d_start_t and point.t < d_stop_t]
             day_transients = [point for point in transients if point.t >= d_start_t and point.t < d_stop_t]
             if len(day_points) == 0:
-                current_grid = None
-            #     continue
+                # current_grid = None
+                continue
 
             # get the daily period for each of these points
             def get_periods(points):            
@@ -112,10 +115,6 @@ def main():
                     current_grid = None
                 sequence.append(current_grid)                    
             sequences.append(sequence)
-
-            # d += 1
-            # if d == 31:
-            #     break
 
         log.info("--> generated %s sequences" % len(sequences))
         draw_strips(user_id, sequences)
@@ -142,7 +141,6 @@ def draw_strips(user_id, sequences):
             if grid is None:
                 continue
             color = colors[ord(grid[-1]) % len(colors)]
-            # ctx.line(p/PERIODS, (q/len(sequences)) + (((ctx.height/len(sequences)) / 2) / ctx.height), (p+1)/PERIODS, (q/len(sequences)) + (((ctx.height/len(sequences)) / 2) / ctx.height), stroke=color, thickness=(ctx.height/len(sequences)) + 1.0)
             ctx.line(p/PERIODS, (q/len(sequences)) - (1 / ctx.height), (p+1)/PERIODS, (q/len(sequences)) - (1 / ctx.height), stroke=color, thickness=2.0)
     ctx.output("strips/%d_%d.png" % (t, user_id))
 

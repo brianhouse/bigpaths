@@ -3,6 +3,7 @@ catalog.txt
 cities/*
 strips/*
 clusters/*
+grid/*
 housepy
 papers
 dev
