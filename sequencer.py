@@ -2,9 +2,10 @@
 
 import random, datetime, json, math
 import numpy as np
-from housepy import drawing, geo, config, log, util, timeutil
+from housepy import config, log, util, timeutil
 from colors import colors
 from data import *
+from drawer import *
 
 
 def sequence():
@@ -19,8 +20,6 @@ def sequence():
 
         # filter out transients
         points, transients = filter_transients(points)     
-
-        # draw_points(user_id, points)
 
         # get our start and stop times
         start_dt = timeutil.t_to_dt(points[0].t, tz="America/New_York")  ## why.
@@ -67,7 +66,13 @@ def sequence():
             user_sequences.append(sequence)
 
         log.info("--> generated %s sequences for user %s" % (len(user_sequences), user_id))
-        # draw_strips(user_id, user_sequences)
+
+        if config['draw']['strips'] or config['draw']['maps']:
+            cluster(points)
+        if config['draw']['maps']:
+            draw_map(user_id, points)
+        if config['draw']['strips']:
+            draw_strips(user_id, user_sequences)      
 
         sequences.extend(user_sequences)
 

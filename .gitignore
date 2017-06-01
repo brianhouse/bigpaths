@@ -2,8 +2,7 @@ __pycache__
 catalog.txt
 cities/*
 strips/*
-clusters/*
-grid/*
+maps/*
 housepy
 papers
 dev
