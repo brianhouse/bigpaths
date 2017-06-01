@@ -7,8 +7,14 @@ from mongo import db
 from colors import colors
 from sklearn.cluster import Birch
 
-LON_1, LAT_1 = -74.053573, 40.919423
-LON_2, LAT_2 = -73.699264, 40.538534
+START_DATE = config['start_date']
+STOP_DATE  = config['stop_date']
+
+PERIODS = config['periods']
+
+LON_1, LAT_1 = config['bounds']['NW']
+LON_2, LAT_2 = config['bounds']['SE']
+
 min_x, max_y = geo.project((LON_1, LAT_1))
 max_x, min_y = geo.project((LON_2, LAT_2))
 ratio = (max_x - min_x) / (max_y - min_y)
@@ -129,33 +135,6 @@ def main():
         draw_strips(user_id, sequences)
         log.info("--> done")
 
-
-def draw_points(user_id, points, labels, clusters):
-    log.info("Drawing clusters for user %s..." % user_id)
-    t = timeutil.timestamp()
-    ctx = drawing.Context(10000, int(10000 / ratio), relative=True, flip=True, hsv=False)
-    ctx.image("basemap/basemap.png")
-    for p, point in enumerate(points):
-        x, y = point[:2]
-        centroid, cluster = clusters[labels[p]]
-        cx, cy = centroid[:2]
-        c = colors[cluster % len(colors)]
-        ctx.line(x, y, cx, cy, stroke=.5, thickness=0.5)
-        ctx.arc(x, y, 3 / ctx.width, 3 / ctx.height, fill=c, thickness=0.0)
-    ctx.output("clusters/%d_%d.png" % (t, user_id))
-
-
-def draw_strips(user_id, sequences):
-    t = timeutil.timestamp()
-    log.info("Drawing %d sequences for user %s..." % (len(sequences), user_id))
-    ctx = drawing.Context(1000, len(sequences), relative=True, flip=True, hsv=False, background=(0., 0., 0., 1.))
-    for q, sequence in enumerate(sequences):
-        for p, cluster in enumerate(sequence):
-            if cluster is None:
-                continue
-            color = colors[cluster % len(colors)]
-            ctx.line(p/288, q/len(sequences), (p+1)/288, q/len(sequences), stroke=color, thickness=2)
-    ctx.output("strips/%d_%d.png" % (t, user_id))
 
 
 if __name__ == "__main__":
