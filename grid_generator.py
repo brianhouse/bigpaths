@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
 
-import random, datetime, json
+import random, datetime, json, math
 import numpy as np
 from housepy import drawing, geo, config, log, util, timeutil
 from mongo import db
 from colors import colors
 from sklearn.cluster import Birch
 
-LON_1, LAT_1 = -74.053573, 40.919423
-LON_2, LAT_2 = -73.699264, 40.538534
+PERIODS = 144   # 10min
+# PERIODS = 288   # 5min
+
+LON_1, LAT_1 = -74.053573, 40.919423    # NW
+LON_2, LAT_2 = -73.699264, 40.538534    # SE
+
 min_x, max_y = geo.project((LON_1, LAT_1))
 max_x, min_y = geo.project((LON_2, LAT_2))
 ratio = (max_x - min_x) / (max_y - min_y)
@@ -38,13 +42,13 @@ def main():
 
     for u, user_id in enumerate(user_ids):
 
-        if u == 1:
+        if u == 5:
             break
 
         # retrieve all user points
         log.info("USER %s..." % user_id)
-        points = db.entries.find({'user_id': user_id, 'location': location}).sort('t')
-        points = [Point(point['location']['coordinates'][0], point['location']['coordinates'][1], point['t']) for point in points]
+        cursor = db.entries.find({'user_id': user_id, 'location': location, 't': {'$gt': timeutil.timestamp(timeutil.string_to_dt("2012-01-01", tz="America/New_York")), '$lt': timeutil.timestamp(timeutil.string_to_dt("2015-01-01", tz="America/New_York"))}}).sort('t')
+        points = [Point(point['location']['coordinates'][0], point['location']['coordinates'][1], point['t']) for point in cursor]
         log.info("--> %d points" % len(points))
 
         # filter out transient points: greater than 1/20mi (1 city block) covered in 10mins on both sides
@@ -60,9 +64,7 @@ def main():
         transients = [point for (p, point) in enumerate(points) if p in marks]
         points = [point for (p, point) in enumerate(points) if p not in marks]        
 
-        draw_points(user_id, points)
-
-        continue
+        # draw_points(user_id, points)
 
         # get our start and stop times
         start_dt = timeutil.t_to_dt(points[0].t, tz="America/New_York")  ## why.
@@ -76,6 +78,7 @@ def main():
         # iterate through days
         day = start_dt.replace(hour=0, minute=0, second=0) + datetime.timedelta(days=1)
         current_grid = None
+        d = 0
         while day < stop_dt - datetime.timedelta(days=1):
             d_start_t = timeutil.timestamp(day)
             day += datetime.timedelta(days=1)
@@ -85,29 +88,34 @@ def main():
             day_points = [point for point in points if point.t >= d_start_t and point.t < d_stop_t]
             day_transients = [point for point in transients if point.t >= d_start_t and point.t < d_stop_t]
             if len(day_points) == 0:
-                continue
+                current_grid = None
+            #     continue
 
             # get the daily period for each of these points
             def get_periods(points):            
                 periods = np.array([point.t for point in points])
                 periods -= d_start_t
                 periods //= 60
-                periods //= 5
+                periods //= math.floor(86400 / 60 / PERIODS)
                 periods = list(periods)
-                return periods
+                return periods                
 
             point_periods = get_periods(day_points)
             transient_periods = get_periods(day_transients)
 
             # add the geohash grid of this point to the sequence
             sequence = []
-            for i in range(288):
+            for i in range(PERIODS):
                 if i in point_periods:
                     current_grid = day_points[point_periods.index(i)].hash
                 elif i in transient_periods:    # prioritize the destination
                     current_grid = None
                 sequence.append(current_grid)                    
             sequences.append(sequence)
+
+            # d += 1
+            # if d == 31:
+            #     break
 
         log.info("--> generated %s sequences" % len(sequences))
         draw_strips(user_id, sequences)
@@ -128,13 +136,14 @@ def draw_points(user_id, points):
 def draw_strips(user_id, sequences):
     t = timeutil.timestamp()
     log.info("Drawing %d sequences for user %s..." % (len(sequences), user_id))
-    ctx = drawing.Context(1000, len(sequences), relative=True, flip=True, hsv=False, background=(0., 0., 0., 1.))
+    ctx = drawing.Context(1000, len(sequences) * 2, relative=True, flip=False, hsv=False, background=(0., 0., 0., 1.))
     for q, sequence in enumerate(sequences):
         for p, grid in enumerate(sequence):
             if grid is None:
                 continue
             color = colors[ord(grid[-1]) % len(colors)]
-            ctx.line(p/288, q/len(sequences), (p+1)/288, q/len(sequences), stroke=color, thickness=2)
+            # ctx.line(p/PERIODS, (q/len(sequences)) + (((ctx.height/len(sequences)) / 2) / ctx.height), (p+1)/PERIODS, (q/len(sequences)) + (((ctx.height/len(sequences)) / 2) / ctx.height), stroke=color, thickness=(ctx.height/len(sequences)) + 1.0)
+            ctx.line(p/PERIODS, (q/len(sequences)) - (1 / ctx.height), (p+1)/PERIODS, (q/len(sequences)) - (1 / ctx.height), stroke=color, thickness=2.0)
     ctx.output("strips/%d_%d.png" % (t, user_id))
 
 

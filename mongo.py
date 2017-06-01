@@ -11,9 +11,10 @@ db = client[mongo['database']]
 def make_indexes():
     db.entries.drop_indexes()
     try:
+        db.entries.create_index("t")
+        db.entries.create_index("user_id")
         db.entries.create_index([("location", GEOSPHERE)])
-        db.entries.create_index([("t", ASCENDING)])
-        db.entries.create_index([("user_id", ASCENDING)])
+        db.entries.create_index([("location", GEOSPHERE), ("user_id", ASCENDING)])
         db.entries.create_index([("t", ASCENDING), ("user_id", ASCENDING)], unique=True)
     except Exception as e:
         log.error(log.exc(e))

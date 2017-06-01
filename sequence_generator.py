@@ -29,8 +29,8 @@ def main():
         
         # retrieve all user points
         log.info("USER %s..." % user_id)
-        points = db.entries.find({'user_id': user_id, 'location': location}).sort('t')
-        # points = db.entries.find({'user_id': user_id, 'location': location, 't': {'$gt': 1293840000, '$lt': 1325289600}}).sort('t')
+        # points = db.entries.find({'user_id': user_id, 'location': location}).sort('t')
+        points = db.entries.find({'user_id': user_id, 'location': location, 't': {'$gt': 1293840000, '$lt': 1325289600}}).sort('t')
         def scale(lon, lat):
             x, y = geo.project((lon, lat))
             x = (x - min_x) / (max_x - min_x)
