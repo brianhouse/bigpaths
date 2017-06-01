@@ -2,7 +2,8 @@ from housepy import drawing
 from colors import colors
 from data import *
 
-def draw_map(user_id, points):
+
+def map(user_id, points):
     log.info("Drawing map for user %s..." % user_id)
     t = timeutil.timestamp()
     ctx = drawing.Context(1000, int(1000 / ratio), relative=True, flip=True, hsv=False)
@@ -13,7 +14,7 @@ def draw_map(user_id, points):
     ctx.output("maps/%d_%d.png" % (t, user_id))
 
 
-def draw_strips(user_id, sequences):
+def strips(user_id, sequences):
     t = timeutil.timestamp()
     log.info("Drawing %d sequences for user %s..." % (len(sequences), user_id))
     ctx = drawing.Context(1000, len(sequences) * 2, relative=True, flip=False, hsv=False, background=(0., 0., 0., 1.))

@@ -15,7 +15,3 @@ bounds:
     - 40.538534
 
 periods: 144
-
-draw:
-  maps: True
-  strips: True

@@ -37,18 +37,13 @@ class Point():
         return geo.distance((self.lon, self.lat), (pt.lon, pt.lat))
 
 
-def get_user():
-
-    user_ids = util.load("user_ids.pkl")
-    user_ids = [1]  # me
-
+def get_user(user_ids):
     for u, user_id in enumerate(user_ids):
         log.info("USER %s..." % user_id)
         cursor = db.entries.find({'user_id': user_id, 'location': location, 't': {'$gt': timeutil.timestamp(timeutil.string_to_dt(START_DATE, tz="America/New_York")), '$lt': timeutil.timestamp(timeutil.string_to_dt(STOP_DATE, tz="America/New_York"))}}).sort('t')
         points = [Point(point['location']['coordinates'][0], point['location']['coordinates'][1], point['t']) for point in cursor]
         log.info("--> %d points" % len(points))
         yield user_id, points
-
     yield (None, None)
 
 

@@ -5,16 +5,16 @@ import numpy as np
 from housepy import config, log, util, timeutil
 from colors import colors
 from data import *
-from drawer import *
+import drawer
 
 
-def sequence():
+def sequence(user_ids, draw_maps=False, draw_strips=False):
 
     sequences = []            
 
-    for (user_id, points) in get_user():        
-        if points is None:
-            break
+    for (user_id, points) in get_user(user_ids):        
+        if points is None or not len(points):
+            continue
 
         user_sequences = []
 
@@ -30,7 +30,7 @@ def sequence():
 
         # iterate through days
         day = start_dt.replace(hour=0, minute=0, second=0) + datetime.timedelta(days=1)
-        current_grid = None
+        current_location = None
         while day < stop_dt - datetime.timedelta(days=1):
             d_start_t = timeutil.timestamp(day)
             day += datetime.timedelta(days=1)
@@ -40,7 +40,6 @@ def sequence():
             day_points = [point for point in points if point.t >= d_start_t and point.t < d_stop_t]
             day_transients = [point for point in transients if point.t >= d_start_t and point.t < d_stop_t]
             if len(day_points) == 0:
-                # current_grid = None
                 continue
 
             # get the daily period for each of these points
@@ -51,7 +50,6 @@ def sequence():
                 periods //= math.floor(86400 / 60 / PERIODS)
                 periods = list(periods)
                 return periods                
-
             point_periods = get_periods(day_points)
             transient_periods = get_periods(day_transients)
 
@@ -59,23 +57,35 @@ def sequence():
             sequence = []
             for i in range(PERIODS):
                 if i in point_periods:
-                    current_grid = day_points[point_periods.index(i)]
-                elif i in transient_periods:    # prioritize the destination
-                    current_grid = None
-                sequence.append(current_grid)                    
+                    current_location = day_points[point_periods.index(i)]
+                # elif i in transient_periods:    # prioritize the destination
+                #     current_location = None
+                sequence.append(current_location)       
             user_sequences.append(sequence)
 
         log.info("--> generated %s sequences for user %s" % (len(user_sequences), user_id))
+        if len(user_sequences) == 0:
+            continue
 
-        if config['draw']['strips'] or config['draw']['maps']:
+        # draw things
+        if draw_maps or draw_strips:
             cluster(points)
-        if config['draw']['maps']:
-            draw_map(user_id, points)
-        if config['draw']['strips']:
-            draw_strips(user_id, user_sequences)      
+            if draw_maps:
+                drawer.map(user_id, points)
+            if draw_strips:
+                drawer.strips(user_id, user_sequences)      
 
+        # fix leading Nones
+        i = 0
+        while user_sequences[0][i] is None:
+            i += 1
+        user_sequences[0][0:i] = [user_sequences[0][i]] * i
         sequences.extend(user_sequences)
 
+    log.info("Collating...")
+    for s, sequence in enumerate(sequences):
+        for p, point in enumerate(sequence):
+            sequence[p] = point.x, point.y
     log.info("--> generated %s total sequences" % len(sequences))
     log.info("--> done")        
 
@@ -83,4 +93,4 @@ def sequence():
 
 
 if __name__ == "__main__":
-    sequence()
+    sequence([1], True, True)

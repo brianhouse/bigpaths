@@ -1,0 +1,1 @@
+- for directions, prioritize destination times (which is intuitive anyway)
