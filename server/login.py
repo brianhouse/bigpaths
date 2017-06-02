@@ -1,0 +1,1 @@
+ssh -i server/walking.pem ubuntu@107.20.190.29

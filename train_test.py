@@ -46,7 +46,7 @@ model.add(LSTM(512, return_sequences=True, input_shape=X[0].shape))
 model.add(Dropout(0.2)) # break x% of inputs to the next layer
 model.add(LSTM(512, return_sequences=False))
 model.add(Dropout(0.2))
-model.add(Dense(2, activation=("softmax")))   # set output node activation to softmax for discrete classification problems to pick a class ## this isnt a class problem, do I use it?
+model.add(Dense(2))   # set output node activation to softmax for discrete classification problems to pick a class ## this isnt a class problem, do I use it?
 if WEIGHTS is not None:
     model.load_weights(WEIGHTS)
 model.compile(loss="categorical_crossentropy", optimizer="rmsprop", metrics=['accuracy'])
