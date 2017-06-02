@@ -74,7 +74,7 @@ for i in range(EPOCHS):
     except KeyboardInterrupt:
         print()
         exit()
-    log.info("Generating example..." % temp)
+    log.info("Generating example...")
     sequence, seed = generate()
     log.info("--> done")
     drawer.sequences([sequence, seed])
