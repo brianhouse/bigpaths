@@ -79,7 +79,8 @@ for i in range(EPOCHS):
     except KeyboardInterrupt:
         exit()
 
-    for temp in [0.2, 0.5, 1.0]:
+    # for temp in [0.2, 0.5, 1.0]:
+    for temp in [1.0]:
         log.info("Generating with temperature %0.2f..." % temp)
         sequence = generate(temperature=temp)
         log.info("--> done")
