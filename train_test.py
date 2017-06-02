@@ -11,6 +11,7 @@ from keras.callbacks import ModelCheckpoint
 from keras.utils import plot_model
 from data import *
 
+SAMPLE_LIMIT = 2000
 EPOCHS = 10
 
 WEIGHTS = None
@@ -27,7 +28,9 @@ outputs = []
 for i in range(len(corpus) - sequence_length):
     sequences.append(corpus[i:i + sequence_length])  # this is the sequence
     outputs.append(corpus[i + sequence_length])   # the expected output is the next lonlat
-sequences = sequences[:2000]
+if SAMPLE_LIMIT is not None:
+    sequences = sequences[:SAMPLE_LIMIT]
+    outputs = outputs[:SAMPLE_LIMIT]
 log.info("--> %d sequences" % len(sequences))
 
 # generate outputs
