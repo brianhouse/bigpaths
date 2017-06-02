@@ -51,7 +51,7 @@ plot_model(model, to_file="model.png", show_shapes=True, show_layer_names=True)
 log.info("--> done")
 
 
-def generate(temperature=0.35):
+def generate():
     start_index = random.randint(0, len(corpus) - sequence_length - 1)
     seed = corpus[start_index:start_index + sequence_length]
     sequence = seed[:]
@@ -67,20 +67,15 @@ log.info("Training...")
 t = timeutil.timestamp()
 for i in range(EPOCHS):
     log.info("(%d)" % (i+1))
-
     try: 
         filepath = "checkpoints/%s_checkpoint-%d-{loss:.4f}.hdf5" % (t, i)
         checkpoint = ModelCheckpoint(filepath, monitor="loss", verbose=1, save_best_only=True, mode="min")
-        model.fit(X, y, epochs=1, callbacks=[checkpoint])
+        model.fit(X, y, epochs=1, batch_size=128, callbacks=[checkpoint])
     except KeyboardInterrupt:
+        print()
         exit()
-
-    # for temp in [0.2, 0.5, 1.0]:
-    for temp in [1.0]:
-        log.info("Generating with temperature %0.2f..." % temp)
-        sequence, seed = generate(temperature=temp)
-        log.info("--> done")
-        log.info("Drawing...")
-        drawer.sequences([sequence, seed])
-        log.info("--> done")
+    log.info("Generating example..." % temp)
+    sequence, seed = generate()
+    log.info("--> done")
+    drawer.sequences([sequence, seed])
 
