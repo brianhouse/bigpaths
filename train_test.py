@@ -85,6 +85,6 @@ for i in range(EPOCHS):
         sequence, seed = generate(temperature=temp)
         log.info("--> done")
         log.info("Drawing...")
-        drawer.sequence(sequence)
+        drawer.sequences([sequence, seed])
         log.info("--> done")
 
