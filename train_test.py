@@ -48,6 +48,7 @@ model.add(Dropout(0.2))
 model.add(LSTM(512, return_sequences=False))
 model.add(Dropout(0.2))
 model.add(Dense(2))
+if WEIGHTS is not None:
     model.load_weights(WEIGHTS)
 model.compile(loss="mean_squared_error", optimizer="rmsprop", metrics=['accuracy'])
 plot_model(model, to_file="model.png", show_shapes=True, show_layer_names=True)
