@@ -43,14 +43,14 @@ log.info("--> done")
 
 log.info("Creating model...")
 model = Sequential()
-model.add(LSTM(512, return_sequences=True, input_shape=X[0].shape))
+model.add(LSTM(512, return_sequences=True, input_shape=X[0].shape)) # LSTMs feeding LSTMs have to have return_sequences=True
 model.add(Dropout(0.2)) # break x% of inputs to the next layer
 model.add(LSTM(512, return_sequences=False))
 model.add(Dropout(0.2))
 model.add(Dense(2))   # set output node activation to softmax for discrete classification problems to pick a class ## this isnt a class problem, do I use it?
 if WEIGHTS is not None:
     model.load_weights(WEIGHTS)
-model.compile(loss="categorical_crossentropy", optimizer="rmsprop", metrics=['accuracy'])
+model.compile(loss="mean_squared_error", optimizer="rmsprop", metrics=['accuracy'])
 plot_model(model, to_file="model.png", show_shapes=True, show_layer_names=True)
 log.info("--> done")
 
