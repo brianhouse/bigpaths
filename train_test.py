@@ -24,18 +24,13 @@ log.info("Generating training sequences...")
 sequence_length = PERIODS
 sequences = []
 outputs = []
-for i in range(0, len(corpus) - sequence_length):
+for i in range(len(corpus) - sequence_length):
     sequences.append(corpus[i:i + sequence_length])  # this is the sequence
     outputs.append(corpus[i + sequence_length])   # the expected output is the next lonlat
 sequences = sequences[:2000]
 log.info("--> %d sequences" % len(sequences))
 
 # generate outputs
-log.info("Generating outputs...")
-outputs = []
-for sequence in sequences:
-    outputs.append(sequence[-1])
-log.info("--> done")    
 log.info("Converting...")    
 X = np.array(sequences)
 y = np.array(outputs)
