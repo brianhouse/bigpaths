@@ -43,12 +43,11 @@ log.info("--> done")
 
 log.info("Creating model...")
 model = Sequential()
-model.add(LSTM(512, return_sequences=True, input_shape=X[0].shape)) # LSTMs feeding LSTMs have to have return_sequences=True
-model.add(Dropout(0.2)) # break x% of inputs to the next layer
+model.add(LSTM(512, return_sequences=True, input_shape=X[0].shape))
+model.add(Dropout(0.2))
 model.add(LSTM(512, return_sequences=False))
 model.add(Dropout(0.2))
-model.add(Dense(2))   # set output node activation to softmax for discrete classification problems to pick a class ## this isnt a class problem, do I use it?
-if WEIGHTS is not None:
+model.add(Dense(2))
     model.load_weights(WEIGHTS)
 model.compile(loss="mean_squared_error", optimizer="rmsprop", metrics=['accuracy'])
 plot_model(model, to_file="model.png", show_shapes=True, show_layer_names=True)
@@ -57,14 +56,14 @@ log.info("--> done")
 def generate(temperature=0.35):
     start_index = random.randint(0, len(corpus) - sequence_length - 1)
     seed = corpus[start_index:start_index + sequence_length]
-    sequence = seed
+    sequence = seed[:]
     for i in range(sequence_length):    # replace the randomly seeded sequence with newly generated points
         x = np.zeros((1, sequence_length, 2))
         x[0] = np.array(sequence)
         point = model.predict(x, verbose=0)[0]
         sequence.append(point)
         sequence.pop(0)
-    return sequence
+    return sequence, seed
 
 
 log.info("Training...")
@@ -82,7 +81,7 @@ for i in range(EPOCHS):
     # for temp in [0.2, 0.5, 1.0]:
     for temp in [1.0]:
         log.info("Generating with temperature %0.2f..." % temp)
-        sequence = generate(temperature=temp)
+        sequence, seed = generate(temperature=temp)
         log.info("--> done")
         log.info("Drawing...")
         drawer.sequence(sequence)

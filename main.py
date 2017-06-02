@@ -17,4 +17,4 @@ from housepy import util
 corpus = util.load("data/corpus_house.pkl")
 
 d = 80
-drawer.sequence(corpus[(d * 144):(d * 144) + 144])
+drawer.sequences([corpus[(d * 144):(d * 144) + 144]])

@@ -30,23 +30,24 @@ def strips(user_id, sequences):
     ctx.output("strips/%d_%d.png" % (t, user_id))
 
 
-def sequence(points):
+def sequences(sequences):
     t = timeutil.timestamp()    
-    log.info("Drawing sequence...")
-    if len(points) != PERIODS:
-        log.error("--> bad sequence length")
-        return
+    log.info("Drawing sequences (%d)..." % len(sequences))
     ctx = drawing.Context(1000, int(1000 / ratio), relative=True, flip=True, hsv=True)
     ctx.image("basemap/basemap.png")
-    for p, point in enumerate(points):
-        if p == len(points) - 1:
-            continue
-        x1, y1 = point
-        x2, y2 = points[p+1]
-        c = p/PERIODS
-        color = c, 1., 1., 1.
-        ctx.arc(x1, y1, 5 / ctx.width, 5 / ctx.height, fill=color, thickness=0.0)
-        ctx.line(x1, y1, x2, y2, stroke=color, thickness=1.0)
+    for points in sequences:
+        if len(points) != PERIODS:
+            log.error("--> bad sequence length")
+            return
+        for p, point in enumerate(points):
+            if p == len(points) - 1:
+                continue
+            x1, y1 = point
+            x2, y2 = points[p+1]
+            c = p/PERIODS
+            color = c, 1., 1., 1.
+            ctx.arc(x1, y1, 5 / ctx.width, 5 / ctx.height, fill=color, thickness=0.0)
+            ctx.line(x1, y1, x2, y2, stroke=color, thickness=1.0)
     ctx.output("sequences/%d.png" % t)    
     log.info("--> done")
 
