@@ -5,7 +5,9 @@ strips/*
 maps/*
 sequences/*
 data/*
+checkpoints/*
 housepy
 papers
 dev
 THOUGHTS.md
+model.png

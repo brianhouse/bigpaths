@@ -30,7 +30,7 @@ def strips(user_id, sequences):
     ctx.output("strips/%d_%d.png" % (t, user_id))
 
 
-def sequences(points):
+def sequence(points):
     t = timeutil.timestamp()    
     log.info("Drawing sequence...")
     if len(points) != PERIODS:

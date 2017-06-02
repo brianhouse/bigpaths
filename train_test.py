@@ -2,6 +2,7 @@
 
 import random, sys
 import numpy as np
+import drawer
 from housepy import config, log
 from keras.models import Sequential
 from keras.layers.recurrent import LSTM
@@ -10,11 +11,13 @@ from keras.callbacks import ModelCheckpoint
 from keras.utils import plot_model
 from data import *
 
+EPOCHS = 10
+
 WEIGHTS = None
 if len(sys.argv) > 1:
     WEIGHTS = sys.argv[1]
 
-corpus = util.load("sequences_house.pkl")
+corpus = util.load("data/corpus_house.pkl")
 
 # split the dataset into moving sequences
 log.info("Generating training sequences...")
@@ -26,32 +29,60 @@ for i in range(0, len(corpus) - sequence_length):
     outputs.append(corpus[i + sequence_length])   # the expected output is the next lonlat
 log.info("--> %d sequences" % len(sequences)) 
 
-# make an empty 3-tensor for the input sequences
-X = np.zeros((len(sequences), sequence_length, 2), dtype=np.float)
-
-# make an empty tensor for the output (which is just 2d, a lonlat for each input sequence)
-y = np.zeros((len(sequences), 2), dtype=np.bool)
-
-# set the appropriate indices to 1 in each one-hot vector
-for i, sequence in enumerate(sequences):
-    for t, character in enumerate(sequence):
-        X[i, t, character_to_label[character]] = 1
-    y[i, character_to_label[outputs[i]]] = 1
-
-
-
-exit()
-
-
+# generate outputs
+log.info("Generating outputs...")
+outputs = []
+for sequence in sequences:
+    outputs.append(sequence[-1])
+log.info("--> done")    
+log.info("Converting...")    
+X = np.array(sequences)
+y = np.array(outputs)
+log.info("--> done")    
 
 log.info("Creating model...")
 model = Sequential()
-model.add(LSTM(512, return_sequences=True, input_shape=(sequence_length, len(characters))))     # input-shape matrix of one-hot character array * length of sequence        ## can this work just doubled?
+model.add(LSTM(512, return_sequences=True, input_shape=X[0].shape))
 model.add(Dropout(0.2)) # break x% of inputs to the next layer
 model.add(LSTM(512, return_sequences=False))
 model.add(Dropout(0.2))
-model.add(Dense(len(characters), activation=("softmax")))   # set output node activation to softmax for discrete classification problems to pick a class
+model.add(Dense(2, activation=("softmax")))   # set output node activation to softmax for discrete classification problems to pick a class ## this isnt a class problem, do I use it?
 if WEIGHTS is not None:
     model.load_weights(WEIGHTS)
-model.compile(loss="categorical_crossentropy", optimizer="rmsprop", metrics=['accuracy']) # setting for categorical classification
+model.compile(loss="categorical_crossentropy", optimizer="rmsprop", metrics=['accuracy'])
+plot_model(model, to_file="model.png", show_shapes=True, show_layer_names=True)
 log.info("--> done")
+
+def generate(temperature=0.35):
+    start_index = random.randint(0, len(corpus) - sequence_length - 1)
+    seed = corpus[start_index:start_index + sequence_length]
+    sequence = seed
+    for i in range(sequence_length):    # replace the randomly seeded sequence with newly generated points
+        x = np.zeros((1, sequence_length, 2))
+        x[0] = np.array(sequence)
+        point = model.predict(x, verbose=0)[0]
+        sequence.append(point)
+        sequence.pop(0)
+    return sequence
+
+
+log.info("Training...")
+t = timeutil.timestamp()
+for i in range(EPOCHS):
+    log.info("(%d)" % (i+1))
+
+    try: 
+        filepath = "checkpoints/%s_checkpoint-%d-{loss:.4f}.hdf5" % (t, i)
+        checkpoint = ModelCheckpoint(filepath, monitor="loss", verbose=1, save_best_only=True, mode="min")
+        model.fit(X, y, epochs=1, callbacks=[checkpoint])
+    except KeyboardInterrupt:
+        exit()
+
+    for temp in [0.2, 0.5, 1.0]:
+        log.info("Generating with temperature %0.2f..." % temp)
+        sequence = generate(temperature=temp)
+        log.info("--> done")
+        log.info("Drawing...")
+        drawer.sequence(sequence)
+        log.info("--> done")
+
