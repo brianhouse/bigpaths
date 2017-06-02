@@ -82,14 +82,15 @@ def sequence(user_ids, draw_maps=False, draw_strips=False):
         user_sequences[0][0:i] = [user_sequences[0][i]] * i
         sequences.extend(user_sequences)
 
-    log.info("Collating...")
-    for s, sequence in enumerate(sequences):
-        for p, point in enumerate(sequence):
-            sequence[p] = point.x, point.y
     log.info("--> generated %s total sequences" % len(sequences))
+    log.info("Flattening...")
+    data = []
+    for sequence in sequences:
+        for point in sequence:
+            data.append((point.x, point.y))
     log.info("--> done")        
 
-    return sequences
+    return data
 
 
 if __name__ == "__main__":
