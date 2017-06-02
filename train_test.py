@@ -27,7 +27,8 @@ outputs = []
 for i in range(0, len(corpus) - sequence_length):
     sequences.append(corpus[i:i + sequence_length])  # this is the sequence
     outputs.append(corpus[i + sequence_length])   # the expected output is the next lonlat
-log.info("--> %d sequences" % len(sequences)) 
+sequences = sequences[:2000]
+log.info("--> %d sequences" % len(sequences))
 
 # generate outputs
 log.info("Generating outputs...")
