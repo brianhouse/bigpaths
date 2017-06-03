@@ -30,8 +30,14 @@ class Point():
         self.x = (x - min_x) / (max_x - min_x)
         self.y = (y - min_y) / (max_y - min_y)
         self.t = t
-        self.hash = None
+        self._hash = None
         self.cluster = None
+
+    @property
+    def hash(self):
+        if self._hash is None:
+            self._hash = geo.geohash_encode((self.lon, self.lat), precision=6)
+        return self._hash
 
     def distance(self, pt):
         return geo.distance((self.lon, self.lat), (pt.lon, pt.lat))
@@ -93,7 +99,3 @@ def cluster(points):
         point.cluster = clusters[labels[p]]
 
 
-def hash(points):
-    for p, point in enumerate(points):
-        point.hash = geo.geohash_encode((point.lon, point.lat), precision=6)
-        point.cluster = ord(point.hash[-1])
