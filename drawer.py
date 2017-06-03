@@ -45,7 +45,7 @@ def sequences(sequences, suffix=None):
             x1, y1 = point
             x2, y2 = points[p+1]
             c = p/PERIODS
-            color = c, 1., 1., 1.
+            color = c, 1., 1., 0.75
             ctx.arc(x1, y1, 5 / ctx.width, 5 / ctx.height, fill=color, thickness=0.0)
             ctx.line(x1, y1, x2, y2, stroke=color, thickness=1.0)
     suffix = "_%s" % suffix if suffix is not None else ""

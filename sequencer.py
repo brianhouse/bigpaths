@@ -83,14 +83,8 @@ def sequence(user_ids, draw_maps=False, draw_strips=False):
         sequences.extend(user_sequences)
 
     log.info("--> generated %s total sequences" % len(sequences))
-    log.info("Flattening...")
-    data = []
-    for sequence in sequences:
-        for point in sequence:
-            data.append((point.x, point.y))
-    log.info("--> done")        
 
-    return data
+    return sequences
 
 
 if __name__ == "__main__":
