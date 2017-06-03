@@ -30,7 +30,7 @@ def strips(user_id, sequences):
     ctx.output("strips/%d_%d.png" % (t, user_id))
 
 
-def sequences(sequences):
+def sequences(sequences, suffix=None):
     t = timeutil.timestamp()    
     log.info("Drawing sequences (%d)..." % len(sequences))
     ctx = drawing.Context(1000, int(1000 / ratio), relative=True, flip=True, hsv=True)
@@ -48,7 +48,8 @@ def sequences(sequences):
             color = c, 1., 1., 1.
             ctx.arc(x1, y1, 5 / ctx.width, 5 / ctx.height, fill=color, thickness=0.0)
             ctx.line(x1, y1, x2, y2, stroke=color, thickness=1.0)
-    ctx.output("sequences/%d.png" % t)    
+    suffix = "_%s" % suffix if suffix is not None else ""
+    ctx.output("sequences/%d%s.png" % (t, suffix))    
     log.info("--> done")
 
 

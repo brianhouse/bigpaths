@@ -11,7 +11,7 @@ from keras.callbacks import ModelCheckpoint
 from keras.utils import plot_model
 from data import *
 
-SAMPLE_LIMIT = 2000
+SAMPLE_LIMIT = None
 EPOCHS = 10
 
 WEIGHTS = None
@@ -79,5 +79,7 @@ for i in range(EPOCHS):
     log.info("Generating example...")
     sequence, seed = generate()
     log.info("--> done")
-    drawer.sequences([sequence, seed])
+    # drawer.sequences([sequence, seed])
+    drawer.sequences([seed], "seed")
+    drawer.sequences([sequence], "result")
 
