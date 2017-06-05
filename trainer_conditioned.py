@@ -62,7 +62,7 @@ def generate():
     seed = corpus[start_index:start_index + PERIODS]
     sequence = seed[:]
     for i in range(PERIODS):    # replace the randomly seeded sequence with a sequence of newly generated points
-        x = np.array([sequence])
+        x = np.array([sequence[-sequence_length:]])
         point = model.predict(x, verbose=0)[0]
         sequence.append(point)
         sequence.pop(0)
