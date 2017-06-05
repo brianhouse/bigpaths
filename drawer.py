@@ -11,46 +11,53 @@ def map(user_id, points):
     ctx = drawing.Context(1000, int(1000 / ratio), relative=True, flip=True, hsv=False)
     ctx.image("basemap/basemap.png")
     for point in points:
-        color = colors[point.cluster % len(colors)]
+        color = colors[ord(point.grid[-1]) % len(colors)]
         ctx.arc(point.x, point.y, 3 / ctx.width, 3 / ctx.height, fill=color, thickness=0.0)
     ctx.output("maps/%d_%d.png" % (t, user_id))
     log.info("--> done")
 
 
 def strips(user_id, sequences):
-    t = timeutil.timestamp()
     log.info("Drawing %d sequences for user %s..." % (len(sequences), user_id))
+    t = timeutil.timestamp()
     ctx = drawing.Context(1000, len(sequences) * 2, relative=True, flip=False, hsv=False, background=(0., 0., 0., 1.))
     for q, sequence in enumerate(sequences):
-        for p, point in enumerate(sequence):
-            if point is None:
+        for p, grid in enumerate(sequence):
+            if grid is None:
                 continue
-            color = colors[point.cluster % len(colors)]
+            color = colors[ord(grid[-1]) % len(colors)]
             ctx.line(p/PERIODS, (q/len(sequences)) - (1 / ctx.height), (p+1)/PERIODS, (q/len(sequences)) - (1 / ctx.height), stroke=color, thickness=2.0)
     ctx.output("strips/%d_%d.png" % (t, user_id))
 
 
-def sequences(sequences, suffix=None):
+def sequence(sequence, suffix=None):
     t = timeutil.timestamp()    
-    log.info("Drawing sequences (%d)..." % len(sequences))
+    log.info("Drawing sequence...")
     ctx = drawing.Context(1000, int(1000 / ratio), relative=True, flip=True, hsv=True)
     ctx.image("basemap/basemap.png")
-    for points in sequences:
-        if len(points) != PERIODS:
-            log.error("--> bad sequence length")
-            return
-        for p, point in enumerate(points):
-            if p == len(points) - 1:
-                continue
-            x1, y1 = point
-            x2, y2 = points[p+1]
-            c = p/PERIODS
-            color = c, 1., 1., 0.75
-            ctx.arc(x1, y1, 5 / ctx.width, 5 / ctx.height, fill=color, thickness=0.0)
-            ctx.line(x1, y1, x2, y2, stroke=color, thickness=1.0)
+    grids = util.load("data/grids_%d_%d.pkl" % (config['grid'], config['periods']))
+    if len(sequence) != PERIODS:
+        log.error("--> bad sequence length")
+        return
+    for s, cell in enumerate(sequence):
+        if s == len(sequence) - 1:
+            continue
+        x1, y1 = scale(geo.geohash_decode(grids[cell]))
+        x2, y2 = scale(geo.geohash_decode(grids[sequence[s+1]]))
+        c = s/PERIODS
+        color = c, 1., 1., 0.75
+        ctx.arc(x1, y1, 5 / ctx.width, 5 / ctx.height, fill=color, thickness=0.0)
+        ctx.line(x1, y1, x2, y2, stroke=color, thickness=1.0)
     suffix = "_%s" % suffix if suffix is not None else ""
     ctx.output("sequences/%d%s.png" % (t, suffix))    
     log.info("--> done")
+
+
+def scale(pt):
+    x, y = geo.project(pt)
+    x = (x - min_x) / (max_x - min_x)
+    y = (y - min_y) / (max_y - min_y)
+    return x, y
 
 
 def gradient_test():

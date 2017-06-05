@@ -11,7 +11,7 @@ from keras.callbacks import ModelCheckpoint
 from keras.utils import plot_model
 from data import *
 
-SAMPLE_LIMIT = 10
+SAMPLE_LIMIT = None
 EPOCHS = 10
 
 WEIGHTS = None

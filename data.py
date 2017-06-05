@@ -30,14 +30,14 @@ class Point():
         self.x = (x - min_x) / (max_x - min_x)
         self.y = (y - min_y) / (max_y - min_y)
         self.t = t
-        self._hash = None
+        self._grid = None
         self.cluster = None
 
     @property
-    def hash(self):
-        if self._hash is None:
-            self._hash = geo.geohash_encode((self.lon, self.lat), precision=6)
-        return self._hash
+    def grid(self):
+        if self._grid is None:
+            self._grid = geo.geohash_encode((self.lon, self.lat), precision=config['grid'])
+        return self._grid
 
     def distance(self, pt):
         return geo.distance((self.lon, self.lat), (pt.lon, pt.lat))

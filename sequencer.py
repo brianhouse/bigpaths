@@ -8,7 +8,7 @@ from data import *
 import drawer
 
 
-def sequence(user_ids, draw_maps=False, draw_strips=False):
+def sequence(user_ids, draw=False):
 
     sequences = []            
 
@@ -30,7 +30,7 @@ def sequence(user_ids, draw_maps=False, draw_strips=False):
 
         # iterate through days
         day = start_dt.replace(hour=0, minute=0, second=0) + datetime.timedelta(days=1)
-        current_location = None
+        cell = None
         while day < stop_dt - datetime.timedelta(days=1):
             d_start_t = timeutil.timestamp(day)
             day += datetime.timedelta(days=1)
@@ -38,54 +38,58 @@ def sequence(user_ids, draw_maps=False, draw_strips=False):
 
             # get points and transients for this day
             day_points = [point for point in points if point.t >= d_start_t and point.t < d_stop_t]
-            day_transients = [point for point in transients if point.t >= d_start_t and point.t < d_stop_t]
             if len(day_points) == 0:
                 continue
 
             # get the daily period for each of these points
-            def get_periods(points):            
-                periods = np.array([point.t for point in points])
-                periods -= d_start_t
-                periods //= 60
-                periods //= math.floor(86400 / 60 / PERIODS)
-                periods = list(periods)
-                return periods                
-            point_periods = get_periods(day_points)
-            transient_periods = get_periods(day_transients)
+            periods = np.array([point.t for point in day_points])
+            periods -= d_start_t
+            periods //= 60
+            periods //= math.floor(86400 / 60 / PERIODS)
+            periods = list(periods)
+
+            ## there is a duplicate problem here. if you go two places, the second gets erased.
+            # it should at least be on deck if there is a spare spot
+            # print(periods)
 
             # add this point to the sequence
             sequence = []
             for i in range(PERIODS):
-                if i in point_periods:
-                    current_location = day_points[point_periods.index(i)]
-                # elif i in transient_periods:    # prioritize the destination
-                #     current_location = None
-                sequence.append(current_location)       
+                if i in periods:
+                    cell = day_points[periods.index(i)].grid
+                sequence.append(cell)       
             user_sequences.append(sequence)
-
-        log.info("--> generated %s sequences for user %s" % (len(user_sequences), user_id))
-        if len(user_sequences) == 0:
-            continue
-
-        # draw things
-        if draw_maps or draw_strips:
-            cluster(points)
-            if draw_maps:
-                drawer.map(user_id, points)
-            if draw_strips:
-                drawer.strips(user_id, user_sequences)      
 
         # fix leading Nones
         i = 0
         while user_sequences[0][i] is None:
             i += 1
         user_sequences[0][0:i] = [user_sequences[0][i]] * i
+
+        log.info("--> generated %s sequences for user %s" % (len(user_sequences), user_id))
+        if len(user_sequences) == 0:
+            continue
         sequences.extend(user_sequences)
+
+        # draw things
+        if draw:
+            drawer.map(user_id, points)
+            drawer.strips(user_id, user_sequences)
 
     log.info("--> generated %s total sequences" % len(sequences))
 
-    return sequences
+    log.info("Generating grids...")
+    grids = [grid for sequence in sequences for grid in sequence]
+    grids = list(set(grids))
+    grids.sort()
+    util.save("data/grids_%d_%d.pkl" % (config['grid'], config['periods']), grids)
+    log.info("--> found grids: %s" % [grids])
+
+    log.info("Flattening and saving...")
+    corpus = [grids.index(cell) for sequence in sequences for cell in sequence]
+    util.save("data/corpus_%d_%d.pkl" % (config['grid'], config['periods']), corpus)
+    log.info("--> done")
 
 
 if __name__ == "__main__":
-    sequence([1], True, True)
+    sequence([1], True)
