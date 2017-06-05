@@ -5,14 +5,15 @@ from colors import colors
 from data import *
 
 
-def map(user_id, points):
+def map(user_id, sequences):
     log.info("Drawing map for user %s..." % user_id)
     t = timeutil.timestamp()
     ctx = drawing.Context(1000, int(1000 / ratio), relative=True, flip=True, hsv=False)
     ctx.image("basemap/basemap.png")
-    for point in points:
-        color = colors[ord(point.grid[-1]) % len(colors)]
-        ctx.arc(point.x, point.y, 3 / ctx.width, 3 / ctx.height, fill=color, thickness=0.0)
+    for sequence in sequences:
+        for point in sequence:
+            color = colors[ord(point.grid[-1]) % len(colors)]
+            ctx.arc(point.x, point.y, 3 / ctx.width, 3 / ctx.height, fill=color, thickness=0.0)
     ctx.output("maps/%d_%d.png" % (t, user_id))
     log.info("--> done")
 
@@ -22,10 +23,8 @@ def strips(user_id, sequences):
     t = timeutil.timestamp()
     ctx = drawing.Context(1000, len(sequences) * 2, relative=True, flip=False, hsv=False, background=(0., 0., 0., 1.))
     for q, sequence in enumerate(sequences):
-        for p, grid in enumerate(sequence):
-            if grid is None:
-                continue
-            color = colors[ord(grid[-1]) % len(colors)]
+        for p, point in enumerate(sequence):
+            color = colors[ord(point.grid[-1]) % len(colors)]
             ctx.line(p/PERIODS, (q/len(sequences)) - (1 / ctx.height), (p+1)/PERIODS, (q/len(sequences)) - (1 / ctx.height), stroke=color, thickness=2.0)
     ctx.output("strips/%d_%d.png" % (t, user_id))
 

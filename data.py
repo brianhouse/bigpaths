@@ -31,6 +31,7 @@ class Point():
         self.y = (y - min_y) / (max_y - min_y)
         self.t = t
         self._grid = None
+        self.index = None
         self.cluster = None
 
     @property

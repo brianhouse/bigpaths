@@ -30,7 +30,7 @@ def sequence(user_ids, draw=False):
 
         # iterate through days
         day = start_dt.replace(hour=0, minute=0, second=0) + datetime.timedelta(days=1)
-        cell = None
+        point = None
         while day < stop_dt - datetime.timedelta(days=1):
             d_start_t = timeutil.timestamp(day)
             day += datetime.timedelta(days=1)
@@ -56,8 +56,8 @@ def sequence(user_ids, draw=False):
             sequence = []
             for i in range(PERIODS):
                 if i in periods:
-                    cell = day_points[periods.index(i)].grid
-                sequence.append(cell)       
+                    point = day_points[periods.index(i)]
+                sequence.append(point)       
             user_sequences.append(sequence)
 
         # fix leading Nones
@@ -73,21 +73,23 @@ def sequence(user_ids, draw=False):
 
         # draw things
         if draw:
-            drawer.map(user_id, points)
+            drawer.map(user_id, user_sequences)
             drawer.strips(user_id, user_sequences)
 
     log.info("--> generated %s total sequences" % len(sequences))
 
     log.info("Generating grids...")
-    grids = [grid for sequence in sequences for grid in sequence]
+    grids = [point.grid for sequence in sequences for point in sequence]
     grids = list(set(grids))
     grids.sort()
     util.save("data/grids_%d_%d.pkl" % (config['grid'], config['periods']), grids)
     log.info("--> found grids: %s" % [grids])
 
-    log.info("Flattening and saving...")
-    corpus = [grids.index(cell) for sequence in sequences for cell in sequence]
-    util.save("data/corpus_%d_%d.pkl" % (config['grid'], config['periods']), corpus)
+    log.info("Indexing...")
+    for sequence in sequences:
+        for point in sequence:
+            point.index = grids.index(point.grid) 
+    util.save("data/corpus_%d_%d.pkl" % (config['grid'], config['periods']), sequences)
     log.info("--> done")
 
 

@@ -11,7 +11,7 @@ from data import *
 corpus = util.load("data/corpus_%d_%d.pkl" % (config['grid'], config['periods']))
 
 # test sequence drawing
-d = 21
+d = 20
 sequence = corpus[(d * PERIODS):(d * PERIODS) + PERIODS]
 print(sequence)
 drawer.sequence(sequence)
