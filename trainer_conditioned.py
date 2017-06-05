@@ -11,7 +11,7 @@ from keras.callbacks import ModelCheckpoint
 from keras.utils import plot_model
 from data import *
 
-SAMPLE_LIMIT = 6000
+SAMPLE_LIMIT = None
 EPOCHS = 10
 
 WEIGHTS = None
@@ -24,7 +24,7 @@ GRIDS = len(grids)
 log.info("Generating training sequences...")
 corpus = util.load("data/sequences_%d_%d.pkl" % (config['grid'], config['periods']))
 corpus = [(p, point.label) for sequence in corpus for (p, point) in enumerate(sequence)]
-sequence_length = PERIODS   ## this could change
+sequence_length = 20   ## this could change
 sequences = []
 outputs = []
 for i in range(len(corpus) - sequence_length):
