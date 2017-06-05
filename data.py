@@ -20,6 +20,8 @@ max_x, min_y = geo.project((LON_2, LAT_2))
 ratio = (max_x - min_x) / (max_y - min_y)
 location = {'$geoWithin': {'$geometry': {'type': "Polygon", 'coordinates': [[ [LON_1, LAT_1], [LON_2, LAT_1], [LON_2, LAT_2], [LON_1, LAT_2], [LON_1, LAT_1] ]]}}}
 
+grids = util.load("data/grids_%d_%d.pkl" % (config['grid'], config['periods']))
+
 
 class Point():
 

@@ -20,10 +20,17 @@ if len(sys.argv) > 1:
 
 GRIDS = len(grids)
 
+# test sequence
+skip = math.ceil(PERIODS / GRIDS)
+sequence = []
+for i in range(PERIODS):
+    sequence.append(math.floor(i / skip))
+
+corpus = sequence * 1000
+
+
 # split the dataset into moving sequences
 log.info("Generating training sequences...")
-corpus = util.load("data/sequences_%d_%d.pkl" % (config['grid'], config['periods']))
-corpus = [point.label for sequence in corpus for point in sequence]
 sequence_length = PERIODS
 sequences = []
 outputs = []

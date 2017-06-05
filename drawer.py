@@ -34,7 +34,6 @@ def sequence(sequence, suffix=None):
     log.info("Drawing sequence...")
     ctx = drawing.Context(1000, int(1000 / ratio), relative=True, flip=True, hsv=True)
     ctx.image("basemap/basemap.png")
-    grids = util.load("data/grids_%d_%d.pkl" % (config['grid'], config['periods']))
     if len(sequence) != PERIODS:
         log.error("--> bad sequence length")
         return
