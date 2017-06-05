@@ -85,13 +85,13 @@ def sequence(user_ids, draw=False):
     util.save("data/grids_%d_%d.pkl" % (config['grid'], config['periods']), grids)
     log.info("--> found grids: %s" % [grids])
 
-    log.info("Indexing...")
+    log.info("Labeling...")
     for sequence in sequences:
         for point in sequence:
-            point.index = grids.index(point.grid) 
+            point.label = grids.index(point.grid) 
     util.save("data/sequences_%d_%d.pkl" % (config['grid'], config['periods']), sequences)
     log.info("--> done")
 
 
 if __name__ == "__main__":
-    sequence([1], True)
+    sequence([1], False)

@@ -18,11 +18,12 @@ WEIGHTS = None
 if len(sys.argv) > 1:
     WEIGHTS = sys.argv[1]
 
-corpus = util.load("data/corpus_house_hash.pkl")
-
+GRIDS = len(util.load("data/grids_%d_%d.pkl" % (config['grid'], config['periods'])))
 
 # split the dataset into moving sequences
 log.info("Generating training sequences...")
+corpus = util.load("data/sequences_%d_%d.pkl" % (config['grid'], config['periods']))
+corpus = [point.label for sequence in corpus for point in sequence]
 sequence_length = PERIODS
 sequences = []
 outputs = []
@@ -36,12 +37,12 @@ log.info("--> %d sequences" % len(sequences))
 
 
 # prep one-hot tensors
-X = np.zeros((len(sequences), sequence_length, 177), dtype=np.bool)     ## fix constant
-y = np.zeros((len(sequences), 177), dtype=np.bool)
+X = np.zeros((len(sequences), sequence_length, GRIDS), dtype=np.bool)     ## fix constant
+y = np.zeros((len(sequences), GRIDS), dtype=np.bool)
 for s, sequence in enumerate(sequences):
-    for p, cluster in enumerate(sequence):
-        X[s, p, cluster] = 1
-    y[s, cluster] = 1
+    for p, label in enumerate(sequence):
+        X[s, p, label] = 1
+    y[s, label] = 1
 
 
 log.info("Creating model...")
@@ -52,7 +53,7 @@ model.add(LSTM(512, return_sequences=True))
 model.add(Dropout(0.2))
 model.add(LSTM(512, return_sequences=False))
 model.add(Dropout(0.2))
-model.add(Dense(177, activation=('softmax')))
+model.add(Dense(GRIDS, activation=('softmax')))
 if WEIGHTS is not None:
     model.load_weights(WEIGHTS)
 model.compile(loss="categorical_crossentropy", optimizer="rmsprop", metrics=['accuracy'])
@@ -65,19 +66,18 @@ def generate():
     seed = corpus[start_index:start_index + sequence_length]
     sequence = seed[:]
     for i in range(sequence_length):
-        x = np.zeros((1, sequence_length, 177))
-        for p, cluster in enumerate(sequence[-sequence_length:]):
-            x[0, p, cluster] = 1.
+        x = np.zeros((1, sequence_length, GRIDS))
+        for p, label in enumerate(sequence[-sequence_length:]):
+            x[0, p, label] = 1.
         distribution = model.predict(x, verbose=0)[0]    
-        cluster = list(distribution).index(np.max(distribution))        
-        sequence.append(cluster)
+        label = list(distribution).index(np.max(distribution))        
+        sequence.append(label)
         sequence.pop(0)
     return sequence, seed
 
 
 log.info("Training...")
 t = timeutil.timestamp()
-hashes = util.load("data/hashes.pkl")
 for i in range(EPOCHS):
     log.info("(%d)" % (i+1))
     try: 
@@ -90,13 +90,6 @@ for i in range(EPOCHS):
     log.info("Generating example...")
     sequence, seed = generate()
     log.info("--> done")
-    for p, cluster in enumerate(seed):
-        point = Point(*geo.geohash_decode(hashes[cluster]), None)
-        seed[p] = point.x, point.y
-    for p, cluster in enumerate(sequence):
-        point = Point(*geo.geohash_decode(hashes[cluster]), None)
-        sequence[p] = point.x, point.y
-    # drawer.sequences([sequence, seed])
-    drawer.sequences([seed], "seed")
-    drawer.sequences([sequence], "result")
+    drawer.sequence(seed, "seed")
+    drawer.sequence(sequence, "result")
 
