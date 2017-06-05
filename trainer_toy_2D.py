@@ -89,6 +89,13 @@ for i in range(EPOCHS):
     log.info("Generating example...")
     sequence, seed = generate()
     log.info("--> done")
+    print(seed)
+    print()
+    print(sequence)
+    seed = seed[:, 1]
+    sequence = sequence[:, 1]
+    print()
+    print(sequence[:, 0])
     drawer.sequence(seed, "seed")
     drawer.sequence(sequence, "result")
 
