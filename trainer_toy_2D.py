@@ -94,7 +94,7 @@ for i in range(EPOCHS):
     seq1 = np.array(sequence)[:, 0]
     seq2 = np.array(sequence)[:, 1]
     print(seq1)
-    print([in(s) for s in seq2])
+    print([int(s) for s in seq2])
     drawer.sequence(np.array(seed)[:, 1], "seed")
     drawer.sequence(seq2, "result")
 
