@@ -44,8 +44,8 @@ def sequence(sequence, suffix=None):
             x1, y1 = point.x, point.y
             x2, y2 = sequence[s+1].x, sequence[s+1].y
         else:
-            x1, y1 = scale(geo.geohash_decode(grids[point]))
-            x2, y2 = scale(geo.geohash_decode(grids[sequence[s+1]]))
+            x1, y1 = scale(geo.geohash_decode(grids[int(point)]))
+            x2, y2 = scale(geo.geohash_decode(grids[int(sequence[s+1])]))
         c = s/PERIODS
         color = c, 1., 1., 0.75
         ctx.arc(x1, y1, 5 / ctx.width, 5 / ctx.height, fill=color, thickness=0.0)

@@ -92,10 +92,10 @@ for i in range(EPOCHS):
     print(seed)
     print()
     print(sequence)
-    seed = seed[:, 1]
-    sequence = sequence[:, 1]
+    seed = np.array(seed[:, 1])
+    sequence = np.array(sequence[:, 1])
     print()
-    print(sequence[:, 0])
+    print(np.array(sequence[:, 0]))
     drawer.sequence(seed, "seed")
     drawer.sequence(sequence, "result")
 
