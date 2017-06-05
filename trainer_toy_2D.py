@@ -11,7 +11,7 @@ from keras.callbacks import ModelCheckpoint
 from keras.utils import plot_model
 from data import *
 
-SAMPLE_LIMIT = 5000
+SAMPLE_LIMIT = 2000
 EPOCHS = 10
 
 WEIGHTS = None
@@ -91,11 +91,10 @@ for i in range(EPOCHS):
     log.info("--> done")
     print(seed)
     print()
-    print(sequence)
-    seed = np.array(seed)[:, 1]
-    sequence = np.array(sequence)[:, 1]
-    print()
-    print(np.array(sequence)[:, 0])
+    seq1 = np.array(sequence)[:, 0]
+    seq2 = np.array(sequence)[:, 1]
+    print(seq1)
+    print(seq2)
     drawer.sequence(seed, "seed")
-    drawer.sequence(sequence, "result")
+    drawer.sequence(seq2, "result")
 
