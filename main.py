@@ -8,12 +8,13 @@ from data import *
 
 
 
-corpus = util.load("data/corpus_%d_%d.pkl" % (config['grid'], config['periods']))
+sequences = util.load("data/sequences_%d_%d.pkl" % (config['grid'], config['periods']))
 
-# test sequence drawing
-d = 20
-sequence = corpus[(d * PERIODS):(d * PERIODS) + PERIODS]
-print(sequence)
+D = 20
+sequence = sequences[D]
+# drawer.map([sequence])
+# drawer.strips([sequence] * 20)
+
 drawer.sequence(sequence)
 
 

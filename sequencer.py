@@ -73,8 +73,8 @@ def sequence(user_ids, draw=False):
 
         # draw things
         if draw:
-            drawer.map(user_id, user_sequences)
-            drawer.strips(user_id, user_sequences)
+            drawer.map(user_sequences, user_id)
+            drawer.strips(user_sequences, user_id)
 
     log.info("--> generated %s total sequences" % len(sequences))
 
@@ -89,7 +89,7 @@ def sequence(user_ids, draw=False):
     for sequence in sequences:
         for point in sequence:
             point.index = grids.index(point.grid) 
-    util.save("data/corpus_%d_%d.pkl" % (config['grid'], config['periods']), sequences)
+    util.save("data/sequences_%d_%d.pkl" % (config['grid'], config['periods']), sequences)
     log.info("--> done")
 
 
