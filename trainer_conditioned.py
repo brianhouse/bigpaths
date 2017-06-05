@@ -59,9 +59,9 @@ log.info("--> done")
 
 def generate():
     start_index = random.randint(0, len(corpus) - sequence_length - 1)
-    seed = corpus[start_index:start_index + sequence_length]
+    seed = corpus[start_index:start_index + PERIODS]
     sequence = seed[:]
-    for i in range(sequence_length):    # replace the randomly seeded sequence with a sequence of newly generated points
+    for i in range(PERIODS):    # replace the randomly seeded sequence with a sequence of newly generated points
         x = np.array([sequence])
         point = model.predict(x, verbose=0)[0]
         sequence.append(point)
