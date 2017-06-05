@@ -23,7 +23,7 @@ GRIDS = len(grids)
 # split the dataset into moving sequences
 log.info("Generating training sequences...")
 corpus = util.load("data/sequences_%d_%d.pkl" % (config['grid'], config['periods']))
-corpus = [(p, point.label) for sequence in corpus for (p, point) in sequence]
+corpus = [(p, point.label) for sequence in corpus for (p, point) in enumerate(sequence)]
 sequence_length = PERIODS   ## this could change
 sequences = []
 outputs = []
