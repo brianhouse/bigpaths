@@ -49,7 +49,7 @@ log.info("--> done")
 
 def generate():
     seed = random.choice(X)
-    sequence = seed[:]
+    sequence = list(seed[:])
     for i in range(PERIODS + len(seed)):
         x = np.array([sequence[-MEMORY:]])
         distribution = model.predict(x, verbose=0)[0]
