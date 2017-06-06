@@ -44,13 +44,11 @@ log.info("--> %d input vectors" % len(X))
 
 log.info("Creating model...")
 model = Sequential()
-model.add(LSTM(128, return_sequences=True, input_shape=X[0].shape))
+model.add(LSTM(512, return_sequences=True, input_shape=X[0].shape))
 model.add(Dropout(0.2))
-model.add(LSTM(256, return_sequences=True))
+model.add(LSTM(512, return_sequences=False))
 model.add(Dropout(0.2))
-model.add(LSTM(128, return_sequences=False))
-model.add(Dropout(0.2))
-model.add(Dense(len(y[0]), activation=('softmax')))
+model.add(Dense(GRIDS, activation=('softmax')))
 if WEIGHTS is not None:
     model.load_weights(WEIGHTS)
 model.compile(loss="categorical_crossentropy", optimizer="rmsprop", metrics=['accuracy'])
@@ -76,7 +74,7 @@ for i in range(EPOCHS):
     try: 
         filepath = "checkpoints/%s_checkpoint-%d-{loss:.4f}.hdf5" % (t, i)
         checkpoint = ModelCheckpoint(filepath, monitor="loss", verbose=1, save_best_only=True, mode="min")
-        model.fit(X, y, epochs=1, callbacks=[checkpoint])
+        model.fit(X, y, epochs=1, batch_size=128, callbacks=[checkpoint])
     except KeyboardInterrupt:
         print()
         exit()
