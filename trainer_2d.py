@@ -51,10 +51,12 @@ def generate():
     seed = random.choice(X)
     sequence = seed[:]
     for i in range(PERIODS + MEMORY):
-        x = [sequence[-MEMORY:]]
+        x = np.array([np.array(sequence[-MEMORY:])])
+        print(x)
+        print(x.shape)
         distribution = model.predict(x, verbose=0)[0]
-        label = list(distribution).index(np.max(distribution))        
-        sequence.append(label)
+        label = list(distribution).index(np.max(distribution))
+        sequence = np.array(list(sequence) + [label])
     return seed, sequence
 
 
