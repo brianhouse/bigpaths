@@ -12,7 +12,7 @@ from keras.utils import to_categorical
 from data import *
 
 EPOCHS = 50
-MEMORY = 20
+MEMORY = 4
 WEIGHTS = None
 if len(sys.argv) > 1:
     WEIGHTS = sys.argv[1]
@@ -28,7 +28,7 @@ for sequence in sequences:
         for m in range(MEMORY):
             if period < MEMORY:
                 vector.append(point.label)  ## so this is kind of fake, should be previous sequence
-            else:
+            else:                           ## it means the seeds will always be mono
                 vector.append(sequence[period - (m + 1)].label)
         inputs.append(vector)
         outputs.append(point.label)
@@ -64,10 +64,18 @@ def generate():
     # iterate
     for period in range(PERIODS-MEMORY):
         x = np.array([[period] + result[-MEMORY:]])
+        print(x)
         distribution = model.predict(x, verbose=0)[0]
-        label = list(distribution).index(np.max(distribution))                
+        label = sample(distribution, 0.8)
         result.append(label)
     return seed, result
+
+def sample(distribution, temperature):
+    """Samples an index given a probability distribution"""
+    a = np.log(distribution) / temperature
+    p = np.exp(a) / np.sum(np.exp(a))
+    choices = range(len(distribution))      # array of indexes
+    return np.random.choice(choices, p=p)    # select an index based on the probabilities of each one
 
 
 log.info("Training...")
