@@ -51,7 +51,7 @@ def generate():
     seed = random.choice(X)
     sequence = list(seed[:])
     for i in range(PERIODS + len(seed)):
-        x = np.array([sequence[-MEMORY:]])
+        x = to_categorical(np.array([sequence[-MEMORY:]]))
         distribution = model.predict(x, verbose=0)[0]
         label = list(distribution).index(np.max(distribution))        
         sequence.append(label)
