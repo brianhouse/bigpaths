@@ -63,10 +63,10 @@ def generate():
 
     # iterate
     for period in range(PERIODS-MEMORY):
-        x = np.array([[period] + result[-MEMORY:]])
+        x = np.array([[period + MEMORY] + result[-MEMORY:]])
         print(x)
         distribution = model.predict(x, verbose=0)[0]
-        label = sample(distribution, 0.8)
+        label = sample(distribution, 0.5)
         result.append(label)
     return seed, result
 
