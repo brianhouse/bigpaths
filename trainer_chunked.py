@@ -62,7 +62,7 @@ def generate():
     result = seed[1:]
 
     # iterate
-    for period in range(PERIODS-3):
+    for period in range(PERIODS-MEMORY):
         x = np.array([[period] + result[-MEMORY:]])
         distribution = model.predict(x, verbose=0)[0]
         label = list(distribution).index(np.max(distribution))                
