@@ -5,7 +5,7 @@ import numpy as np
 import drawer
 from housepy import config, log, geo
 from keras.models import Sequential
-from keras.layers.recurrent import LSTM, GRU
+from keras.layers.recurrent import LSTM
 from keras.layers.core import Dense, Activation, Dropout
 from keras.callbacks import ModelCheckpoint
 from keras.utils import plot_model
