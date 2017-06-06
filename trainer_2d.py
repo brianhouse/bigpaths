@@ -31,18 +31,6 @@ X = np.array([to_categorical(np.array(input), GRIDS) for input in inputs])
 y = to_categorical(np.array(outputs), GRIDS)
 log.info("--> %d input vectors" % len(X))
 
-# print(X[0])
-# print()
-# print(y)
-# print(len(y[0]))
-# print(GRIDS)
-# print(len(y))
-
-# print(X[0])
-# exit()
-
-print(X.shape)
-print(y.shape)
 
 log.info("Creating model...")
 model = Sequential()
