@@ -11,8 +11,8 @@ from keras.callbacks import ModelCheckpoint
 from keras.utils import to_categorical
 from data import *
 
-EPOCHS = 1
-MEMORY = 3
+EPOCHS = 50
+MEMORY = 20
 WEIGHTS = None
 if len(sys.argv) > 1:
     WEIGHTS = sys.argv[1]
@@ -26,7 +26,7 @@ for sequence in sequences:
     for (period, point) in enumerate(sequence):
         vector = [period]
         for m in range(MEMORY):
-            if period < MEMORY:            
+            if period < MEMORY:
                 vector.append(point.label)  ## so this is kind of fake, should be previous sequence
             else:
                 vector.append(sequence[period - (m + 1)].label)
@@ -39,7 +39,10 @@ log.info("--> %d inputs" % len(inputs))
 
 log.info("Creating model...")
 model = Sequential()
-model.add(Dense(32, input_shape=X[0].shape))
+model.add(Dense(512, input_shape=X[0].shape))
+model.add(Dropout(0.2))
+model.add(Dense(512))
+model.add(Dropout(0.2))
 model.add(Dense(len(y[0]), activation=('softmax')))
 if WEIGHTS is not None:
     model.load_weights(WEIGHTS)
