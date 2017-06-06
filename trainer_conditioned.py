@@ -43,19 +43,20 @@ y = np.array(outputs)
 
 log.info("Creating model...")
 model = Sequential()
-model.add(LSTM(512, return_sequences=True, input_shape=X[0].shape))
+model.add(GRU(512, return_sequences=True, input_shape=X[0].shape))
 model.add(Dropout(0.2))
-model.add(LSTM(512, return_sequences=True))
+model.add(GRU(512, return_sequences=True))
 model.add(Dropout(0.2))
-model.add(LSTM(512, return_sequences=True))
+model.add(GRU(512, return_sequences=True))
 model.add(Dropout(0.2))
-model.add(LSTM(512, return_sequences=False))
+model.add(GRU(512, return_sequences=False))
 model.add(Dropout(0.2))
 model.add(Dense(2))
 if WEIGHTS is not None:
     model.load_weights(WEIGHTS)
 model.compile(loss="mean_squared_error", optimizer="rmsprop", metrics=['accuracy'])
-plot_model(model, to_file="model.png", show_shapes=True, show_layer_names=True)
+# plot_model(model, to_file="model.png", show_shapes=True, show_layer_names=True)
+model.summary()
 log.info("--> done")
 
 
@@ -78,7 +79,7 @@ for i in range(EPOCHS):
     try: 
         filepath = "checkpoints/%s_checkpoint-%d-{loss:.4f}.hdf5" % (t, i)
         checkpoint = ModelCheckpoint(filepath, monitor="loss", verbose=1, save_best_only=True, mode="min")
-        model.fit(X, y, epochs=1, batch_size=128, callbacks=[checkpoint])
+        model.fit(X, y, epochs=1, callbacks=[checkpoint])
     except KeyboardInterrupt:
         print()
         exit()
