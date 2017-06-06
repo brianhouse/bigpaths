@@ -50,12 +50,16 @@ log.info("--> done")
 def generate():
     seed = random.choice(X)
     sequence = seed[:]
-    for i in range(PERIODS + MEMORY):
+    for i in range(PERIODS):
         x = np.array([sequence[-MEMORY:]])
         distribution = model.predict(x, verbose=0)[0]
         label = list(distribution).index(np.max(distribution))
         sequence = np.append(sequence, to_categorical(label, GRIDS), axis=0)
-    return seed, sequence
+    sequence = sequence[MEMORY:]
+    for l, label in enumerate(sequence):
+        sequence[l] = list(label).index(np.max(label))
+    print(len(sequence))
+    return seed, sequence[MEMORY:]
 
 
 log.info("Training...")
