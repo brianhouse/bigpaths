@@ -31,6 +31,16 @@ X = inputs
 y = to_categorical(np.array(outputs), GRIDS)
 log.info("--> %d input vectors" % len(X))
 
+# print(X[0])
+# print()
+# print(y)
+# print(len(y[0]))
+# print(GRIDS)
+# print(len(y))
+
+# print(X[0])
+# exit()
+
 
 log.info("Creating model...")
 model = Sequential()
@@ -53,8 +63,9 @@ def generate():
     sequence = seed[:]
     for i in range(PERIODS + len(seed)):
         x = np.array([sequence[-MEMORY:]])
-        point = model.predict(x, verbose=0)[0]
-        sequence.append(point)
+        distribution = model.predict(x, verbose=0)[0]
+        label = list(distribution).index(np.max(distribution))        
+        sequence.append(label)
     return seed, sequence
 
 
