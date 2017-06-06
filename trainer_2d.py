@@ -25,9 +25,9 @@ data = [point.label for sequence in sequences for point in sequence]
 inputs = []
 outputs = []
 for i in range(len(data) - MEMORY):
-    inputs.append(to_categorical(data[i:i + MEMORY], GRIDS))
+    inputs.append(data[i:i + MEMORY])
     outputs.append(data[i + MEMORY])
-X = inputs
+X = np.array([to_categorical(np.array(input), GRIDS) for input in inputs])
 y = to_categorical(np.array(outputs), GRIDS)
 log.info("--> %d input vectors" % len(X))
 
@@ -41,6 +41,8 @@ log.info("--> %d input vectors" % len(X))
 # print(X[0])
 # exit()
 
+print(X.shape)
+print(y.shape)
 
 log.info("Creating model...")
 model = Sequential()
@@ -54,6 +56,7 @@ if WEIGHTS is not None:
 model.compile(loss="categorical_crossentropy", optimizer="rmsprop", metrics=['accuracy'])
 model.summary()
 log.info("--> done")
+
 
 
 def generate():
