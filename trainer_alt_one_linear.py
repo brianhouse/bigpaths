@@ -41,7 +41,6 @@ if WEIGHTS is not None:
 model.compile(loss="categorical_crossentropy", optimizer="rmsprop", metrics=['accuracy'])
 model.summary()
 log.info("--> done")
-exit()
 
 def generate():
     result = []
