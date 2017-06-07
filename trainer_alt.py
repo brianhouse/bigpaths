@@ -12,8 +12,8 @@ from keras.utils import to_categorical
 from data import *
 
 
-EPOCHS = 10
-MEMORY = 5
+EPOCHS = 50
+MEMORY = PERIODS
 WEIGHTS = None
 if len(sys.argv) > 1:
     WEIGHTS = sys.argv[1]
@@ -21,12 +21,12 @@ if len(sys.argv) > 1:
 
 log.info("Generating training input...")
 points = util.load("data/sequences_alt_%d_%d.pkl" % (config['grid'], config['periods']))
-data = [(point.label, point.duration) for point in points]
+cells = [(point.label, point.duration) for point in points]
 inputs = []
 outputs = []
-for i in range(len(data) - MEMORY):
-    inputs.append(data[i:i + MEMORY])
-    outputs.append(data[i + MEMORY])
+for i in range(len(cells) - MEMORY):
+    inputs.append(cells[i:i + MEMORY])
+    outputs.append(cells[i + MEMORY])
 X = np.array(inputs)
 y = np.array(outputs)
 log.info("--> %d input vectors" % len(X))
@@ -48,12 +48,11 @@ log.info("--> done")
 
 def generate():
     result = []
-    sequence = random.choice(X)    
+    input = random.choice(X)    
     for i in range(MEMORY):
-        print(sequence[-MEMORY:])
-        r = model.predict(np.array([sequence[-MEMORY:]]), verbose=0)[0]
-        result.append((int(r[0]), int(r[1])))
-        sequence = np.append(sequence, [r], axis=0)
+        cell = model.predict(np.array([input[-MEMORY:]]), verbose=0)[0]
+        result.append((int(cell[0]), int(cell[1])))
+        input = np.append(input, [cell], axis=0)
     return result
 
 
@@ -64,13 +63,13 @@ for i in range(EPOCHS):
     try: 
         filepath = "checkpoints/%s_checkpoint-%d-{loss:.4f}.hdf5" % (t, i)
         checkpoint = ModelCheckpoint(filepath, monitor="loss", verbose=1, save_best_only=True, mode="min")
-        model.fit(X, y, epochs=1, batch_size=128, callbacks=[checkpoint])
+        model.fit(X, y, epochs=1, callbacks=[checkpoint])
     except KeyboardInterrupt:
         print()
         exit()
     log.info("Generating example...")
-    sequence = generate()
+    cells = generate()
     log.info("--> done")
-    print(sequence)
-    # drawer.sequence(sequence, "result")
+    print(cells)
+    drawer.path(cells)
 

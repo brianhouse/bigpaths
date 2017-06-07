@@ -55,6 +55,28 @@ def sequence(sequence, suffix=None):
     log.info("--> done")
 
 
+def path(cells, suffix=None):
+    t = timeutil.timestamp()    
+    log.info("Drawing path...")
+    ctx = drawing.Context(1000, int(1000 / ratio), relative=True, flip=True, hsv=True)
+    ctx.image("basemap/basemap.png")
+    s = 0
+    for p in range(len(cells) - 1):
+        label_1, duration_1 = cells[p]
+        label_2, duration_2 = cells[p+1]
+        x1, y1 = scale(geo.geohash_decode(grids[label_1]))
+        x2, y2 = scale(geo.geohash_decode(grids[label_2]))
+        s += duration_1
+        c = s/PERIODS
+        color = c, 1., 1., 0.75
+        ctx.arc(x1, y1, 5 / ctx.width, 5 / ctx.height, fill=color, thickness=0.0)
+        ctx.line(x1, y1, x2, y2, stroke=color, thickness=1.0)
+    suffix = "_%s" % suffix if suffix is not None else ""
+    ctx.output("sequences/%d%s.png" % (t, suffix))    
+    log.info("--> done")
+
+
+
 def scale(pt):
     x, y = geo.project(pt)
     x = (x - min_x) / (max_x - min_x)
