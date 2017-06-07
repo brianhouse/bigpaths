@@ -94,4 +94,4 @@ def sequence(user_ids, draw=False):
 
 
 if __name__ == "__main__":
-    sequence([1], False)
+    sequence([1], True)

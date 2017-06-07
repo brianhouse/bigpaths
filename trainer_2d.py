@@ -13,7 +13,7 @@ from data import *
 
 
 EPOCHS = 10
-MEMORY = 5
+MEMORY = PERIODS
 WEIGHTS = None
 if len(sys.argv) > 1:
     WEIGHTS = sys.argv[1]
@@ -21,12 +21,18 @@ if len(sys.argv) > 1:
 
 log.info("Generating training input...")
 sequences = util.load("data/sequences_%d_%d.pkl" % (config['grid'], config['periods']))
-data = [point.label for sequence in sequences for point in sequence]
+# data = [point.label for sequence in sequences for point in sequence]
 inputs = []
 outputs = []
-for i in range(len(data) - MEMORY):
-    inputs.append(data[i:i + MEMORY])
-    outputs.append(data[i + MEMORY])
+# for i in range(len(data) - MEMORY):
+#     inputs.append(data[i:i + MEMORY])
+#     outputs.append(data[i + MEMORY])
+for sequence in sequences:
+    inputs.append([point.label for point in sequence])
+    outputs.append(sequence[-1].label)
+# for input in inputs:
+#     print(input)
+# exit()
 X = np.array([to_categorical(np.array(input), GRIDS) for input in inputs])
 y = to_categorical(np.array(outputs), GRIDS)
 log.info("--> %d input vectors" % len(X))
