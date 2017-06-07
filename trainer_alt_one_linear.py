@@ -21,7 +21,7 @@ if len(sys.argv) > 1:
 
 log.info("Generating training input...")
 points = util.load("data/sequences_alt_%d_%d.pkl" % (config['grid'], config['periods']))
-cells = [(point.label, point.duration) for point in points]
+cells = [(point.label, 0) for point in points]
 inputs = []
 outputs = []
 for i in range(len(cells) - MEMORY):
@@ -31,34 +31,41 @@ X = np.array(inputs)
 y = np.array(outputs)
 log.info("--> %d input vectors" % len(X))
 
-
 log.info("Creating model...")
 model = Sequential()
 model.add(LSTM(512, return_sequences=True, input_shape=X[0].shape, dropout=0.2, recurrent_dropout=0.2))
 model.add(LSTM(512, return_sequences=False, dropout=0.2))
-model.add(Dense(len(y[0])))
+model.add(Dense(len(y[0]), activation="softmax"))
 if WEIGHTS is not None:
     model.load_weights(WEIGHTS)
-model.compile(loss="mean_squared_error", optimizer="rmsprop", metrics=['accuracy'])
+model.compile(loss="categorical_crossentropy", optimizer="rmsprop", metrics=['accuracy'])
 model.summary()
 log.info("--> done")
-
+exit()
 
 def generate():
     result = []
-    input = random.choice(X)    
-    for i in range(MEMORY):
-        cell = model.predict(np.array([input[-MEMORY:]]), verbose=0)[0]
-        result.append((int(cell[0]), int(cell[1])))
-        input = np.append(input, [cell], axis=0)
+    input = random.choice(X)
+    for i in range(PERIODS):
+        distribution = model.predict(np.array([input[-MEMORY:]]), verbose=0)[0]
+        label = sample(distribution, 0.5)
+        result.append(label)
+        input = np.append(input, to_categorical(label, GRIDS), axis=0)
     return result
+
+
+def sample(distribution, temperature):
+    a = np.log(distribution) / temperature
+    p = np.exp(a) / np.sum(np.exp(a))
+    choices = range(len(distribution))
+    return np.random.choice(choices, p=p)
 
 
 log.info("Training...")
 t = timeutil.timestamp()
 for i in range(EPOCHS):
     log.info("(%d)" % (i+1))
-    try:
+    try: 
         filepath = "checkpoints/%s_checkpoint-%d-{loss:.4f}.hdf5" % (t, i)
         checkpoint = ModelCheckpoint(filepath, monitor="loss", verbose=1, save_best_only=True, mode="min")
         model.fit(X, y, epochs=1, callbacks=[checkpoint])
@@ -66,8 +73,10 @@ for i in range(EPOCHS):
         print()
         exit()
     log.info("Generating example...")
-    cells = generate()
-    log.info("--> done")
+    cells = list(generate())
+    log.info("--> done")    
     print(cells)
+    for c, cell in enumerate(cells):
+        cells[c] = cell, 10
     drawer.path(cells)
 
