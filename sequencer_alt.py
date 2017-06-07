@@ -10,6 +10,8 @@ import drawer
 
 def sequence(user_ids, draw=False):
 
+    data = []
+
     for (user_id, points) in get_user(user_ids):        
         if points is None or not len(points):
             continue
@@ -28,8 +30,9 @@ def sequence(user_ids, draw=False):
             drawer.map([points])
 
         log.info("--> total points for user %s: %d" % (user_id, len(points)))
+        data = data + points
 
-    util.save("data/sequences_alt_%d_%d.pkl" % (config['grid'], config['periods']), points)
+    util.save("data/sequences_alt_%d_%d.pkl" % (config['grid'], config['periods']), data)
     log.info("--> done")
 
 

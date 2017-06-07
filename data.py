@@ -96,6 +96,8 @@ def calculate_durations(points):
         duration = points[p + 1].t - point.t
         duration //= 60
         duration //= math.floor(86400 / 60 / PERIODS)
+        if duration > PERIODS:
+            duration = PERIODS
         # print(points[p + 1].t - point.t, duration)
         point.duration = duration
     a_points = [point for point in points if point.duration is not None and point.duration > 0]        
