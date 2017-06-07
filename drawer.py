@@ -12,7 +12,7 @@ def map(sequences, user_id=None):
     ctx.image("basemap/basemap.png")
     for sequence in sequences:
         for point in sequence:
-            color = colors[ord(point.grid[-1]) % len(colors)]
+            color = colors[point.label % len(colors)]
             ctx.arc(point.x, point.y, 3 / ctx.width, 3 / ctx.height, fill=color, thickness=0.0)
     ctx.output("maps/%d_%s.png" % (t, user_id))
     log.info("--> done")

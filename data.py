@@ -36,15 +36,10 @@ class Point():
         self.x = (x - min_x) / (max_x - min_x)
         self.y = (y - min_y) / (max_y - min_y)
         self.t = t
-        self._grid = None
+        self.duration = None
+        self.grid = geo.geohash_encode((self.lon, self.lat), precision=config['grid'])
         self.label = None
         self.cluster = None
-
-    @property
-    def grid(self):
-        if self._grid is None:
-            self._grid = geo.geohash_encode((self.lon, self.lat), precision=config['grid'])
-        return self._grid
 
     def distance(self, pt):
         return geo.distance((self.lon, self.lat), (pt.lon, pt.lat))
@@ -61,6 +56,7 @@ def get_user(user_ids):
 
 
 def filter_transients(points):
+    log.info("Filtering transients...")    
     # filter out transient points: greater than 1/20mi (1 city block) covered in 10mins on both sides
     # so in theory, if you run to the bodega nearby, that's still cool
     marks = []
@@ -70,10 +66,51 @@ def filter_transients(points):
         prev, next = points[p-1], points[p+1]
         if point.t - prev.t <= 10 * 60 and next.t - point.t <= 10 * 60 and point.distance(prev) > 1/20 and point.distance(next) > 1/20:
             marks.append(p)
-    log.info("--> marked %d transients" % len(marks))
-    transients = [point for (p, point) in enumerate(points) if p in marks]
     points = [point for (p, point) in enumerate(points) if p not in marks]       
-    return points, transients
+    log.info("--> removed %d transients" % len(marks))    
+    return points
+
+
+def join_adjacent(points):
+    log.info("Joining like adjacent points...")
+    a_points = []
+    p = 0    
+    while True:        
+        point = points[p]
+        a_points.append(point)
+        q = p + 1
+        while q < len(points) and points[q].grid == points[p].grid:
+            q += 1
+        p = q
+        if p == len(points):
+            break
+    log.info("--> joined %d points" % (len(points) - len(a_points)))
+    return a_points
+
+
+def calculate_durations(points):
+    log.info("Calculating durations...")    
+    for (p, point) in enumerate(points):
+        if p == len(points) - 1:
+            continue
+        duration = points[p + 1].t - point.t
+        duration //= 60
+        duration //= math.floor(86400 / 60 / PERIODS)
+        # print(points[p + 1].t - point.t, duration)
+        point.duration = duration
+    a_points = [point for point in points if point.duration is not None and point.duration > 0]        
+    log.info("--> removed %d too short points" % (len(points) - len(a_points)))
+    return a_points
+
+
+def generate_grid_list(points):
+    log.info("Generating grid list...")    
+    grids = [point.grid for point in points]
+    grids = list(set(grids))
+    grids.sort()
+    util.save("data/grids_%d_%d.pkl" % (config['grid'], config['periods']), grids)
+    log.info("--> found grids: %s" % [grids])
+    return grids
 
 
 def cluster(points):
