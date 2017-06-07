@@ -73,8 +73,10 @@ for i in range(EPOCHS):
         print()
         exit()
     log.info("Generating example...")
-    cells = generate()
-    log.info("--> done")
+    cells = list(generate())
+    log.info("--> done")    
     print(cells)
-    # drawer.path(cells)
+    for c, cell in enumerate(cells):
+        cells[c] = cell, 10
+    drawer.path(cells)
 
