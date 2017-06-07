@@ -110,7 +110,7 @@ def generate_grid_list(points):
     grids = [point.grid for point in points]
     grids = list(set(grids))
     grids.sort()
-    util.save("data/grids_%d_%d.pkl" % (config['grid'], config['periods']), grids)
+    util.save("data/grids_alt_%d_%d.pkl" % (config['grid'], config['periods']), grids)
     log.info("--> found grids: %s" % [grids])
     return grids
 

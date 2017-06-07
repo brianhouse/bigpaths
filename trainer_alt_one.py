@@ -21,37 +21,44 @@ if len(sys.argv) > 1:
 
 log.info("Generating training input...")
 points = util.load("data/sequences_alt_%d_%d.pkl" % (config['grid'], config['periods']))
-cells = [(point.label, point.duration) for point in points]
+cells = [point.label for point in points]
 inputs = []
 outputs = []
 for i in range(len(cells) - MEMORY):
     inputs.append(cells[i:i + MEMORY])
     outputs.append(cells[i + MEMORY])
-X = np.array(inputs)
-y = np.array(outputs)
+X = np.array([to_categorical(np.array(input), GRIDS) for input in inputs])
+y = to_categorical(np.array(outputs), GRIDS)
 log.info("--> %d input vectors" % len(X))
-
 
 log.info("Creating model...")
 model = Sequential()
 model.add(LSTM(512, return_sequences=True, input_shape=X[0].shape, dropout=0.2, recurrent_dropout=0.2))
 model.add(LSTM(512, return_sequences=False, dropout=0.2))
-model.add(Dense(len(y[0])))
+model.add(Dense(len(y[0]), activation="softmax"))
 if WEIGHTS is not None:
     model.load_weights(WEIGHTS)
-model.compile(loss="mean_squared_error", optimizer="rmsprop", metrics=['accuracy'])
+model.compile(loss="categorical_crossentropy", optimizer="rmsprop", metrics=['accuracy'])
 model.summary()
 log.info("--> done")
 
 
 def generate():
     result = []
-    input = random.choice(X)    
-    for i in range(MEMORY):
-        cell = model.predict(np.array([input[-MEMORY:]]), verbose=0)[0]
-        result.append((int(cell[0]), int(cell[1])))
-        input = np.append(input, [cell], axis=0)
+    input = random.choice(X)
+    for i in range(PERIODS):
+        distribution = model.predict(np.array([input[-MEMORY:]]), verbose=0)[0]
+        label = sample(distribution, 0.5)
+        result.append(label)
+        input = np.append(input, to_categorical(label, GRIDS), axis=0)
     return result
+
+
+def sample(distribution, temperature):
+    a = np.log(distribution) / temperature
+    p = np.exp(a) / np.sum(np.exp(a))
+    choices = range(len(distribution))
+    return np.random.choice(choices, p=p)
 
 
 log.info("Training...")
@@ -69,5 +76,5 @@ for i in range(EPOCHS):
     cells = generate()
     log.info("--> done")
     print(cells)
-    drawer.path(cells)
+    # drawer.path(cells)
 
