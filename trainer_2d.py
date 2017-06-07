@@ -50,7 +50,7 @@ def generate():
     result = []
     sequence = random.choice(X)
     for i in range(PERIODS):
-        distribution = model.predict([sequence[-MEMORY:]], verbose=0)[0]
+        distribution = model.predict(np.array([sequence[-MEMORY:]]), verbose=0)[0]
         label = list(distribution).index(np.max(distribution))
         result.append(label)
         sequence = np.append(sequence, to_categorical(label, GRIDS), axis=0)
@@ -69,9 +69,8 @@ for i in range(EPOCHS):
         print()
         exit()
     log.info("Generating example...")
-    seed, sequence = generate()
+    sequence = generate()
     log.info("--> done")
-    print(seed)
     print(sequence)
     drawer.sequence(sequence, "result")
 
