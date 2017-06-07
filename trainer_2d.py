@@ -46,20 +46,15 @@ model.summary()
 log.info("--> done")
 
 
-
 def generate():
-    seed = random.choice(X)
-    sequence = seed[:]
+    result = []
+    sequence = random.choice(X)
     for i in range(PERIODS):
-        x = np.array([sequence[-MEMORY:]])
-        distribution = model.predict(x, verbose=0)[0]
+        distribution = model.predict([sequence[-MEMORY:]], verbose=0)[0]
         label = list(distribution).index(np.max(distribution))
+        result.append(label)
         sequence = np.append(sequence, to_categorical(label, GRIDS), axis=0)
-    sequence = sequence[MEMORY:]
-    for l, label in enumerate(sequence):
-        sequence[l] = list(label).index(np.max(label))
-    print(len(sequence))
-    return seed, sequence[MEMORY:]
+    return result
 
 
 log.info("Training...")
