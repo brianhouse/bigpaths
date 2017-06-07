@@ -51,10 +51,17 @@ def generate():
     sequence = random.choice(X)
     for i in range(PERIODS):
         distribution = model.predict(np.array([sequence[-MEMORY:]]), verbose=0)[0]
-        label = list(distribution).index(np.max(distribution))
+        label = sample(distribution, 0.5)
         result.append(label)
         sequence = np.append(sequence, to_categorical(label, GRIDS), axis=0)
     return result
+
+
+def sample(distribution, temperature):
+    a = np.log(distribution) / temperature
+    p = np.exp(a) / np.sum(np.exp(a))
+    choices = range(len(distribution))
+    return np.random.choice(choices, p=p)
 
 
 log.info("Training...")
