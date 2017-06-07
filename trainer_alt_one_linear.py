@@ -47,10 +47,9 @@ def generate():
     input = random.choice(X)
     for i in range(10):
         cell = model.predict(np.array([input[-MEMORY:]]), verbose=0)[0]
-        result.append(int(cell))
+        result.append((int(cell[0]), int(cell[1])))
         input = np.append(input, cell, axis=0)
     return result
-
 
 log.info("Training...")
 t = timeutil.timestamp()
