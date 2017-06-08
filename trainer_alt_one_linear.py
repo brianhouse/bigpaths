@@ -11,6 +11,9 @@ from keras.callbacks import ModelCheckpoint
 from keras.utils import to_categorical
 from data import *
 
+print(__file__.split("/")[-1].split(".")[0])
+exit()
+
 
 EPOCHS = 50
 MEMORY = 30
@@ -35,13 +38,16 @@ log.info("Creating model...")
 model = Sequential()
 model.add(LSTM(512, return_sequences=True, input_shape=X[0].shape, dropout=0.2, recurrent_dropout=0.2))
 model.add(LSTM(512, return_sequences=False, dropout=0.2))
-model.add(Dense(len(y[0])))
+model.add(Dense(len(y[0]), activation="relu"))
 if WEIGHTS is not None:
     model.load_weights(WEIGHTS)
 model.compile(loss="mean_squared_error", optimizer="rmsprop", metrics=['accuracy'])
 model.summary()
 log.info("--> done")
 
+log.info("Training...")
+model.fit(X, y, epochs=EPOCHS)
+model.save("checkpoints/%s_%s.hdf5" % (__file__.split("/")[-1].split(".")[0], timeutil.timestamp()))
 
 def generate():
     result = []
@@ -52,20 +58,8 @@ def generate():
         input = np.append(input, np.array([cell]), axis=0)
     return result
 
-
-log.info("Training...")
-t = timeutil.timestamp()
-for i in range(EPOCHS):
-    log.info("(%d)" % (i+1))
-    try:
-        filepath = "checkpoints/%s_checkpoint-%d-{loss:.4f}.hdf5" % (t, i)
-        checkpoint = ModelCheckpoint(filepath, monitor="loss", verbose=1, save_best_only=True, mode="min")
-        model.fit(X, y, epochs=1, callbacks=[checkpoint])
-    except KeyboardInterrupt:
-        print()
-        exit()
-    log.info("Generating example...")
+log.info("Generating examples...")
+for i in range(10):    
     cells = list(generate())
-    log.info("--> done")
     print(cells)
     drawer.path(cells)
