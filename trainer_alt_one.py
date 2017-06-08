@@ -38,7 +38,7 @@ model.add(LSTM(512, return_sequences=False, dropout=0.2))
 model.add(Dense(len(y[0]), activation="softmax"))
 if WEIGHTS is not None:
     model.load_weights(WEIGHTS)
-model.compile(loss="mean_squared_error", optimizer="rmsprop", metrics=['accuracy'])
+model.compile(loss="categorical_crossentropy", optimizer="rmsprop", metrics=['accuracy'])
 model.summary()
 log.info("--> done")
 
