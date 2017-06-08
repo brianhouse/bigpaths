@@ -21,7 +21,7 @@ if len(sys.argv) > 1:
 
 log.info("Generating training input...")
 points = util.load("data/sequences_alt_%d_%d.pkl" % (config['grid'], config['periods']))
-cells = [point.label for point in points]
+cells = [(point.label, 0) for point in points]
 inputs = []
 outputs = []
 for i in range(len(cells) - MEMORY):
@@ -33,7 +33,7 @@ log.info("--> %d input vectors" % len(X))
 
 log.info("Creating model...")
 model = Sequential()
-model.add(LSTM(512, return_sequences=True, dropout=0.2, recurrent_dropout=0.2))
+model.add(LSTM(512, return_sequences=True, input_shape=X[0].shape, dropout=0.2, recurrent_dropout=0.2))
 model.add(LSTM(512, return_sequences=False, dropout=0.2))
 model.add(Dense(GRIDS, activation="relu"))
 model.add(Dense(1, activation="linear"))
@@ -55,15 +55,11 @@ def generate():
     input = random.choice(X)
     for i in range(10):
         cell = model.predict(np.array([input[-MEMORY:]]), verbose=0)[0]
-        print(cell)
-        result.append(cell)
-        input = np.append(input, label, axis=0)
+        result.append((int(cell[0]), 10))
+        input = np.append(input, np.array([cell]), axis=0)
     return result
 
 log.info("Generating examples...")
 for i in range(10):
     cells = list(generate())
-    print(cells)
-    for c, cell in enumerate(cells):
-        cells[c] = int(cell), 1
     drawer.path(cells)
