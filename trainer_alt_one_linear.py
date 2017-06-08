@@ -30,6 +30,8 @@ for i in range(len(cells) - MEMORY):
 X = np.array(inputs)
 y = np.array(outputs)
 log.info("--> %d input vectors" % len(X))
+X = X[:5]
+y = y[:5]
 
 log.info("Creating model...")
 model = Sequential()
@@ -48,7 +50,7 @@ def generate():
     for i in range(10):
         cell = model.predict(np.array([input[-MEMORY:]]), verbose=0)[0]
         result.append((int(cell[0]),))
-        input = np.append(input, cell, axis=0)
+        input = np.append(input, np.array([cell]), axis=0)
     return result
 
 log.info("Training...")
