@@ -21,7 +21,7 @@ if len(sys.argv) > 1:
 
 log.info("Generating training input...")
 points = util.load("data/sequences_alt_%d_%d.pkl" % (config['grid'], config['periods']))
-cells = [(point.label, point.duration) for point in points]
+cells = [point.label for point in points]
 inputs = []
 outputs = []
 for i in range(len(cells) - MEMORY):
@@ -33,7 +33,6 @@ log.info("--> %d input vectors" % len(X))
 
 log.info("Creating model...")
 model = Sequential()
-model.add(Embedding(GRIDS, 512))
 model.add(LSTM(512, return_sequences=True, dropout=0.2, recurrent_dropout=0.2))
 model.add(LSTM(512, return_sequences=False, dropout=0.2))
 model.add(Dense(GRIDS, activation="relu"))
