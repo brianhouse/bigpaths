@@ -5,6 +5,7 @@ import numpy as np
 import drawer
 from housepy import config, log, geo
 from keras.models import Sequential
+from keras.layers.embeddings import Embedding
 from keras.layers.recurrent import LSTM, GRU
 from keras.layers.core import Dense, Activation, Dropout
 from keras.callbacks import ModelCheckpoint
@@ -20,7 +21,7 @@ if len(sys.argv) > 1:
 
 log.info("Generating training input...")
 points = util.load("data/sequences_alt_%d_%d.pkl" % (config['grid'], config['periods']))
-cells = [(point.label,) for point in points]
+cells = [point.label for point in points]
 inputs = []
 outputs = []
 for i in range(len(cells) - MEMORY):
@@ -32,9 +33,10 @@ log.info("--> %d input vectors" % len(X))
 
 log.info("Creating model...")
 model = Sequential()
-model.add(LSTM(512, return_sequences=True, input_shape=X[0].shape, dropout=0.2, recurrent_dropout=0.2))
+model.add(Embedding(GRIDS, 512))
+model.add(LSTM(512, return_sequences=True, dropout=0.2, recurrent_dropout=0.2))
 model.add(LSTM(512, return_sequences=False, dropout=0.2))
-model.add(Dense(len(y[0]), activation="relu"))
+model.add(Dense(1, activation="linear"))
 if WEIGHTS is not None:
     model.load_weights(WEIGHTS)
 model.compile(loss="mean_squared_error", optimizer="rmsprop", metrics=['accuracy'])
@@ -52,9 +54,9 @@ def generate():
     result = []
     input = random.choice(X)
     for i in range(10):
-        cell = model.predict(np.array([input[-MEMORY:]]), verbose=0)[0]
-        result.append((int(cell[0]), 10))
-        input = np.append(input, np.array([cell]), axis=0)
+        label = model.predict(np.array([input[-MEMORY:]]), verbose=0)[0]
+        result.append(label)
+        input = np.append(input, np.array([label]), axis=0)
     return result
 
 log.info("Generating examples...")
