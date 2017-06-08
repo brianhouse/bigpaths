@@ -11,9 +11,6 @@ from keras.callbacks import ModelCheckpoint
 from keras.utils import to_categorical
 from data import *
 
-print(__file__.split("/")[-1].split(".")[0])
-exit()
-
 
 EPOCHS = 50
 MEMORY = 30
@@ -46,8 +43,12 @@ model.summary()
 log.info("--> done")
 
 log.info("Training...")
-model.fit(X, y, epochs=EPOCHS)
-model.save("checkpoints/%s_%s.hdf5" % (__file__.split("/")[-1].split(".")[0], timeutil.timestamp()))
+try:
+    model.fit(X, y, epochs=EPOCHS)
+    model.save("checkpoints/%s_%s.hdf5" % (__file__.split("/")[-1].split(".")[0], timeutil.timestamp()))
+except KeyboardInterrupt:
+    print()
+    exit()
 
 def generate():
     result = []

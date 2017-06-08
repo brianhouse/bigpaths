@@ -42,6 +42,13 @@ model.compile(loss="categorical_crossentropy", optimizer="rmsprop", metrics=['ac
 model.summary()
 log.info("--> done")
 
+log.info("Training...")
+try:
+    model.fit(X, y, epochs=EPOCHS)
+    model.save("checkpoints/%s_%s.hdf5" % (__file__.split("/")[-1].split(".")[0], timeutil.timestamp()))
+except KeyboardInterrupt:
+    print()
+    exit()
 
 def generate():
     result = []
@@ -53,30 +60,16 @@ def generate():
         input = np.append(input, to_categorical(label, GRIDS), axis=0)
     return result
 
-
 def sample(distribution, temperature):
     a = np.log(distribution) / temperature
     p = np.exp(a) / np.sum(np.exp(a))
     choices = range(len(distribution))
     return np.random.choice(choices, p=p)
 
-
-log.info("Training...")
-t = timeutil.timestamp()
-for i in range(EPOCHS):
-    log.info("(%d)" % (i+1))
-    try: 
-        filepath = "checkpoints/%s_checkpoint-%d-{loss:.4f}.hdf5" % (t, i)
-        checkpoint = ModelCheckpoint(filepath, monitor="loss", verbose=1, save_best_only=True, mode="min")
-        model.fit(X, y, epochs=1, callbacks=[checkpoint])
-    except KeyboardInterrupt:
-        print()
-        exit()
-    log.info("Generating example...")
+log.info("Generating examples...")
+for i in range(10):    
     cells = list(generate())
-    log.info("--> done")    
     print(cells)
     for c, cell in enumerate(cells):
         cells[c] = cell, 10
     drawer.path(cells)
-
