@@ -21,7 +21,7 @@ if len(sys.argv) > 1:
 
 log.info("Generating training input...")
 points = util.load("data/sequences_alt_%d_%d.pkl" % (config['grid'], config['periods']))
-cells = [point.label for point in points]
+cells = [(point.label, point.duration) for point in points]
 inputs = []
 outputs = []
 for i in range(len(cells) - MEMORY):
@@ -36,6 +36,7 @@ model = Sequential()
 model.add(Embedding(GRIDS, 512))
 model.add(LSTM(512, return_sequences=True, dropout=0.2, recurrent_dropout=0.2))
 model.add(LSTM(512, return_sequences=False, dropout=0.2))
+model.add(Dense(GRIDS, activation="relu"))
 model.add(Dense(1, activation="linear"))
 if WEIGHTS is not None:
     model.load_weights(WEIGHTS)
@@ -54,8 +55,9 @@ def generate():
     result = []
     input = random.choice(X)
     for i in range(10):
-        label = model.predict(np.array([input[-MEMORY:]]), verbose=0)[0]
-        result.append(label)
+        cell = model.predict(np.array([input[-MEMORY:]]), verbose=0)[0]
+        print(cell)
+        result.append(cell)
         input = np.append(input, label, axis=0)
     return result
 
