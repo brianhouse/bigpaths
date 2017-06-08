@@ -12,7 +12,6 @@ from keras.utils import to_categorical
 from data import *
 
 
-EPOCHS = 50
 MEMORY = 30
 WEIGHTS = None
 if len(sys.argv) > 1:
@@ -44,11 +43,10 @@ log.info("--> done")
 
 log.info("Training...")
 try:
-    model.fit(X, y, epochs=EPOCHS)
+    model.fit(X, y, epochs=100)
     model.save("checkpoints/%s_%s.hdf5" % (__file__.split("/")[-1].split(".")[0], timeutil.timestamp()))
 except KeyboardInterrupt:
     print()
-    exit()
 
 def generate():
     result = []
