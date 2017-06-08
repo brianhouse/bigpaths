@@ -45,7 +45,7 @@ log.info("--> done")
 
 log.info("Training...")
 try:
-    model.fit(X, y, epochs=100)
+    model.fit(X, y, epochs=1000)
     model.save("checkpoints/%s_%s.hdf5" % (__file__.split("/")[-1].split(".")[0], timeutil.timestamp()))
 except KeyboardInterrupt:
     print()
@@ -60,7 +60,9 @@ def generate():
     return result
 
 log.info("Generating examples...")
-for i in range(10):    
+for i in range(10):
     cells = list(generate())
     print(cells)
+    for c, cell in enumerate(cells):
+        cells[c] = int(cell), 1
     drawer.path(cells)
