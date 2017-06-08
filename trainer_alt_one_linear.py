@@ -21,7 +21,7 @@ if len(sys.argv) > 1:
 
 log.info("Generating training input...")
 points = util.load("data/sequences_alt_%d_%d.pkl" % (config['grid'], config['periods']))
-cells = [(point.label, 0) for point in points]
+cells = [(point.label,) for point in points]
 inputs = []
 outputs = []
 for i in range(len(cells) - MEMORY):
@@ -47,7 +47,7 @@ def generate():
     input = random.choice(X)
     for i in range(10):
         cell = model.predict(np.array([input[-MEMORY:]]), verbose=0)[0]
-        result.append((int(cell[0]), int(cell[1])))
+        result.append((int(cell[0]),))
         input = np.append(input, cell, axis=0)
     return result
 
@@ -66,4 +66,4 @@ for i in range(EPOCHS):
     cells = list(generate())
     log.info("--> done")
     print(cells)
-    drawer.path(cells)
+    # drawer.path(cells)
