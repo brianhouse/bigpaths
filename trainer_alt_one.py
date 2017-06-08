@@ -46,7 +46,7 @@ log.info("--> done")
 def generate():
     result = []
     input = random.choice(X)
-    for i in range(PERIODS):
+    for i in range(10):
         distribution = model.predict(np.array([input[-MEMORY:]]), verbose=0)[0]
         label = sample(distribution, 0.5)
         result.append(label)
