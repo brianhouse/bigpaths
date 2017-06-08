@@ -48,7 +48,7 @@ def generate():
     input = random.choice(X)
     for i in range(10):
         cell = model.predict(np.array([input[-MEMORY:]]), verbose=0)[0]
-        result.append((int(cell[0]),))
+        result.append((int(cell[0]), 10))
         input = np.append(input, np.array([cell]), axis=0)
     return result
 
