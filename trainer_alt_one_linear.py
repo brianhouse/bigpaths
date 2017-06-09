@@ -40,7 +40,7 @@ model.add(Dense(GRIDS, activation="relu"))
 model.add(Dense(1, activation="linear"))
 if WEIGHTS is not None:
     model.load_weights(WEIGHTS)
-model.compile(loss="mean_squared_error", optimizer="rmsprop", metrics=['accuracy'])
+model.compile(loss="sparse_categorical_crossentropy", optimizer="rmsprop", metrics=['accuracy'])
 model.summary()
 log.info("--> done")
 

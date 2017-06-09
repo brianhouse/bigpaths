@@ -21,7 +21,7 @@ ratio = (max_x - min_x) / (max_y - min_y)
 location = {'$geoWithin': {'$geometry': {'type': "Polygon", 'coordinates': [[ [LON_1, LAT_1], [LON_2, LAT_1], [LON_2, LAT_2], [LON_1, LAT_2], [LON_1, LAT_1] ]]}}}
 
 try:
-    grids = util.load("data/grids_%d_%d.pkl" % (config['grid'], config['periods']))
+    grids = util.load("data/grids_alt_%d_%d.pkl" % (config['grid'], config['periods']))
     GRIDS = len(grids)
 except FileNotFoundError as e:
     log.warning(e)
@@ -110,7 +110,7 @@ def generate_grid_list(points):
     grids = [point.grid for point in points]
     grids = list(set(grids))
     grids.sort()
-    util.save("data/grids_%d_%d.pkl" % (config['grid'], config['periods']), grids)
+    util.save("data/grids_alt_%d_%d.pkl" % (config['grid'], config['periods']), grids)
     log.info("--> found grids: %s" % [grids])
     return grids
 
