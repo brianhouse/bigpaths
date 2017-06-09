@@ -35,7 +35,7 @@ def sequence(sequence, suffix=None):
     ctx = drawing.Context(1000, int(1000 / ratio), relative=True, flip=True, hsv=True)
     ctx.image("basemap/basemap.png")
     if len(sequence) != PERIODS:
-        log.error("--> bad sequence length")
+        log.error("--> bad sequence length (%d, expected %d)" % (len(sequence), PERIODS))
         return
     for s, point in enumerate(sequence):
         if s == len(sequence) - 1:

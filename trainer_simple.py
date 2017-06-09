@@ -18,7 +18,7 @@ if len(sys.argv) > 1:
     WEIGHTS = sys.argv[1]
 
 
-log.info("Generating training input...")
+log.info("Generating training input (%d %d)..." % (config['grid'], config['periods']))
 sequences = util.load("data/sequences_%d_%d.pkl" % (config['grid'], config['periods']))
 cells = [point.label for sequence in sequences for point in sequence]
 inputs = []
