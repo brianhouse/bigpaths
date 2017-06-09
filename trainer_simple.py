@@ -72,5 +72,4 @@ def sample(distribution, temperature):
 log.info("Generating examples...")
 for i in range(10):    
     labels = list(generate())
-    print(labels)
-    drawer.sequence(cells)
+    drawer.sequence(labels)
