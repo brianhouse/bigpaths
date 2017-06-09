@@ -30,12 +30,13 @@ for i in range(len(cells) - MEMORY):
 X = np.array(inputs)
 y = np.array(outputs)
 log.info("--> %d input vectors" % len(X))
+log.info("--> shape: %s" % (X.shape,))
 
 log.info("Creating model...")
 model = Sequential()
 model.add(LSTM(512, input_shape=X[0].shape, return_sequences=True, dropout=0.2, recurrent_dropout=0.2))
 model.add(LSTM(512, return_sequences=False, dropout=0.2))
-model.add(Dense(2, activation="linear"))
+model.add(Dense(1, activation="linear"))
 if WEIGHTS is not None:
     model.load_weights(WEIGHTS)
 model.compile(loss="sparse_categorical_crossentropy", optimizer="adam", metrics=['accuracy'])
