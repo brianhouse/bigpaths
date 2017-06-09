@@ -19,7 +19,7 @@ if len(sys.argv) > 1:
     WEIGHTS = sys.argv[1]
 
 
-log.info("Generating training input...")
+log.info("Generating training input (%d, %d[%d])..." % (config['periods'], config['grid'], GRIDS))
 points = util.load("data/sequences_alt_%d_%d.pkl" % (config['grid'], config['periods']))
 cells = [(point.label,) for point in points]
 inputs = []
@@ -45,9 +45,14 @@ log.info("--> done")
 log.info("Training...")
 try:
     model.fit(X, y, epochs=1000)
-    model.save("checkpoints/%s_%s.hdf5" % (__file__.split("/")[-1].split(".")[0], timeutil.timestamp()))
 except KeyboardInterrupt:
     print()
+    k = input("Save? y/[n]:")
+    if k.lower() != "y":
+        exit()
+
+model.save("checkpoints/%s_%s.hdf5" % (__file__.split("/")[-1].split(".")[0], timeutil.timestamp()))
+
 
 def generate():
     result = []
