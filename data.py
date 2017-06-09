@@ -89,7 +89,7 @@ def join_adjacent(points):
 
 
 def calculate_durations(points):
-    log.info("Calculating durations...")    
+    log.info("Calculating durations (%dmin units)..." % (1440 / PERIODS))    
     for (p, point) in enumerate(points):
         if p == len(points) - 1:
             continue
@@ -111,7 +111,7 @@ def generate_grid_list(points):
     grids = list(set(grids))
     grids.sort()
     util.save("data/grids_alt_%d_%d.pkl" % (config['grid'], config['periods']), grids)
-    log.info("--> found grids: %s" % [grids])
+    log.info("--> found %d grids" % len(grids))
     return grids
 
 
