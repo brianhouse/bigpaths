@@ -35,11 +35,10 @@ log.info("Creating model...")
 model = Sequential()
 model.add(LSTM(512, input_shape=X[0].shape, return_sequences=True, dropout=0.2, recurrent_dropout=0.2))
 model.add(LSTM(512, return_sequences=False, dropout=0.2))
-model.add(Dense(GRIDS, activation="relu"))
 model.add(Dense(1, activation="linear"))
 if WEIGHTS is not None:
     model.load_weights(WEIGHTS)
-model.compile(loss="sparse_categorical_crossentropy", optimizer="adam", metrics=['accuracy'])
+model.compile(loss="sparse_categorical_crossentropy", optimizer="rmsprop", metrics=['accuracy'])
 model.summary()
 log.info("--> done")
 
