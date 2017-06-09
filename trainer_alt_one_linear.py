@@ -21,26 +21,25 @@ if len(sys.argv) > 1:
 
 log.info("Generating training input...")
 points = util.load("data/sequences_alt_%d_%d.pkl" % (config['grid'], config['periods']))
-cells = [point.label for point in points]
+cells = [(point.label,) for point in points]
 inputs = []
 outputs = []
 for i in range(len(cells) - MEMORY):
     inputs.append(cells[i:i + MEMORY])
-    outputs.append(cells[i + MEMORY])
+    outputs.append(cells[i + MEMORY][0])
 X = np.array(inputs)
 y = np.array(outputs)
 log.info("--> %d input vectors" % len(X))
 
 log.info("Creating model...")
 model = Sequential()
-model.add(Embedding(GRIDS, 512))
 model.add(LSTM(512, return_sequences=True, dropout=0.2, recurrent_dropout=0.2))
 model.add(LSTM(512, return_sequences=False, dropout=0.2))
 model.add(Dense(GRIDS, activation="relu"))
 model.add(Dense(1, activation="linear"))
 if WEIGHTS is not None:
     model.load_weights(WEIGHTS)
-model.compile(loss="sparse_categorical_crossentropy", optimizer="rmsprop", metrics=['accuracy'])
+model.compile(loss="sparse_categorical_crossentropy", optimizer="adam", metrics=['accuracy'])
 model.summary()
 log.info("--> done")
 
