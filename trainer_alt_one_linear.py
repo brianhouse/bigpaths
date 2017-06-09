@@ -56,7 +56,7 @@ def generate():
     for i in range(10):
         label = model.predict(np.array([input[-MEMORY:]]), verbose=0)[0]
         result.append(label)
-        input = np.append(input, label, axis=0)
+        input = np.append(input, [label], axis=0)
     return result
 
 log.info("Generating examples...")
