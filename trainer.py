@@ -49,16 +49,22 @@ model.summary()
 log.info("--> done")
 
 
-log.info("Training...")
-try:
-    model.fit(X, y, epochs=1000, batch_size=64)    ## is this important to this problem
-except KeyboardInterrupt:
-    print()
-    k = input("Save? y/[n]: ")
-    if k.lower() != "y":
-        exit()
-
-model.save("models/%s.hdf5" % timeutil.timestamp())
+train = True
+if WEIGHTS is not None:
+    train = False
+    k = input("Train? y/[n]: ")
+    if k.lower() == "y":
+        train = True    
+if train:
+    log.info("Training...")
+    try:
+        model.fit(X, y, epochs=1000, batch_size=64)    ## is this important to this problem
+    except KeyboardInterrupt:
+        print()
+        k = input("Save? y/[n]: ")
+        if k.lower() != "y":
+            exit()
+    model.save("models/%s.hdf5" % timeutil.timestamp())
 
 
 def generate():
@@ -88,3 +94,4 @@ log.info("Generating examples...")
 for i in range(10):    
     cells = generate()
     print(cells)
+    drawer.path(cells)
