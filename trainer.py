@@ -7,9 +7,8 @@ from housepy import config, log, geo
 from keras.models import Sequential
 from keras.layers.recurrent import LSTM, GRU
 from keras.layers.core import Dense, Activation, Dropout
-from keras.callbacks import ModelCheckpoint
 from keras.utils import to_categorical
-from data import *
+from points import *
 
 
 MEMORY = 30
@@ -17,19 +16,26 @@ WEIGHTS = None
 if len(sys.argv) > 1:
     WEIGHTS = sys.argv[1]
 
+# batch size could be important
 
-log.info("Generating training input (%d, %d[%d])..." % (config['periods'], config['grid'], GRIDS))
-points = util.load("data/sequences_alt_%d_%d.pkl" % (config['grid'], config['periods']))
-cells = [point.label for point in points]
+
+log.info("Generating training input (%d[%d], %d[%d])..." % (PERIODS, PERIOD_SIZE, LOCATIONS, GRID_SIZE))
+points = util.load("data/points_%d_%d.pkl" % (PERIOD_SIZE, GRID_SIZE))
+CATEGORIES = max(PERIODS, LOCATIONS)
+cells = []
+for point in points:
+    cells.append(point.location)
+    cells.append(point.duration)
 inputs = []
 outputs = []
 for i in range(len(cells) - MEMORY):
     inputs.append(cells[i:i + MEMORY])
     outputs.append(cells[i + MEMORY])
-X = np.array([to_categorical(np.array(input), GRIDS) for input in inputs])
-y = to_categorical(np.array(outputs), GRIDS)
+X = np.array([to_categorical(np.array(input), CATEGORIES) for input in inputs])
+y = to_categorical(np.array(outputs), CATEGORIES)
 log.info("--> %d input vectors" % len(X))
-log.info("--> shape: %s" % (X.shape,))
+log.info("--> %d categories" % CATEGORIES)
+
 
 log.info("Creating model...")
 model = Sequential()
@@ -42,6 +48,7 @@ model.compile(loss="categorical_crossentropy", optimizer="rmsprop", metrics=['ac
 model.summary()
 log.info("--> done")
 
+
 log.info("Training...")
 try:
     model.fit(X, y, epochs=1000)
@@ -51,13 +58,13 @@ except KeyboardInterrupt:
     if k.lower() != "y":
         exit()
 
-model.save("checkpoints/%s_%s.hdf5" % (__file__.split("/")[-1].split(".")[0], timeutil.timestamp()))
+model.save("models/%s_%s.hdf5" % (__file__.split("/")[-1].split(".")[0], timeutil.timestamp()))
 
 
 def generate():
     result = []
     input = random.choice(X)
-    for i in range(10):
+    for i in range(PERIODS):
         distribution = model.predict(np.array([input[-MEMORY:]]), verbose=0)[0]
         label = sample(distribution, 0.5)
         result.append(label)
@@ -72,8 +79,5 @@ def sample(distribution, temperature):
 
 log.info("Generating examples...")
 for i in range(10):    
-    cells = list(generate())
-    print(cells)
-    for c, cell in enumerate(cells):
-        cells[c] = cell, 10
-    drawer.path(cells)
+    labels = list(generate())
+    drawer.sequence(labels)

@@ -5,7 +5,7 @@ strips/*
 maps/*
 sequences/*
 data/*
-checkpoints/*
+models/*
 housepy
 papers
 dev

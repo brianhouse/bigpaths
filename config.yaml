@@ -14,5 +14,5 @@ bounds:
     - -73.699264
     - 40.538534
 
-periods: 144
-grid: 7
+period_size: 10
+grid_size: 6

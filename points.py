@@ -5,24 +5,27 @@ import numpy as np
 from housepy import geo, config, log, util, timeutil
 from mongo import db
 from sklearn.cluster import Birch
+import drawer
 
 
 START_DATE = config['start_date']
 STOP_DATE  = config['stop_date']
 
-PERIODS = config['periods']
+PERIOD_SIZE = config['period_size']
+PERIODS = int(1440 / PERIOD_SIZE)
+GRID_SIZE = config['grid_size']
 
 LON_1, LAT_1 = config['bounds']['NW']
 LON_2, LAT_2 = config['bounds']['SE']
 
-min_x, max_y = geo.project((LON_1, LAT_1))
-max_x, min_y = geo.project((LON_2, LAT_2))
-ratio = (max_x - min_x) / (max_y - min_y)
+MIN_X, MAX_Y = geo.project((LON_1, LAT_1))
+MAX_X, MIN_Y = geo.project((LON_2, LAT_2))
+RATIO = (MAX_X - MIN_X) / (MAX_Y - MIN_Y)
 location = {'$geoWithin': {'$geometry': {'type': "Polygon", 'coordinates': [[ [LON_1, LAT_1], [LON_2, LAT_1], [LON_2, LAT_2], [LON_1, LAT_2], [LON_1, LAT_1] ]]}}}
 
 try:
-    grids = util.load("data/grids_alt_%d_%d.pkl" % (config['grid'], config['periods']))
-    GRIDS = len(grids)
+    locations = util.load("data/locations_%d_%d.pkl" % (PERIOD_SIZE, GRID_SIZE))
+    LOCATIONS = len(locations)
 except FileNotFoundError as e:
     log.warning(e)
 
@@ -33,13 +36,13 @@ class Point():
         self.lon = lon
         self.lat = lat
         x, y = geo.project((self.lon, self.lat))
-        self.x = (x - min_x) / (max_x - min_x)
-        self.y = (y - min_y) / (max_y - min_y)
-        self.t = t
-        self.duration = None
-        self.grid = geo.geohash_encode((self.lon, self.lat), precision=config['grid'])
-        self.label = None
+        self.x = (x - MIN_X) / (MAX_X - MIN_X)
+        self.y = (y - MIN_Y) / (MAX_Y - MIN_Y)
+        self.t = t        
+        self.grid = geo.geohash_encode((self.lon, self.lat), precision=GRID_SIZE)
+        self.location = None
         self.cluster = None
+        self.duration = None
 
     def distance(self, pt):
         return geo.distance((self.lon, self.lat), (pt.lon, pt.lat))
@@ -89,29 +92,28 @@ def join_adjacent(points):
 
 
 def calculate_durations(points):
-    log.info("Calculating durations (%dmin units)..." % (1440 / PERIODS))    
+    log.info("Calculating durations (%d min)..." % PERIOD_SIZE)  
     for (p, point) in enumerate(points):
         if p == len(points) - 1:
             continue
         duration = points[p + 1].t - point.t
         duration //= 60
-        duration //= math.floor(86400 / 60 / PERIODS)
-        if duration > PERIODS:
+        duration //= PERIOD_SIZE
+        if duration > PERIODS:   # one day
             duration = PERIODS
-        # print(points[p + 1].t - point.t, duration)
         point.duration = duration
     a_points = [point for point in points if point.duration is not None and point.duration > 0]        
     log.info("--> removed %d too short points" % (len(points) - len(a_points)))
     return a_points
 
 
-def generate_grid_list(points):
-    log.info("Generating grid list...")    
+def generate_locations(points):
+    log.info("Generating location list...")    
     grids = [point.grid for point in points]
     grids = list(set(grids))
     grids.sort()
-    util.save("data/grids_alt_%d_%d.pkl" % (config['grid'], config['periods']), grids)
-    log.info("--> found %d grids" % len(grids))
+    util.save("data/locations_%d_%d.pkl" % (PERIOD_SIZE, GRID_SIZE), grids)
+    log.info("--> found %d locations" % len(grids))
     return grids
 
 
@@ -145,3 +147,35 @@ def cluster(points):
         point.cluster = clusters[labels[p]]
 
 
+def main(user_ids, draw=False):
+
+    data = []
+
+    for (user_id, points) in get_user(user_ids):        
+        if points is None or not len(points):
+            continue
+
+        points = filter_transients(points)     
+        points = join_adjacent(points)
+        points = calculate_durations(points)
+        cluster(points)
+        locations = generate_locations(points)
+
+        log.info("Labeling...")
+        for point in points:
+            point.location = locations.index(point.grid)     
+
+        if draw:
+            drawer.map(points, user_id)
+
+            ## ok, so in theory can draw the sequence too, given onset and duration. write that later if it works.
+
+        log.info("--> total points for user %s: %d" % (user_id, len(points)))
+        data = data + points
+
+    util.save("data/points_%d_%d.pkl" % (PERIOD_SIZE, GRID_SIZE), data)
+    log.info("--> done")
+
+
+if __name__ == "__main__":
+    main([1], False)
