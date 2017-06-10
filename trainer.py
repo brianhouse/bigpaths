@@ -12,7 +12,7 @@ from points import *
 
 
 MEMORY = 30
-TEMPERATURE = 0.2
+TEMPERATURE = 0.5
 WEIGHTS = None
 if len(sys.argv) > 1:
     WEIGHTS = sys.argv[1]
@@ -39,8 +39,8 @@ log.info("--> shape: %s" % (X.shape,))
 
 log.info("Creating model...")
 model = Sequential()
-model.add(LSTM(512, return_sequences=True, input_shape=X[0].shape, dropout=0.2))
-model.add(LSTM(512, return_sequences=False))
+model.add(LSTM(512, return_sequences=True, input_shape=X[0].shape, dropout=0.2, recurrent_dropout=0.2))
+model.add(LSTM(512, return_sequences=False, dropout=0.2, recurrent_dropout=0.2))
 model.add(Dense(len(y[0]), activation="softmax"))
 if WEIGHTS is not None:
     model.load_weights(WEIGHTS)
