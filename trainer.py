@@ -21,6 +21,7 @@ if len(sys.argv) > 1:
 log.info("Generating training input (%d[%d], %d[%d])..." % (PERIODS, PERIOD_SIZE, LOCATIONS, GRID_SIZE))
 points = util.load("data/points_%d_%d.pkl" % (PERIOD_SIZE, GRID_SIZE))
 CATEGORIES = PERIODS + LOCATIONS
+log.info("--> %d categories" % CATEGORIES)
 cells = []
 for point in points:
     cells.append(point.location)
@@ -33,7 +34,6 @@ for i in range(len(cells) - MEMORY):
 X = np.array([to_categorical(np.array(input), CATEGORIES) for input in inputs])
 y = to_categorical(np.array(outputs), CATEGORIES)
 log.info("--> %d input vectors" % len(X))
-log.info("--> %d categories" % CATEGORIES)
 log.info("--> shape: %s" % (X.shape,))
 
 

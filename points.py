@@ -99,8 +99,8 @@ def calculate_durations(points):
         duration = points[p + 1].t - point.t
         duration //= 60
         duration //= PERIOD_SIZE
-        if duration > PERIODS:   # one day
-            duration = PERIODS
+        if duration >= PERIODS:   # one day
+            duration = PERIODS - 1
         point.duration = duration
     a_points = [point for point in points if point.duration is not None and point.duration > 0]        
     log.info("--> removed %d too short points" % (len(points) - len(a_points)))
