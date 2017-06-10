@@ -61,5 +61,5 @@ for point in points:
 
     ctx.arc(x, y, SIZE / ctx.width, SIZE / ctx.height, fill=(colors[int(point[2]) % len(colors)]), thickness=0.0)
 
-ctx.output("maps")
+ctx.output("cities")
 
