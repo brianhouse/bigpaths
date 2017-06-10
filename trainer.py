@@ -40,6 +40,7 @@ log.info("--> shape: %s" % (X.shape,))
 log.info("Creating model...")
 model = Sequential()
 model.add(LSTM(256, return_sequences=True, input_shape=X[0].shape, dropout=0.2, recurrent_dropout=0.2))
+model.add(LSTM(256, return_sequences=True, dropout=0.2, recurrent_dropout=0.2))
 model.add(LSTM(256, return_sequences=False, dropout=0.2, recurrent_dropout=0.2))
 model.add(Dense(len(y[0]), activation="softmax"))
 if WEIGHTS is not None:
