@@ -18,7 +18,6 @@ if len(sys.argv) > 1:
     WEIGHTS = sys.argv[1]
 
 
-
 log.info("Generating training input (%d[%d], %d[%d])..." % (PERIODS, PERIOD_SIZE, LOCATIONS, GRID_SIZE))
 points = util.load("data/points_%d_%d.pkl" % (PERIOD_SIZE, GRID_SIZE))
 CATEGORIES = max(PERIODS, LOCATIONS)
@@ -65,12 +64,17 @@ model.save("models/%s.hdf5" % timeutil.timestamp())
 def generate():
     result = []
     input = random.choice(X)
-    for i in range(PERIODS):
+    total_duration = 0
+    while True:
         distribution = model.predict(np.array([input[-MEMORY:]]), verbose=0)[0]
         label = sample(distribution, TEMPERATURE)
         result.append(label)
         input = np.append(input, to_categorical(label, CATEGORIES), axis=0)
-    return result
+        if i % 2 == 1:
+            total_duration += label
+        if total_duration >= PERIODS:
+            break
+    return list(zip(result[::2], result[1::2]))
 
 def sample(distribution, temperature):
     a = np.log(distribution) / temperature
@@ -80,6 +84,5 @@ def sample(distribution, temperature):
 
 log.info("Generating examples...")
 for i in range(10):    
-    labels = list(generate())
-    print(labels)
-    # drawer.sequence(labels)
+    cells = generate()
+    print(cells)

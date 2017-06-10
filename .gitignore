@@ -1,9 +1,7 @@
 __pycache__
 catalog.txt
 cities/*
-strips/*
-maps/*
-sequences/*
+images/*
 data/*
 models/*
 housepy
