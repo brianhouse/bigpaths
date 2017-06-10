@@ -54,7 +54,7 @@ try:
     model.fit(X, y, epochs=1000, batch_size=64)    ## is this important to this problem
 except KeyboardInterrupt:
     print()
-    k = input("Save? y/[n]:")
+    k = input("Save? y/[n]: ")
     if k.lower() != "y":
         exit()
 
@@ -65,6 +65,7 @@ def generate():
     result = []
     input = random.choice(X)
     total_duration = 0
+    i = 0
     while True:
         distribution = model.predict(np.array([input[-MEMORY:]]), verbose=0)[0]
         label = sample(distribution, TEMPERATURE)
@@ -74,6 +75,7 @@ def generate():
             total_duration += label
         if total_duration >= PERIODS:
             break
+        i += 1
     return list(zip(result[::2], result[1::2]))
 
 def sample(distribution, temperature):
