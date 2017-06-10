@@ -20,11 +20,11 @@ if len(sys.argv) > 1:
 
 log.info("Generating training input (%d[%d], %d[%d])..." % (PERIODS, PERIOD_SIZE, LOCATIONS, GRID_SIZE))
 points = util.load("data/points_%d_%d.pkl" % (PERIOD_SIZE, GRID_SIZE))
-CATEGORIES = max(PERIODS, LOCATIONS)
+CATEGORIES = PERIODS + LOCATIONS
 cells = []
 for point in points:
     cells.append(point.location)
-    cells.append(point.duration)
+    cells.append(LOCATIONS + point.duration)
 inputs = []
 outputs = []
 for i in range(len(cells) - MEMORY):
@@ -40,7 +40,6 @@ log.info("--> shape: %s" % (X.shape,))
 log.info("Creating model...")
 model = Sequential()
 model.add(LSTM(256, return_sequences=True, input_shape=X[0].shape, dropout=0.2, recurrent_dropout=0.2))
-model.add(LSTM(256, return_sequences=True, dropout=0.2, recurrent_dropout=0.2))
 model.add(LSTM(256, return_sequences=False, dropout=0.2, recurrent_dropout=0.2))
 model.add(Dense(len(y[0]), activation="softmax"))
 if WEIGHTS is not None:
@@ -75,13 +74,17 @@ def generate():
     i = 0
     while True:
         distribution = model.predict(np.array([input[-MEMORY:]]), verbose=0)[0]
-        label = sample(distribution, TEMPERATURE)
-        result.append(label)
+        category = sample(distribution, TEMPERATURE)
         input = np.append(input, to_categorical(label, CATEGORIES), axis=0)
-        if i % 2 == 1:
-            total_duration += label
-        if total_duration >= PERIODS:
-            break
+        if i % 2 == 0:
+            location = category
+            result.append(location)
+        else:
+            duration = category - LOCATIONS 
+            total_duration += duration
+            result.append(duration)
+            if total_duration >= PERIODS:
+                break
         i += 1
     return list(zip(result[::2], result[1::2]))
 
