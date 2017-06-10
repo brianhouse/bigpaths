@@ -12,11 +12,11 @@ from points import *
 
 
 MEMORY = 30
+TEMPERATURE = 0.2
 WEIGHTS = None
 if len(sys.argv) > 1:
     WEIGHTS = sys.argv[1]
 
-# batch size could be important
 
 
 log.info("Generating training input (%d[%d], %d[%d])..." % (PERIODS, PERIOD_SIZE, LOCATIONS, GRID_SIZE))
@@ -35,12 +35,14 @@ X = np.array([to_categorical(np.array(input), CATEGORIES) for input in inputs])
 y = to_categorical(np.array(outputs), CATEGORIES)
 log.info("--> %d input vectors" % len(X))
 log.info("--> %d categories" % CATEGORIES)
+log.info("--> shape: %s" % (X.shape,))
 
 
 log.info("Creating model...")
 model = Sequential()
 model.add(LSTM(512, return_sequences=True, input_shape=X[0].shape, dropout=0.2, recurrent_dropout=0.2))
-model.add(LSTM(512, return_sequences=False, dropout=0.2))
+model.add(LSTM(512, return_sequences=True, dropout=0.2, recurrent_dropout=0.2))
+model.add(LSTM(512, return_sequences=False, dropout=0.2, recurrent_dropout=0.2))
 model.add(Dense(len(y[0]), activation="softmax"))
 if WEIGHTS is not None:
     model.load_weights(WEIGHTS)
@@ -51,14 +53,14 @@ log.info("--> done")
 
 log.info("Training...")
 try:
-    model.fit(X, y, epochs=1000)
+    model.fit(X, y, epochs=1000, batch_size=128)    ## is this important to this problem
 except KeyboardInterrupt:
     print()
     k = input("Save? y/[n]:")
     if k.lower() != "y":
         exit()
 
-model.save("models/%s_%s.hdf5" % (__file__.split("/")[-1].split(".")[0], timeutil.timestamp()))
+model.save("models/%s.hdf5" % timeutil.timestamp())
 
 
 def generate():
@@ -66,9 +68,9 @@ def generate():
     input = random.choice(X)
     for i in range(PERIODS):
         distribution = model.predict(np.array([input[-MEMORY:]]), verbose=0)[0]
-        label = sample(distribution, 0.5)
+        label = sample(distribution, TEMPERATURE)
         result.append(label)
-        input = np.append(input, to_categorical(label, GRIDS), axis=0)
+        input = np.append(input, to_categorical(label, CATEGORIES), axis=0)
     return result
 
 def sample(distribution, temperature):
@@ -80,4 +82,5 @@ def sample(distribution, temperature):
 log.info("Generating examples...")
 for i in range(10):    
     labels = list(generate())
-    drawer.sequence(labels)
+    print(labels)
+    # drawer.sequence(labels)
