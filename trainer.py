@@ -40,6 +40,7 @@ log.info("--> shape: %s" % (X.shape,))
 log.info("Creating model...")
 model = Sequential()
 model.add(LSTM(512, return_sequences=True, input_shape=X[0].shape, dropout=0.2, recurrent_dropout=0.2))
+model.add(LSTM(512, return_sequences=True, dropout=0.2, recurrent_dropout=0.2))
 model.add(LSTM(512, return_sequences=False, dropout=0.2, recurrent_dropout=0.2))
 model.add(Dense(len(y[0]), activation="softmax"))
 if WEIGHTS is not None:
@@ -61,10 +62,10 @@ if train:
         model.fit(X, y, epochs=1000, batch_size=64)    ## is this important to this problem
     except KeyboardInterrupt:
         print()
-        k = input("Save? y/[n]: ")
-        if k.lower() != "y":
-            exit()
-    model.save("models/%s.hdf5" % timeutil.timestamp())
+k = input("Save? y/[n]: ")
+if k.lower() != "y":
+    exit()
+model.save("models/%s.hdf5" % timeutil.timestamp())
 
 
 def generate():
