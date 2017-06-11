@@ -73,19 +73,22 @@ def generate():
     total_duration = 0
     i = 0
     while True:
-        distribution = model.predict(np.array([input[-MEMORY:]]), verbose=0)[0]
-        category = sample(distribution, TEMPERATURE)
-        input = np.append(input, to_categorical(category, CATEGORIES), axis=0)
-        if i % 2 == 0:
-            location = category
-            result.append(location)
-        else:
-            duration = category - LOCATIONS 
-            total_duration += duration
-            result.append(duration)
-            if total_duration >= PERIODS:
-                break
-        i += 1
+        try:
+            distribution = model.predict(np.array([input[-MEMORY:]]), verbose=0)[0]
+            category = sample(distribution, TEMPERATURE)
+            input = np.append(input, to_categorical(category, CATEGORIES), axis=0)
+            if i % 2 == 0:
+                location = category
+                result.append(location)
+            else:
+                duration = category - LOCATIONS 
+                total_duration += duration
+                result.append(duration)
+                if total_duration >= PERIODS:
+                    break
+            i += 1
+        except Exception as e:
+            log.error(log.exc(e))
     return list(zip(result[::2], result[1::2]))
 
 def sample(distribution, temperature):
