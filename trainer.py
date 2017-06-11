@@ -80,7 +80,6 @@ def generate():
             duration = category - LOCATIONS
             total_duration += duration
             result.append(duration)
-            print(total_duration)
             if total_duration >= PERIODS:
                 break
         else:
