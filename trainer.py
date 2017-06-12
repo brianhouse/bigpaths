@@ -118,5 +118,5 @@ all_points = []
 for i in range(n):    
     points = generate()
     drawer.path(points)
-    all_points.append(points)
+    all_points.extend(points)
 drawer.strips(all_points)
