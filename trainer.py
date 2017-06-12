@@ -71,7 +71,7 @@ if k.lower() == "y":
     model.save("models/%s_%d_%d.hdf5" % (timeutil.timestamp(), PERIOD_SIZE, GRID_SIZE))
 
 
-def generate(days=1):
+def generate():
     cells = []
     index = random.choice(range(len(inputs) // 2)) * 2 # have to pick an even-numbered seed, otherwise we'll be starting on a duration and not a location
     input = X[index]
@@ -90,7 +90,7 @@ def generate(days=1):
             duration = category - LOCATIONS
             cells.append(duration)
             total_duration += duration            
-            if total_duration >= PERIODS * days:
+            if total_duration >= PERIODS:
                 break
         else:
             log.warning("Incorrect category order: %s" % category)
@@ -117,12 +117,9 @@ def sample(distribution, temperature):
 k = input("Generate how many examples? [10]: ")
 n = int(k.lower()) if len(k) else 10
 log.info("Generating %d examples..." % n)
-points = generate(10)
-drawer.path(points)
-drawer.strips(points)
-# all_points = []
-# for i in range(n):    
-#     points = generate()
-#     drawer.path(points)
-#     all_points.extend(points)
-# drawer.strips(all_points)
+all_points = []
+for i in range(n):    
+    points = generate()
+    drawer.path(points)
+    all_points.extend(points)
+drawer.strips(all_points)
