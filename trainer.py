@@ -12,6 +12,7 @@ from points import *
 
 
 MEMORY = config['memory']
+assert(MEMORY % 2 == 0)
 TEMPERATURE = config['temperature']
 WEIGHTS = None
 if len(sys.argv) > 1:
@@ -28,9 +29,11 @@ for point in points:
     cells.append(LOCATIONS + point.duration)
 inputs = []
 outputs = []
+t_refs = []
 for i in range(len(cells) - MEMORY):
     inputs.append(cells[i:i + MEMORY])
     outputs.append(cells[i + MEMORY])
+    period_refs.append(points[(i + MEMORY)//2].period)    # the period of the target, which we'll use to reconstruct presumed time of day
 X = np.array([to_categorical(np.array(input), CATEGORIES) for input in inputs])
 y = to_categorical(np.array(outputs), CATEGORIES)
 log.info("--> %d input vectors" % len(X))
@@ -67,8 +70,10 @@ if k.lower() == "y":
 
 
 def generate():
-    result = []
-    input = random.choice(X[::2])    # have to pick an even-numbered seed, otherwise we'll be starting on a duration and not a location
+    cells = []
+    index = random.choice(range(len(inputs) / 2)) # have to pick an even-numbered seed, otherwise we'll be starting on a duration and not a location
+    input = X[index * 2]
+    period_ref = period_refs[index * 2] # this is the period of the target
     total_duration = 0
     i = 0
     while True:
@@ -77,18 +82,28 @@ def generate():
         input = np.append(input, to_categorical(category, CATEGORIES), axis=0)
         if i % 2 == 0 and category < LOCATIONS:
             location = category
-            result.append(location)        
+            cells.append(location)
         elif i % 2 == 1 and category >= LOCATIONS:
             duration = category - LOCATIONS
-            total_duration += duration
-            result.append(duration)
+            cells.append(duration)
+            total_duration += duration            
             if total_duration >= PERIODS:
                 break
         else:
             log.warning("Incorrect category order: %s" % category)
             continue
         i += 1
-    return list(zip(result[::2], result[1::2]))
+    cells = list(zip(result[::2], result[1::2]))
+    print(cells)
+    points = []
+    total_duration = 0
+    for cell in cells:        
+        location, duration = cell
+        period = (period_ref + total_duration) % PERIODS
+        total_duration += duration
+        point = GeneratedPoint(location, period, duration)
+        points.append(point)
+    return points
 
 def sample(distribution, temperature):
     a = np.log(distribution) / temperature
@@ -100,6 +115,5 @@ k = input("Generate how many examples? [10]: ")
 n = int(k.lower()) if len(k) else 10
 log.info("Generating %d examples..." % n)
 for i in range(n):    
-    cells = generate()
-    print(cells)
-    drawer.path(cells)
+    points = generate()
+    drawer.path(points)

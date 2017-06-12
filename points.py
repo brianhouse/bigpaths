@@ -42,11 +42,29 @@ class Point():
         self.grid = geo.geohash_encode((self.lon, self.lat), precision=GRID_SIZE)
         self.location = None
         self.cluster = None
-        # self.period = t // 60 
+        dt = timeutil.t_to_dt(self.t, tz="America/New_York")    # not sure why, honestly.        
+        self.period = ((dt.hour * 60) + (dt.minute)) // PERIOD_SIZE
         self.duration = None
 
     def distance(self, pt):
         return geo.distance((self.lon, self.lat), (pt.lon, pt.lat))
+
+    def __str__(self):
+        return "[%d] (%f,%f) %f,%f %d %d" % (self.location, self.lon, self.lat, self.x, self.y, self.period, self.duration)
+
+
+class GeneratedPoint(Point):
+
+    def __init__(self, location, period, duration):
+        self.location = location
+        self.period = period
+        self.duration
+        self.grid = locations[self.location]
+        self.lon, self.lat = geo.geohash_decode(self.grid)
+        x, y = geo.project((self.lon, self.lat))
+        self.x = (x - MIN_X) / (MAX_X - MIN_X)
+        self.y = (y - MIN_Y) / (MAX_Y - MIN_Y)        
+
 
 
 def get_user(user_ids):
@@ -168,8 +186,10 @@ def main(user_ids, draw=False):
 
         if draw:
             drawer.map(points, user_id)
-
-            ## ok, so in theory can draw the sequence too, given onset and duration. write that later if it works.
+            drawer.strips(points, user_id)
+            for i in range(5):
+                index = random.choice(range(len(points)))
+                drawer.path(points[index:index + 5])
 
         log.info("--> total points for user %s: %d" % (user_id, len(points)))
         data = data + points
@@ -179,4 +199,4 @@ def main(user_ids, draw=False):
 
 
 if __name__ == "__main__":
-    main([1], False)
+    main([1], True)

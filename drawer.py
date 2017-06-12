@@ -17,70 +17,42 @@ def map(points, user_id=None):
     log.info("--> done")
 
 
-# def strips(sequences, user_id=None):
-#     log.info("Drawing %d sequences for user %s..." % (len(sequences), user_id))
-#     t = timeutil.timestamp()
-#     ctx = drawing.Context(1000, len(sequences) * 2, relative=True, flip=False, hsv=False, background=(0., 0., 0., 1.))
-#     for q, sequence in enumerate(sequences):
-#         for p, point in enumerate(sequence):
-#             color = colors[ord(point.grid[-1]) % len(colors)]
-#             ctx.line(p/PERIODS, (q/len(sequences)) - (1 / ctx.height), (p+1)/PERIODS, (q/len(sequences)) - (1 / ctx.height), stroke=color, thickness=2.0)
-#     ctx.output("images/%d_%s.png" % (t, user_id))
+def strips(points, user_id=None):
+    log.info("Drawing strips for user %s..." % user_id)
+    t = str(timeutil.timestamp(ms=True)).replace(".", "-")
+    lines = []
+    q = 0
+    for p, point in enumerate(points):
+        prev = points[p-1] if p > 0 else None
+        if prev is not None and point.period < prev.period:
+            q += 1
+        color = colors[point.location % len(colors)]        
+        lines.append([point.period/PERIODS, q, (point.period + point.duration)/PERIODS, q, color, 8.0])
+        if point.period + point.duration > PERIODS:
+            overflow = (point.period + point.duration) - PERIODS
+            lines.append([0, q+1, overflow/PERIODS, q+1, color, 8.0])
+    ctx = drawing.Context(1000, q * 10, relative=True, flip=False, hsv=False, background=(0., 0., 0., 1.))
+    for line in lines:
+        line[1] = line[3] = (line[1]/q) - (1 / ctx.height)
+        ctx.line(*line)
+    ctx.output("images/%s_%s_strips.png" % (t, user_id))
 
 
-# def sequence(sequence, suffix=None):
-#     t = timeutil.timestamp()    
-#     log.info("Drawing sequence...")
-#     ctx = drawing.Context(1000, int(1000 / ratio), relative=True, flip=True, hsv=True)
-#     ctx.image("basemap/basemap.png")
-#     if len(sequence) != PERIODS:
-#         log.error("--> bad sequence length (%d, expected %d)" % (len(sequence), PERIODS))
-#         return
-#     for s, point in enumerate(sequence):
-#         if s == len(sequence) - 1:
-#             continue
-#         if type(point) is Point:
-#             x1, y1 = point.x, point.y
-#             x2, y2 = sequence[s+1].x, sequence[s+1].y
-#         else:
-#             x1, y1 = scale(geo.geohash_decode(grids[int(point)]))
-#             x2, y2 = scale(geo.geohash_decode(grids[int(sequence[s+1])]))
-#         c = s/PERIODS
-#         color = c, 1., 1., 0.75
-#         ctx.arc(x1, y1, 5 / ctx.width, 5 / ctx.height, fill=color, thickness=0.0)
-#         ctx.line(x1, y1, x2, y2, stroke=color, thickness=1.0)
-#     suffix = "_%s" % suffix if suffix is not None else ""
-#     ctx.output("images/%d%s.png" % (t, suffix))    
-#     log.info("--> done")
-
-
-def path(cells):
+def path(points):
     t = str(timeutil.timestamp(ms=True)).replace(".", "-")
     log.info("Drawing path...")
     ctx = drawing.Context(1000, int(1000 / RATIO), relative=True, flip=True, hsv=True)
     ctx.image("basemap/basemap.png")
-    s = 0
-    for p in range(len(cells)):
-        location_1, duration = cells[p]
-        if p < len(cells) - 1:
-            location_2, duration_2 = cells[p+1]
-            x2, y2 = scale(geo.geohash_decode(locations[location_2]))
-        x1, y1 = scale(geo.geohash_decode(locations[location_1]))
-        color = s/PERIODS, 1., 1., 1.
-        s += duration
+    for p in range(len(points)):
+        x1, y1 = points[p].x, points[p].y
+        color = points[p].period / PERIODS, 1., 1., 1.
         ctx.arc(x1, y1, 5 / ctx.width, 5 / ctx.height, fill=color, thickness=0.0)
-        if p < len(cells) - 1:
+        if p < len(points) - 1:
+            x2, y2 = points[p+1].x, points[p+1].y        
             ctx.line(x1, y1, x2, y2, stroke=color, thickness=1.0)
     ctx.output("images/%s_path.png" % t)    
     log.info("--> done")
 
-
-
-def scale(pt):
-    x, y = geo.project(pt)
-    x = (x - MIN_X) / (MAX_X - MIN_X)
-    y = (y - MIN_Y) / (MAX_Y - MIN_Y)
-    return x, y
 
 
 def gradient_test():
