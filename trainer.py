@@ -68,7 +68,7 @@ if k.lower() == "y":
 
 def generate():
     result = []
-    input = random.choice(X)
+    input = random.choice(X[::2])    # have to pick an even-numbered seed, otherwise we'll be starting on a duration and not a location
     total_duration = 0
     i = 0
     while True:
