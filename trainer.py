@@ -17,7 +17,7 @@ TEMPERATURE = config['temperature']
 WEIGHTS = None
 if len(sys.argv) > 1:
     WEIGHTS = "models/%s" % sys.argv[1].strip("models/")
-BATCH_SIZE = 64 # we want inputs to be a multiple of batch_size so we dont train on multiple users in the same batch
+BATCH_SIZE = 64 
 
 
 log.info("Generating training input (%d[%d], %d[%d])..." % (PERIODS, PERIOD_SIZE, LOCATIONS, GRID_SIZE))
@@ -36,7 +36,8 @@ for i in range(len(cells) - MEMORY):
     outputs.append(cells[i + MEMORY])
     period_refs.append(points[(i + MEMORY)//2].period)    # the period of the target, which we'll use to reconstruct the point when generating
 X = np.array([to_categorical(np.array(input), CATEGORIES) for input in inputs])
-y = to_categorical(np.array(outputs), CATEGORIES)
+X = X[:(len(X) // BATCH_SIZE) * BATCH_SIZE] # we need inputs to be a multiple of batch_size so we dont train on multiple users in the same batch
+y = to_categorical(np.array(outputs), CATEGORIES)[:len(X)]
 log.info("--> %d input vectors" % len(X))
 log.info("--> shape: %s" % (X.shape,))
 
