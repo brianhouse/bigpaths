@@ -29,11 +29,11 @@ for point in points:
     cells.append(LOCATIONS + point.duration)
 inputs = []
 outputs = []
-t_refs = []
+period_refs = []
 for i in range(len(cells) - MEMORY):
     inputs.append(cells[i:i + MEMORY])
     outputs.append(cells[i + MEMORY])
-    period_refs.append(points[(i + MEMORY)//2].period)    # the period of the target, which we'll use to reconstruct presumed time of day
+    period_refs.append(points[(i + MEMORY)//2].period)    # the period of the target, which we'll use to reconstruct the point when generating
 X = np.array([to_categorical(np.array(input), CATEGORIES) for input in inputs])
 y = to_categorical(np.array(outputs), CATEGORIES)
 log.info("--> %d input vectors" % len(X))
@@ -71,9 +71,9 @@ if k.lower() == "y":
 
 def generate():
     cells = []
-    index = random.choice(range(len(inputs) / 2)) # have to pick an even-numbered seed, otherwise we'll be starting on a duration and not a location
-    input = X[index * 2]
-    period_ref = period_refs[index * 2] # this is the period of the target
+    index = random.choice(range(len(inputs) / 2)) * 2 # have to pick an even-numbered seed, otherwise we'll be starting on a duration and not a location
+    input = X[index]
+    period_ref = period_refs[index] # this is the period of the target
     total_duration = 0
     i = 0
     while True:
