@@ -95,7 +95,7 @@ def sample(distribution, temperature):
     return np.random.choice(choices, p=p)
 
 k = input("Generate how many examples? [10]: ")
-n = int(k.lower())
+n = int(k.lower()) if len(n) else 10
 log.info("Generating %d examples..." % n)
 for i in range(n):    
     cells = generate()
