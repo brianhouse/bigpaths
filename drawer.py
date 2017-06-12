@@ -71,7 +71,7 @@ def path(cells):
         ctx.arc(x1, y1, 5 / ctx.width, 5 / ctx.height, fill=color, thickness=0.0)
         if p < len(cells) - 1:
             ctx.line(x1, y1, x2, y2, stroke=color, thickness=1.0)
-    ctx.output("images/%d_path.png" % t)    
+    ctx.output("images/%s_path.png" % t)    
     log.info("--> done")
 
 
