@@ -75,16 +75,18 @@ def generate():
         distribution = model.predict(np.array([input[-MEMORY:]]), verbose=0)[0]
         category = sample(distribution, TEMPERATURE)
         input = np.append(input, to_categorical(category, CATEGORIES), axis=0)
-        if category > LOCATIONS and i % 2 == 1:
+        if i % 2 == 0 and category < LOCATIONS:
+            location = category
+            result.append(location)        
+        elif i % 2 == 1 and category >= LOCATIONS:
             duration = category - LOCATIONS
             total_duration += duration
             result.append(duration)
             if total_duration >= PERIODS:
                 break
-        elif i % 2 == 0:
-            result.append(category)        
         else:
-            log.warning("Incorrect categorization: %s" % category)
+            log.warning("Incorrect category order: %s" % category)
+            continue
         i += 1
     return list(zip(result[::2], result[1::2]))
 
