@@ -117,3 +117,4 @@ log.info("Generating %d examples..." % n)
 for i in range(n):    
     points = generate()
     drawer.path(points)
+    drawer.strips(points)
