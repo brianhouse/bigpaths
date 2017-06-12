@@ -71,7 +71,7 @@ if k.lower() == "y":
 
 def generate():
     cells = []
-    index = random.choice(range(len(inputs) / 2)) * 2 # have to pick an even-numbered seed, otherwise we'll be starting on a duration and not a location
+    index = random.choice(range(len(inputs) // 2)) * 2 # have to pick an even-numbered seed, otherwise we'll be starting on a duration and not a location
     input = X[index]
     period_ref = period_refs[index] # this is the period of the target
     total_duration = 0
