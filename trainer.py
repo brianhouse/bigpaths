@@ -11,8 +11,8 @@ from keras.utils import to_categorical
 from points import *
 
 
-MEMORY = 30
-TEMPERATURE = 0.5
+MEMORY = config['memory']
+TEMPERATURE = config['temperature']
 WEIGHTS = None
 if len(sys.argv) > 1:
     WEIGHTS = sys.argv[1]

@@ -16,3 +16,6 @@ bounds:
 
 period_size: 10
 grid_size: 6
+
+temperature: 0.25
+memory: 30
