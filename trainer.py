@@ -71,11 +71,16 @@ if k.lower() == "y":
     model.save("models/%s_%d_%d.hdf5" % (timeutil.timestamp(), PERIOD_SIZE, GRID_SIZE))
 
 
-def generate():
+def generate(seed=None):
     cells = []
-    index = random.choice(range(len(inputs) // 2)) * 2 # have to pick an even-numbered seed, otherwise we'll be starting on a duration and not a location
-    input = X[index]
-    period_ref = period_refs[index] # this is the period of the target
+    if seed is None:
+        index = random.choice(range(len(inputs) // 2)) * 2 # have to pick an even-numbered seed, otherwise we'll be starting on a duration and not a location
+        input = X[index]
+        period_ref = period_refs[index] # this is the period of the target
+    else:
+        input, duration = seed
+        period_ref = duration       # whatever remainder from the last generation is where we start time-wise
+    day_indexes = []
     total_duration = 0
     i = 0
     while True:
@@ -95,6 +100,7 @@ def generate():
             log.warning("Incorrect category order: %s" % category)
             continue
         i += 1
+    next_seed = input, (total_duration - PERIODS)
     cells = list(zip(cells[::2], cells[1::2]))
     print(cells)
     points = []
@@ -105,7 +111,7 @@ def generate():
         total_duration += duration
         point = GeneratedPoint(location, period, duration)
         points.append(point)
-    return points
+    return points, next_seed
 
 def sample(distribution, temperature):
     a = np.log(distribution) / temperature
@@ -117,8 +123,9 @@ k = input("Generate how many examples? [10]: ")
 n = int(k.lower()) if len(k) else 10
 log.info("Generating %d examples..." % n)
 all_points = []
+next_seed = None
 for i in range(n):    
-    points = generate()
+    points, next_seed = generate(next_seed)
     drawer.path(points)
     all_points.extend(points)
 drawer.strips(all_points)

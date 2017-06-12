@@ -3,3 +3,5 @@
 - for strips, use grid=6
 
 - for actual printing, need vector map, b&w, light grey paths with time labels
+
+- test training with grid=7
