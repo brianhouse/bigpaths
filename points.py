@@ -42,6 +42,7 @@ class Point():
         self.grid = geo.geohash_encode((self.lon, self.lat), precision=GRID_SIZE)
         self.location = None
         self.cluster = None
+        # self.period = t // 60 
         self.duration = None
 
     def distance(self, pt):

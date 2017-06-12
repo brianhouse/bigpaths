@@ -55,7 +55,7 @@ def map(points, user_id=None):
 
 
 def path(cells):
-    t = timeutil.timestamp()    
+    t = str(timeutil.timestamp(ms=True)).replace(".", "-")
     log.info("Drawing path...")
     ctx = drawing.Context(1000, int(1000 / RATIO), relative=True, flip=True, hsv=True)
     ctx.image("basemap/basemap.png")
