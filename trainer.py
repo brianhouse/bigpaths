@@ -114,7 +114,9 @@ def sample(distribution, temperature):
 k = input("Generate how many examples? [10]: ")
 n = int(k.lower()) if len(k) else 10
 log.info("Generating %d examples..." % n)
+all_points = []
 for i in range(n):    
     points = generate()
     drawer.path(points)
-    drawer.strips(points)
+    all_points.append(points)
+drawer.strips(all_points)

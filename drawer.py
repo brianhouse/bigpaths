@@ -33,7 +33,7 @@ def strips(points, user_id=None):
             lines.append([0, q+1, overflow/PERIODS, q+1, color, 8.0])
     ctx = drawing.Context(1000, (q + 1) * 10, relative=True, flip=False, hsv=False, background=(0., 0., 0., 1.))
     for line in lines:
-        line[1] = line[3] = (line[1]/q) - (1 / ctx.height)
+        line[1] = line[3] = (line[1] / (q+1)) - (1 / ctx.height)
         ctx.line(*line)
     ctx.output("images/%s_%s_strips.png" % (t, user_id))
 
