@@ -123,5 +123,5 @@ for i in range(n):
     drawer.path(day)
     points.append(day)
 drawer.strips([point for day in points for point in day])
-util.save("data/%s_points.pkl" % (timeutil.timestamp()), points)
+util.save("data/%s_output.pkl" % (timeutil.timestamp()), points)
 log.info("--> done")
