@@ -71,15 +71,11 @@ if k.lower() == "y":
     model.save("models/%s_%d_%d.hdf5" % (timeutil.timestamp(), PERIOD_SIZE, GRID_SIZE))
 
 
-def generate(seed=None):
+def generate(days=1):
     cells = []
-    if seed is None:
-        index = random.choice(range(len(inputs) // 2)) * 2 # have to pick an even-numbered seed, otherwise we'll be starting on a duration and not a location
-        input = X[index]
-        period_ref = period_refs[index] # this is the period of the target
-    else:
-        input, duration = seed
-        period_ref = duration       # whatever remainder from the last generation is where we start time-wise
+    index = random.choice(range(len(inputs) // 2)) * 2 # have to pick an even-numbered seed, otherwise we'll be starting on a duration and not a location
+    input = X[index]
+    period_ref = period_refs[index] # this is the period of the target
     day_indexes = []
     total_duration = 0
     i = 0
@@ -94,13 +90,12 @@ def generate(seed=None):
             duration = category - LOCATIONS
             cells.append(duration)
             total_duration += duration            
-            if total_duration >= PERIODS:
+            if total_duration >= PERIODS * days:
                 break
         else:
             log.warning("Incorrect category order: %s" % category)
             continue
         i += 1
-    next_seed = input, (total_duration - PERIODS)
     cells = list(zip(cells[::2], cells[1::2]))
     print(cells)
     points = []
@@ -111,7 +106,7 @@ def generate(seed=None):
         total_duration += duration
         point = GeneratedPoint(location, period, duration)
         points.append(point)
-    return points, next_seed
+    return points
 
 def sample(distribution, temperature):
     a = np.log(distribution) / temperature
@@ -122,10 +117,12 @@ def sample(distribution, temperature):
 k = input("Generate how many examples? [10]: ")
 n = int(k.lower()) if len(k) else 10
 log.info("Generating %d examples..." % n)
-all_points = []
-next_seed = None
-for i in range(n):    
-    points, next_seed = generate(next_seed)
-    drawer.path(points)
-    all_points.extend(points)
-drawer.strips(all_points)
+points = generate(10)
+drawer.path(points)
+drawer.stips(points)
+# all_points = []
+# for i in range(n):    
+#     points = generate()
+#     drawer.path(points)
+#     all_points.extend(points)
+# drawer.strips(all_points)
