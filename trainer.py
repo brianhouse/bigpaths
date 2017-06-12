@@ -16,7 +16,7 @@ assert(MEMORY % 2 == 0)
 TEMPERATURE = config['temperature']
 WEIGHTS = None
 if len(sys.argv) > 1:
-    WEIGHTS = sys.argv[1]
+    WEIGHTS = "models/%s" % sys.argv[1].strip("models/")
 
 
 log.info("Generating training input (%d[%d], %d[%d])..." % (PERIODS, PERIOD_SIZE, LOCATIONS, GRID_SIZE))
@@ -66,7 +66,7 @@ if train:
         print()
 k = input("Save? y/[n]: ")
 if k.lower() == "y":
-    model.save("models/%s.hdf5" % timeutil.timestamp())
+    model.save("models/%s_%d_%d.hdf5" % (timeutil.timestamp(), PERIOD_SIZE, GRID_SIZE))
 
 
 def generate():
