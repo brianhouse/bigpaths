@@ -58,7 +58,7 @@ class GeneratedPoint(Point):
     def __init__(self, location, period, duration):
         self.location = location
         self.period = period
-        self.duration
+        self.duration = duration
         self.grid = locations[self.location]
         self.lon, self.lat = geo.geohash_decode(self.grid)
         x, y = geo.project((self.lon, self.lat))
