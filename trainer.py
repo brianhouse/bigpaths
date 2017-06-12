@@ -117,9 +117,11 @@ def sample(distribution, temperature):
 k = input("Generate how many examples? [10]: ")
 n = int(k.lower()) if len(k) else 10
 log.info("Generating %d examples..." % n)
-all_points = []
+points = []
 for i in range(n):    
-    points = generate()
-    drawer.path(points)
-    all_points.extend(points)
-drawer.strips(all_points)
+    day = generate()
+    drawer.path(day)
+    points.append(day)
+drawer.strips([point for day in points for point in day])
+util.save("data/%s_points.pkl" % (timeutil.timestamp()), points)
+log.info("--> done")
