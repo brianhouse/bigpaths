@@ -93,7 +93,7 @@ def generate():
             log.warning("Incorrect category order: %s" % category)
             continue
         i += 1
-    cells = list(zip(result[::2], result[1::2]))
+    cells = list(zip(cells[::2], cells[1::2]))
     print(cells)
     points = []
     total_duration = 0
