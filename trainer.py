@@ -119,7 +119,7 @@ n = int(k.lower()) if len(k) else 10
 log.info("Generating %d examples..." % n)
 points = generate(10)
 drawer.path(points)
-drawer.stips(points)
+drawer.strips(points)
 # all_points = []
 # for i in range(n):    
 #     points = generate()
