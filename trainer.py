@@ -17,6 +17,7 @@ TEMPERATURE = config['temperature']
 WEIGHTS = None
 if len(sys.argv) > 1:
     WEIGHTS = "models/%s" % sys.argv[1].strip("models/")
+BATCH_SIZE = 64 # we want inputs to be a multiple of batch_size so we dont train on multiple users in the same batch
 
 
 log.info("Generating training input (%d[%d], %d[%d])..." % (PERIODS, PERIOD_SIZE, LOCATIONS, GRID_SIZE))
@@ -61,7 +62,7 @@ if WEIGHTS is not None:
 if train:
     log.info("Training...")
     try:
-        model.fit(X, y, epochs=1000, batch_size=64)    ## is this important to this problem
+        model.fit(X, y, epochs=1000, batch_size=BATCH_SIZE)
     except KeyboardInterrupt:
         print()
 k = input("Save? y/[n]: ")
@@ -77,7 +78,7 @@ def generate():
     total_duration = 0
     i = 0
     while True:
-        distribution = model.predict(np.array([input[-MEMORY:]]), verbose=0)[0]
+        distribution = model.predict(np.array([input[-MEMORY:]]), verbose=0, batch_size=1)[0]
         category = sample(distribution, TEMPERATURE)
         input = np.append(input, to_categorical(category, CATEGORIES), axis=0)
         if i % 2 == 0 and category < LOCATIONS:
