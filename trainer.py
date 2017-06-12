@@ -62,9 +62,8 @@ if train:
     except KeyboardInterrupt:
         print()
 k = input("Save? y/[n]: ")
-if k.lower() != "y":
-    exit()
-model.save("models/%s.hdf5" % timeutil.timestamp())
+if k.lower() == "y":
+    model.save("models/%s.hdf5" % timeutil.timestamp())
 
 
 def generate():
@@ -76,13 +75,13 @@ def generate():
         distribution = model.predict(np.array([input[-MEMORY:]]), verbose=0)[0]
         category = sample(distribution, TEMPERATURE)
         input = np.append(input, to_categorical(category, CATEGORIES), axis=0)
-        if category > LOCATIONS and i % 2 == 0:
+        if category > LOCATIONS and i % 2 == 1:
             duration = category - LOCATIONS
             total_duration += duration
             result.append(duration)
             if total_duration >= PERIODS:
                 break
-        elif i % 2 == 1:
+        elif i % 2 == 0:
             result.append(category)        
         else:
             log.warning("Incorrect categorization: %s" % category)
@@ -95,8 +94,10 @@ def sample(distribution, temperature):
     choices = range(len(distribution))
     return np.random.choice(choices, p=p)
 
-log.info("Generating examples...")
-for i in range(10):    
+k = input("Generate how many examples? [10]: ")
+n = int(k.lower())
+log.info("Generating %d examples..." % n)
+for i in range(n):    
     cells = generate()
     print(cells)
     drawer.path(cells)
