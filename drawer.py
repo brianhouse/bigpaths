@@ -31,7 +31,7 @@ def strips(points, user_id=None):
         if point.period + point.duration > PERIODS:
             overflow = (point.period + point.duration) - PERIODS
             lines.append([0, q+1, overflow/PERIODS, q+1, color, 8.0])
-    ctx = drawing.Context(1000, q * 10, relative=True, flip=False, hsv=False, background=(0., 0., 0., 1.))
+    ctx = drawing.Context(1000, (q + 1) * 10, relative=True, flip=False, hsv=False, background=(0., 0., 0., 1.))
     for line in lines:
         line[1] = line[3] = (line[1]/q) - (1 / ctx.height)
         ctx.line(*line)
