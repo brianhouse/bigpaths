@@ -50,7 +50,7 @@ def generate_input():
     inputs = []
     outputs = []
     period_refs = []
-    for i in range(0, len(cells[:]) - MEMORY, 2):
+    for i in range(0, len(cells[:]) - MEMORY):
         inputs.append(cells[i:i + MEMORY])
         outputs.append(cells[i + MEMORY])
         period_refs.append(points[(i + MEMORY)//2].period)    # the period of the target, which we'll use to reconstruct the point when generating
@@ -103,7 +103,7 @@ else:
 # generate outputs
 def generate():
     cells = []
-    index = random.choice(range(len(X)))
+    index = random.choice(range(len(X) // 2)) * 2
     input = X[index]
     period_ref = period_refs[index] # this is the period of the target
     day_indexes = []
