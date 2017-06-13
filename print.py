@@ -8,10 +8,8 @@ from points import *
 
 days = util.load("data/1497311751_output.pkl")
 
-# for day in days:
-#     drawer.path(day)
-
-print(len(days), "days")
+for day in days:
+    drawer.path(day)
+    break
 
 # drawer.strips([point for day in days for point in day])
-drawer.strips(days[0])

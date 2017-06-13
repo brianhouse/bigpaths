@@ -15,8 +15,10 @@ MEMORY = config['memory']
 assert(MEMORY % 2 == 0)
 TEMPERATURE = config['temperature']
 WEIGHTS = None
+MODEL = None
 if len(sys.argv) > 1:
-    WEIGHTS = "models/%s" % sys.argv[1].strip("models/")
+    MODEL = sys.argv[1].strip("models/")
+    WEIGHTS = "models/%s" % MODEL
 BATCH_SIZE = 64 
 
 
@@ -66,9 +68,11 @@ if train:
         model.fit(X, y, epochs=1000, batch_size=BATCH_SIZE)
     except KeyboardInterrupt:
         print()
+if MODEL is None:
+    MODEL = "%s_%d_%d" % (timeutil.timestamp(), PERIOD_SIZE, GRID_SIZE)
 k = input("Save? y/[n]: ")
 if k.lower() == "y":
-    model.save("models/%s_%d_%d.hdf5" % (timeutil.timestamp(), PERIOD_SIZE, GRID_SIZE))
+    model.save("models/%s.hdf5" % model)
 
 
 def generate():
@@ -123,5 +127,5 @@ for i in range(n):
     drawer.path(day)
     points.append(day)
 drawer.strips([point for day in points for point in day])
-util.save("data/%s_output.pkl" % (timeutil.timestamp()), points)
+util.save("data/%s_%s_output.pkl" % (MODEL, TEMPERATURE), points)
 log.info("--> done")
