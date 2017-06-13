@@ -3,7 +3,7 @@
 import random, sys
 import numpy as np
 import drawer
-from housepy import config, log, geo
+from housepy import config, log, geo, strings
 from keras.models import Sequential
 from keras.layers.recurrent import LSTM, GRU
 from keras.layers.core import Dense, Activation, Dropout
@@ -36,28 +36,39 @@ def generate_input():
     inputs = []
     outputs = []
     period_refs = []
-    for i in range(len(cells[:]) - MEMORY):
+    for i in range(0, len(cells[:]) - MEMORY, 2):
         inputs.append(cells[i:i + MEMORY])
         outputs.append(cells[i + MEMORY])
         period_refs.append(points[(i + MEMORY)//2].period)    # the period of the target, which we'll use to reconstruct the point when generating
-    log.info("--> %d points into %s prelim inputs" % (len(points), len(inputs)))
-    log.info("Categoricalizing...")
-    X = np.array([to_categorical(np.array(input), CATEGORIES) for input in inputs])
-    X = X[:(len(X) // BATCH_SIZE) * BATCH_SIZE] # we need inputs to be a multiple of batch_size so we dont train on multiple users in the same batch
+    log.info("--> %d points into %s prelim inputs" % (len(points), len(inputs)))    
+    log.info("Categoricalizing (%s memory required)..." % strings.format_size(len(inputs) * MEMORY * CATEGORIES))
+    input_length = (len(inputs) // BATCH_SIZE) * BATCH_SIZE # we need inputs to be a multiple of batch_size so we dont train on multiple users in the same batch
+    log.info("--> made array")
+    X = np.zeros((input_length, MEMORY, CATEGORIES), dtype=np.bool)
+    last_percent = 0
+    for i, input in enumerate(inputs):
+        if i == input_length:
+            break
+        X[i] = to_categorical(np.array(input), CATEGORIES)
+        percent = int((i / input_length) * 100)
+        if percent != last_percent:
+            log.info("%s%%" % percent)
+        last_percent = percent
+    log.info("--> filled")
+    log.info("Categorializing output...")
     y = to_categorical(np.array(outputs), CATEGORIES)[:len(X)]
     log.info("--> %d input vectors" % len(X))
     log.info("--> shape: %s" % (X[0].shape,))
-    util.save("data/X.pkl", X)
-    util.save("data/y.pkl", y)
-    util.save("data/ref.pkl", period_refs)
+    return X, y, period_refs
 
-k = input("Generate input? y/[n]: ")
-if k.lower() == "y":
-    generate_input()
-else:
-    X = util.load("data/X.pkl")
-    y = util.load("data/y.pkl")
-    period_refs = util.load("data/ref.pkl")
+X, y, period_refs = generate_input()
+
+# k = input("Generate input? y/[n]: ")
+# if k.lower() == "y":
+#     generate_input()
+# X = util.load("data/X.pkl")
+# y = util.load("data/y.pkl")
+# period_refs = util.load("data/ref.pkl")
 
 
 log.info("Creating model...")
@@ -93,7 +104,7 @@ if k.lower() == "y":
 
 def generate():
     cells = []
-    index = random.choice(range(len(X) // 2)) * 2 # have to pick an even-numbered seed, otherwise we'll be starting on a duration and not a location
+    index = random.choice(range(len(X)))
     input = X[index]
     period_ref = period_refs[index] # this is the period of the target
     day_indexes = []
@@ -117,7 +128,7 @@ def generate():
             continue
         i += 1
     cells = list(zip(cells[::2], cells[1::2]))
-    print(cells)
+    log.debug(cells)
     points = []
     total_duration = 0
     for cell in cells:        
