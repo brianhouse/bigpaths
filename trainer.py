@@ -11,6 +11,7 @@ from keras.utils import to_categorical
 from points import *
 
 
+# assign constants
 MEMORY = config['memory']
 assert(MEMORY % 2 == 0)
 TEMPERATURE = config['temperature']
@@ -20,12 +21,25 @@ if len(sys.argv) > 1:
     MODEL = sys.argv[1].strip("models/").strip(".hdf5")
     WEIGHTS = "models/%s.hdf5" % MODEL    
 BATCH_SIZE = 64 
-
-
 log.info("Data size (%d[%d], %d[%d])..." % (PERIODS, PERIOD_SIZE, LOCATIONS, GRID_SIZE))
 CATEGORIES = PERIODS + LOCATIONS
 log.info("--> %d categories" % CATEGORIES)
 
+
+# create model
+log.info("Creating model...")
+model = Sequential()
+model.add(LSTM(256, return_sequences=True, input_shape=(MEMORY, CATEGORIES), dropout=0.2, recurrent_dropout=0.2))
+model.add(LSTM(256, return_sequences=False, dropout=0.2, recurrent_dropout=0.2))
+model.add(Dense(CATEGORIES, activation="softmax"))
+if WEIGHTS is not None:
+    model.load_weights(WEIGHTS)
+model.compile(loss="categorical_crossentropy", optimizer="rmsprop", metrics=['accuracy'])
+model.summary()
+log.info("--> done")
+
+
+# generate inputs
 def generate_input():
     log.info("Generating input data...")
     points = util.load("data/points_%d_%d.pkl" % (PERIOD_SIZE, GRID_SIZE))
@@ -60,29 +74,10 @@ def generate_input():
     log.info("--> %d input vectors" % len(X))
     log.info("--> shape: %s" % (X[0].shape,))
     return X, y, period_refs
-
 X, y, period_refs = generate_input()
 
-# k = input("Generate input? y/[n]: ")
-# if k.lower() == "y":
-#     generate_input()
-# X = util.load("data/X.pkl")
-# y = util.load("data/y.pkl")
-# period_refs = util.load("data/ref.pkl")
 
-
-log.info("Creating model...")
-model = Sequential()
-model.add(LSTM(256, return_sequences=True, input_shape=(MEMORY, CATEGORIES), dropout=0.2, recurrent_dropout=0.2))
-model.add(LSTM(256, return_sequences=False, dropout=0.2, recurrent_dropout=0.2))
-model.add(Dense(len(y[0]), activation="softmax"))
-if WEIGHTS is not None:
-    model.load_weights(WEIGHTS)
-model.compile(loss="categorical_crossentropy", optimizer="rmsprop", metrics=['accuracy'])
-model.summary()
-log.info("--> done")
-
-
+# train
 train = True
 if WEIGHTS is not None:
     train = False
@@ -102,6 +97,7 @@ if k.lower() == "y":
     model.save("models/%s.hdf5" % model)
 
 
+# generate outputs
 def generate():
     cells = []
     index = random.choice(range(len(X)))
