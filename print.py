@@ -14,4 +14,3 @@ days = util.load("data/1497313211_10_7_house_0.25_output.pkl")
 day = random.choice(days)
 drawer.path_print(day)
 
-

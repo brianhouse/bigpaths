@@ -15,7 +15,7 @@ bounds:
     - 40.538534
 
 period_size: 10
-grid_size: 6
+grid_size: 7
 
 temperature: 0.25
 memory: 32

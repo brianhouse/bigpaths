@@ -13,7 +13,7 @@ def map(points, user_id=None):
     for point in points:
         color = colors[point.location % len(colors)]
         ctx.arc(point.x, point.y, 3 / ctx.width, 3 / ctx.height, fill=color, thickness=0.0)
-    ctx.output("images/%d_map.png" % user_id)
+    ctx.output("images/%d_map.png" % user_id, False)
     log.info("--> done")
 
 
@@ -35,7 +35,7 @@ def strips(points, user_id=None):
     for line in lines:
         line[1] = line[3] = (((line[1] / (q + 2))) * ((q + 2) * 10)) + 6
         ctx.line(*line)
-    ctx.output("images/%s_%s_strips.png" % (t, user_id))
+    ctx.output("images/%s_%s_strips.png" % (t, user_id), False)
 
 
 def path(points):
