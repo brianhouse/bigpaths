@@ -59,7 +59,8 @@ def generate_input():
     inputs = None
     log.info("--> filled")
     log.info("Categorializing output...")
-    y = to_categorical(np.array(outputs), CATEGORIES)[:len(X)]
+    outputs = np.array(outputs[:len(X)])
+    y = to_categorical(outputs, CATEGORIES)
     log.info("--> %d input vectors" % len(X))
     log.info("--> shape: %s" % (X[0].shape,))
     return X, y, period_refs
