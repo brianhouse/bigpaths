@@ -54,6 +54,20 @@ def path(points):
     log.info("--> done")
 
 
+def path_print(points):
+    t = str(timeutil.timestamp(ms=True)).replace(".", "-")
+    log.info("Drawing path...")
+    ctx = drawing.Context(1000, int(1000 / RATIO), relative=True, flip=True, hsv=True)
+    ctx.image("basemap/basemap.png")
+    for p in range(len(points)):
+        x1, y1 = points[p].x, points[p].y
+        ctx.arc(x1, y1, 5 / ctx.width, 5 / ctx.height, fill=(0., 0., 1., 1.), thickness=0.0)
+        if p < len(points) - 1:
+            x2, y2 = points[p+1].x, points[p+1].y        
+            ctx.line(x1, y1, x2, y2, stroke=(0, 0, .8, 1), thickness=1.0)
+    ctx.output("images/%s_path.png" % t)    
+    log.info("--> done")
+
 
 def gradient_test():
     ctx = drawing.Context(1000, 250, relative=True, flip=True, hsv=True)

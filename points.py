@@ -174,29 +174,34 @@ def main(user_ids, draw=False):
         if points is None or not len(points):
             continue
 
-        points = filter_transients(points)     
-        points = join_adjacent(points)
-        points = calculate_durations(points)
-        cluster(points)
-        locations = generate_locations(points)
+        try:
+            points = filter_transients(points)     
+            points = join_adjacent(points)
+            points = calculate_durations(points)
+            cluster(points)
+            locations = generate_locations(points)
 
-        log.info("Labeling...")
-        for point in points:
-            point.location = locations.index(point.grid)     
+            log.info("Labeling...")
+            for point in points:
+                point.location = locations.index(point.grid)     
 
-        if draw:
-            drawer.map(points, user_id)
-            drawer.strips(points, user_id)
-            for i in range(5):
-                index = random.choice(range(len(points)))
-                drawer.path(points[index:index + 5])
+            if draw:
+                drawer.map(points, user_id)
+                drawer.strips(points, user_id)
+                for i in range(5):
+                    index = random.choice(range(len(points)))
+                    drawer.path(points[index:index + 5])
 
-        log.info("--> total points for user %s: %d" % (user_id, len(points)))
-        data = data + points
+            log.info("--> total points for user %s: %d" % (user_id, len(points)))
+            data = data + points
+        except Exception as e:
+            log.error(log.exc(e))
+            continue
 
     util.save("data/points_%d_%d.pkl" % (PERIOD_SIZE, GRID_SIZE), data)
     log.info("--> done")
 
 
 if __name__ == "__main__":
-    main([1], True)
+    users = util.load("data/user_ids.pkl")
+    main(users, False)
