@@ -26,19 +26,6 @@ CATEGORIES = PERIODS + LOCATIONS
 log.info("--> %d categories" % CATEGORIES)
 
 
-# create model
-log.info("Creating model...")
-model = Sequential()
-model.add(LSTM(256, return_sequences=True, input_shape=(MEMORY, CATEGORIES), dropout=0.2, recurrent_dropout=0.2))
-model.add(LSTM(256, return_sequences=False, dropout=0.2, recurrent_dropout=0.2))
-model.add(Dense(CATEGORIES, activation="softmax"))
-if WEIGHTS is not None:
-    model.load_weights(WEIGHTS)
-model.compile(loss="categorical_crossentropy", optimizer="rmsprop", metrics=['accuracy'])
-model.summary()
-log.info("--> done")
-
-
 # generate inputs
 def generate_input():
     log.info("Generating input data...")
@@ -54,6 +41,7 @@ def generate_input():
         inputs.append(cells[i:i + MEMORY])
         outputs.append(cells[i + MEMORY])
         period_refs.append(points[(i + MEMORY)//2].period)    # the period of the target, which we'll use to reconstruct the point when generating
+    cells = None
     log.info("--> %d points into %s prelim inputs" % (len(points), len(inputs)))    
     log.info("Categoricalizing (%s memory required)..." % strings.format_size(len(inputs) * MEMORY * CATEGORIES))
     input_length = (len(inputs) // BATCH_SIZE) * BATCH_SIZE # we need inputs to be a multiple of batch_size so we dont train on multiple users in the same batch
@@ -68,6 +56,7 @@ def generate_input():
         if percent != last_percent:
             log.info("%s%%" % percent)
         last_percent = percent
+    inputs = None
     log.info("--> filled")
     log.info("Categorializing output...")
     y = to_categorical(np.array(outputs), CATEGORIES)[:len(X)]
@@ -75,6 +64,19 @@ def generate_input():
     log.info("--> shape: %s" % (X[0].shape,))
     return X, y, period_refs
 X, y, period_refs = generate_input()
+
+
+# create model
+log.info("Creating model...")
+model = Sequential()
+model.add(LSTM(256, return_sequences=True, input_shape=(MEMORY, CATEGORIES), dropout=0.2, recurrent_dropout=0.2))
+model.add(LSTM(256, return_sequences=False, dropout=0.2, recurrent_dropout=0.2))
+model.add(Dense(CATEGORIES, activation="softmax"))
+if WEIGHTS is not None:
+    model.load_weights(WEIGHTS)
+model.compile(loss="categorical_crossentropy", optimizer="rmsprop", metrics=['accuracy'])
+model.summary()
+log.info("--> done")
 
 
 # train
