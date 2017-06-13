@@ -40,6 +40,8 @@ def generate_input():
         inputs.append(cells[i:i + MEMORY])
         outputs.append(cells[i + MEMORY])
         period_refs.append(points[(i + MEMORY)//2].period)    # the period of the target, which we'll use to reconstruct the point when generating
+    log.info("--> %d points into %s prelim inputs" % (len(points), len(inputs)))
+    log.info("Categoricalizing...")
     X = np.array([to_categorical(np.array(input), CATEGORIES) for input in inputs])
     X = X[:(len(X) // BATCH_SIZE) * BATCH_SIZE] # we need inputs to be a multiple of batch_size so we dont train on multiple users in the same batch
     y = to_categorical(np.array(outputs), CATEGORIES)[:len(X)]
