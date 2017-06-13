@@ -42,7 +42,7 @@ log.info("--> done")
 # generate inputs
 def generate_input():
     log.info("Generating input data...")
-    points = util.load("data/points_%d_%d.pkl" % (PERIOD_SIZE, GRID_SIZE))[:200]
+    points = util.load("data/points_%d_%d.pkl" % (PERIOD_SIZE, GRID_SIZE))
     cells = []
     for point in points:
         cells.append(point.location)
