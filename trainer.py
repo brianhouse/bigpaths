@@ -17,8 +17,8 @@ TEMPERATURE = config['temperature']
 WEIGHTS = None
 MODEL = None
 if len(sys.argv) > 1:
-    MODEL = sys.argv[1].strip("models/")
-    WEIGHTS = "models/%s" % MODEL
+    MODEL = sys.argv[1].strip("models/").strip(".hdf5")
+    WEIGHTS = "models/%s.hdf5" % MODEL    
 BATCH_SIZE = 64 
 
 
