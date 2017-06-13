@@ -22,31 +22,45 @@ if len(sys.argv) > 1:
 BATCH_SIZE = 64 
 
 
-log.info("Generating training input (%d[%d], %d[%d])..." % (PERIODS, PERIOD_SIZE, LOCATIONS, GRID_SIZE))
-points = util.load("data/points_%d_%d.pkl" % (PERIOD_SIZE, GRID_SIZE))
+log.info("Data size (%d[%d], %d[%d])..." % (PERIODS, PERIOD_SIZE, LOCATIONS, GRID_SIZE))
 CATEGORIES = PERIODS + LOCATIONS
 log.info("--> %d categories" % CATEGORIES)
-cells = []
-for point in points:
-    cells.append(point.location)
-    cells.append(LOCATIONS + point.duration)
-inputs = []
-outputs = []
-period_refs = []
-for i in range(len(cells) - MEMORY):
-    inputs.append(cells[i:i + MEMORY])
-    outputs.append(cells[i + MEMORY])
-    period_refs.append(points[(i + MEMORY)//2].period)    # the period of the target, which we'll use to reconstruct the point when generating
-X = np.array([to_categorical(np.array(input), CATEGORIES) for input in inputs])
-X = X[:(len(X) // BATCH_SIZE) * BATCH_SIZE] # we need inputs to be a multiple of batch_size so we dont train on multiple users in the same batch
-y = to_categorical(np.array(outputs), CATEGORIES)[:len(X)]
-log.info("--> %d input vectors" % len(X))
-log.info("--> shape: %s" % (X.shape,))
+
+def generate_input():
+    log.info("Generating input data...")
+    points = util.load("data/points_%d_%d.pkl" % (PERIOD_SIZE, GRID_SIZE))
+    cells = []
+    for point in points:
+        cells.append(point.location)
+        cells.append(LOCATIONS + point.duration)
+    inputs = []
+    outputs = []
+    period_refs = []
+    for i in range(len(cells[:]) - MEMORY):
+        inputs.append(cells[i:i + MEMORY])
+        outputs.append(cells[i + MEMORY])
+        period_refs.append(points[(i + MEMORY)//2].period)    # the period of the target, which we'll use to reconstruct the point when generating
+    X = np.array([to_categorical(np.array(input), CATEGORIES) for input in inputs])
+    X = X[:(len(X) // BATCH_SIZE) * BATCH_SIZE] # we need inputs to be a multiple of batch_size so we dont train on multiple users in the same batch
+    y = to_categorical(np.array(outputs), CATEGORIES)[:len(X)]
+    log.info("--> %d input vectors" % len(X))
+    log.info("--> shape: %s" % (X[0].shape,))
+    util.save("data/X.pkl", X)
+    util.save("data/y.pkl", y)
+    util.save("data/ref.pkl", period_refs)
+
+k = input("Generate input? y/[n]: ")
+if k.lower() == "y":
+    generate_input()
+else:
+    X = util.load("data/X.pkl")
+    y = util.load("data/y.pkl")
+    period_refs = util.load("data/ref.pkl")
 
 
 log.info("Creating model...")
 model = Sequential()
-model.add(LSTM(256, return_sequences=True, input_shape=X[0].shape, dropout=0.2, recurrent_dropout=0.2))
+model.add(LSTM(256, return_sequences=True, input_shape=(MEMORY, CATEGORIES), dropout=0.2, recurrent_dropout=0.2))
 model.add(LSTM(256, return_sequences=False, dropout=0.2, recurrent_dropout=0.2))
 model.add(Dense(len(y[0]), activation="softmax"))
 if WEIGHTS is not None:
