@@ -98,11 +98,11 @@ if train:
 if MODEL is None:
     MODEL = "%s_%d_%d" % (timeutil.timestamp(), PERIOD_SIZE, GRID_SIZE)
 if config['autonomous']:
-    model.save("models/%s.hdf5" % model)
+    model.save("models/%s.hdf5" % MODEL)
 else:
     k = input("Save? y/[n]: ")
     if k.lower() == "y":
-        model.save("models/%s.hdf5" % model)
+        model.save("models/%s.hdf5" % MODEL)
 
 
 # generate outputs
