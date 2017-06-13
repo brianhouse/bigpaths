@@ -47,6 +47,7 @@ def generate_input():
     input_length = (len(inputs) // BATCH_SIZE) * BATCH_SIZE # we need inputs to be a multiple of batch_size so we dont train on multiple users in the same batch
     log.info("--> made array")
     X = np.zeros((input_length, MEMORY, CATEGORIES), dtype=np.bool)
+    y = np.zeros((input_length, CATEGORIES), dtype=np.bool)
     last_percent = 0
     for i, input in enumerate(inputs):
         if i == input_length:
@@ -60,7 +61,8 @@ def generate_input():
     log.info("--> filled")
     log.info("Categorializing output...")
     outputs = np.array(outputs[:len(X)])
-    y = to_categorical(outputs, CATEGORIES)
+    for o, output in enumerate(outputs):
+        y[o][output] = 1
     log.info("--> %d input vectors" % len(X))
     log.info("--> shape: %s" % (X[0].shape,))
     return X, y, period_refs
