@@ -11,4 +11,7 @@ days = util.load("data/1497311751_output.pkl")
 # for day in days:
 #     drawer.path(day)
 
-drawer.strips([point for day in days for point in day])
+print(len(days), "days")
+
+# drawer.strips([point for day in days for point in day])
+drawer.strips(days[0])

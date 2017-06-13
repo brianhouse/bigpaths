@@ -6,4 +6,8 @@
 
 - test training with grid=7
 
-- question here is whether the timing is making sense
+/
+
+- make printable output
+- train on full dataset
+

@@ -27,13 +27,13 @@ def strips(points, user_id=None):
         if prev is not None and point.period < prev.period:
             q += 1
         color = colors[point.location % len(colors)]        
-        lines.append([point.period/PERIODS, q, (point.period + point.duration)/PERIODS, q, color, 8.0])
+        lines.append([(point.period/PERIODS) * 1000, q, ((point.period + point.duration)/PERIODS) * 1000, q, color, 8.0])
         if point.period + point.duration > PERIODS:
             overflow = (point.period + point.duration) - PERIODS
-            lines.append([0, q+1, overflow/PERIODS, q+1, color, 8.0])
-    ctx = drawing.Context(1000, (q + 1) * 10, relative=True, flip=False, hsv=False, background=(0., 0., 0., 1.))
+            lines.append([0, q+1, (overflow/PERIODS) * 1000, q+1, color, 8.0])
+    ctx = drawing.Context(1000, ((q + 2) * 10) + 2, relative=False, flip=False, hsv=False, background=(0., 0., 0., 1.))
     for line in lines:
-        line[1] = line[3] = (line[1] / (q+1)) - (1 / ctx.height)
+        line[1] = line[3] = (((line[1] / (q + 2))) * ((q + 2) * 10)) + 6
         ctx.line(*line)
     ctx.output("images/%s_%s_strips.png" % (t, user_id))
 
