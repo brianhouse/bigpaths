@@ -42,7 +42,7 @@ log.info("--> done")
 # generate inputs
 def generate_input():
     log.info("Generating input data...")
-    points = util.load("data/points_%d_%d.pkl" % (PERIOD_SIZE, GRID_SIZE))
+    points = util.load("data/points_%d_%d.pkl" % (PERIOD_SIZE, GRID_SIZE))[:200]
     cells = []
     for point in points:
         cells.append(point.location)
@@ -87,14 +87,17 @@ if WEIGHTS is not None:
 if train:
     log.info("Training...")
     try:
-        model.fit(X, y, epochs=1000, batch_size=BATCH_SIZE)
+        model.fit(X, y, epochs=100, batch_size=BATCH_SIZE)
     except KeyboardInterrupt:
         print()
 if MODEL is None:
     MODEL = "%s_%d_%d" % (timeutil.timestamp(), PERIOD_SIZE, GRID_SIZE)
-k = input("Save? y/[n]: ")
-if k.lower() == "y":
+if config['autonomous']:
     model.save("models/%s.hdf5" % model)
+else:
+    k = input("Save? y/[n]: ")
+    if k.lower() == "y":
+        model.save("models/%s.hdf5" % model)
 
 
 # generate outputs
@@ -141,8 +144,11 @@ def sample(distribution, temperature):
     choices = range(len(distribution))
     return np.random.choice(choices, p=p)
 
-k = input("Generate how many examples? [10]: ")
-n = int(k.lower()) if len(k) else 10
+if not config['autonomous']:
+    k = input("Generate how many examples? [10]: ")
+    n = int(k.lower()) if len(k) else 10
+else:
+    n = 50
 log.info("Generating %d examples..." % n)
 points = []
 for i in range(n):    
