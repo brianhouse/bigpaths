@@ -96,6 +96,7 @@ if MODEL is None:
     MODEL = "%s_%d_%d" % (timeutil.timestamp(), PERIOD_SIZE, GRID_SIZE)
 if train:
     log.info("Training...")
+    try:
         if config['checkpoints']:
             callbacks = [ModelCheckpoint(filepath="models/%s-{epoch:02d}-{acc:.4f}.hdf5" % MODEL, verbose=1, save_best_only=True, monitor="acc", mode="max")]
         else:
