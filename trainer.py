@@ -8,6 +8,7 @@ from keras.models import Sequential
 from keras.layers.recurrent import LSTM, GRU
 from keras.layers.core import Dense, Activation, Dropout
 from keras.utils import to_categorical
+from keras.callbacks import ModelCheckpoint
 from points import *
 
 
@@ -17,6 +18,7 @@ assert(MEMORY % 2 == 0)
 TEMPERATURE = config['temperature']
 WEIGHTS = None
 MODEL = None
+EPOCHS = config['epochs']
 if len(sys.argv) > 1:
     MODEL = sys.argv[1].strip("models/").strip(".hdf5")
     WEIGHTS = "models/%s.hdf5" % MODEL    
@@ -90,14 +92,17 @@ if WEIGHTS is not None:
     k = input("Train? y/[n]: ")
     if k.lower() == "y":
         train = True    
-if train:
-    log.info("Training...")
-    try:
-        model.fit(X, y, epochs=100, batch_size=BATCH_SIZE)
-    except KeyboardInterrupt:
-        print()
 if MODEL is None:
     MODEL = "%s_%d_%d" % (timeutil.timestamp(), PERIOD_SIZE, GRID_SIZE)
+if train:
+    log.info("Training...")
+        if config['checkpoints']:
+            callbacks = [ModelCheckpoint(filepath="models/%s-{epoch:02d}-{acc:.4f}.hdf5" % MODEL, verbose=1, save_best_only=True, monitor="acc", mode="max")]
+        else:
+            callbacks = None
+        model.fit(X, y, epochs=EPOCHS, batch_size=BATCH_SIZE, callbacks=callbacks)
+    except KeyboardInterrupt:
+        print()
 if config['autonomous']:
     model.save("models/%s.hdf5" % MODEL)
 else:

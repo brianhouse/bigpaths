@@ -1,8 +1,6 @@
 log: True
 tail: True
 
-autonomous: True
-
 mongo:
     host: localhost
     port: 27017
@@ -24,3 +22,7 @@ grid_size: 6
 
 temperature: 0.25
 memory: 32
+
+epochs: 100
+checkpoints: True
+autonomous: True
