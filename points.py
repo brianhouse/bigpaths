@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import random, datetime, json, math
+import random, datetime, json, math, requests, json
 import numpy as np
 from housepy import geo, config, log, util, timeutil
 from mongo import db
@@ -45,6 +45,8 @@ class Point():
         dt = timeutil.t_to_dt(self.t, tz="America/New_York")    # not sure why, honestly.        
         self.period = ((dt.hour * 60) + (dt.minute)) // PERIOD_SIZE
         self.duration = None
+        self.address = None
+        self.display_time = None
 
     def distance(self, pt):
         return geo.distance((self.lon, self.lat), (pt.lon, pt.lat))
@@ -63,7 +65,9 @@ class GeneratedPoint(Point):
         self.lon, self.lat = geo.geohash_decode(self.grid)
         x, y = geo.project((self.lon, self.lat))
         self.x = (x - MIN_X) / (MAX_X - MIN_X)
-        self.y = (y - MIN_Y) / (MAX_Y - MIN_Y)        
+        self.y = (y - MIN_Y) / (MAX_Y - MIN_Y)   
+        self.address = None
+        self.display_time = None     
 
 
 
@@ -164,6 +168,29 @@ def cluster(points):
 
     for p, point in enumerate(points):
         point.cluster = clusters[labels[p]]
+
+
+def geocode(points):
+    log.info("Geocoding %d points..." % len(points))
+    for point in points:
+        try:
+            url = "https://maps.googleapis.com/maps/api/geocode/json?latlng=%s,%s" % (point.lat, point.lon)
+            result = requests.get(url).json()
+            point.address = result['results'][0]['formatted_address']
+            point.address = point.address.split(", NY ")[0].replace(", New York", "")
+            # log.debug(point.address)
+        except Exception as e:
+            log.error(log.exc(e))
+            log.debug(json.dumps(result, indent=4))
+    log.info("--> done")
+    return points
+
+
+def format_times(points):
+    for point in points:
+        tod = timeutil.seconds_to_string(point.period * 10 * 60, show_seconds=False, pm=True).lstrip("0").replace(" ", "")
+        point.display_time = tod
+    return points
 
 
 def main(user_ids, draw=False):

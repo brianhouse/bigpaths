@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import time
+import time, math
 from housepy import drawing, util, log, config, geo, timeutil
 from colors import colors
 from points import *
@@ -35,7 +35,7 @@ def strips(points, user_id=None):
     for line in lines:
         line[1] = line[3] = (((line[1] / (q + 2))) * ((q + 2) * 10)) + 6
         ctx.line(*line)
-    ctx.output("images/%s_%s_strips.png" % (t, user_id), False)
+    ctx.output("images/%s_%s_strips.png" % (t, user_id), True)
 
 
 def path(points):
@@ -57,14 +57,44 @@ def path(points):
 def path_print(points):
     t = str(timeutil.timestamp(ms=True)).replace(".", "-")
     log.info("Drawing path...")
-    ctx = drawing.Context(1000, int(1000 / RATIO), relative=True, flip=True, hsv=True)
+    ctx = drawing.Context(3000, int(3000 / RATIO), relative=True, flip=True, hsv=True)
     ctx.image("basemap/basemap.png")
+    midline = sum([point.x for point in points]) / len(points)
+    poss = []
     for p in range(len(points)):
         x1, y1 = points[p].x, points[p].y
-        ctx.arc(x1, y1, 5 / ctx.width, 5 / ctx.height, fill=(0., 0., 1., 1.), thickness=0.0)
         if p < len(points) - 1:
             x2, y2 = points[p+1].x, points[p+1].y        
-            ctx.line(x1, y1, x2, y2, stroke=(0, 0, .8, 1), thickness=1.0)
+            ctx.line(x1, y1, x2, y2, stroke=(0., 0., .5, 1.), thickness=5.0)
+        ctx.arc(x1, y1, 15 / ctx.width, 15 / ctx.height, fill=(0., 0., 0., 1.), thickness=0.0)
+        if p == 0:
+            tod = "Wake"
+        else:
+            tod = timeutil.seconds_to_string(points[p].period * 10 * 60, show_seconds=False, pm=True).lstrip("0").replace(" ", "")
+        print(tod)
+        flip = False
+        if x1 < midline:
+            flip = True
+        for pos in poss:
+            dist_x = abs(x1 - pos[0]) * ctx.height
+            dist_y = abs(y1 - pos[1]) * ctx.height
+            # print(dist_x, dist_y)
+            if dist_y <= 100 and dist_x <= 400:
+                # print("flipping")
+                flip = not flip
+        # print()
+        if not flip:
+            x = x1 + (30 / ctx.width)
+        else:
+            if len(tod) == 6:
+                x = x1 - (160 / ctx.width)
+            else:
+                x = x1 - (180 / ctx.width)
+        y = y1 - (12 / ctx.height)
+        poss.append((x, y))
+        ctx.label(x, y, tod, stroke=(0., 0., 0., 1.), font="Monaco", size=36)
+        if p == len(points) - 1:
+            ctx.label(x, y - (40 / ctx.height), "Sleep", stroke=(0., 0., 0., 1.), font="Monaco", size=36)
     ctx.output("images/%s_path.png" % t)    
     log.info("--> done")
 
