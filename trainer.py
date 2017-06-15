@@ -87,11 +87,11 @@ log.info("--> done")
 
 # train
 train = True
-if WEIGHTS is not None:
+if not config['autonomous'] and WEIGHTS is not None:
     train = False
     k = input("Train? y/[n]: ")
     if k.lower() == "y":
-        train = True    
+        train = True
 if MODEL is None:
     MODEL = "%s_%d_%d" % (timeutil.timestamp(), PERIOD_SIZE, GRID_SIZE)
 if train:
