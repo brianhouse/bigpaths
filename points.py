@@ -55,6 +55,7 @@ class Point():
         return "[%d] (%f,%f) %f,%f %d %d" % (self.location, self.lon, self.lat, self.x, self.y, self.period, self.duration)
 
 
+
 class GeneratedPoint(Point):
 
     def __init__(self, location, period, duration):
@@ -188,8 +189,10 @@ def geocode(points):
 
 def format_times(points):
     for point in points:
-        tod = timeutil.seconds_to_string(point.period * 10 * 60, show_seconds=False, pm=True).lstrip("0").replace(" ", "")
-        point.display_time = tod
+        tod = timeutil.seconds_to_string(point.period * 10 * 60, show_seconds=False, pm=True).replace(" ", "")
+        if not (tod[3] == "0" or tod[3] == "3"):
+            tod = tod[:4] + str(random.randint(0, 9)) + tod[5:]
+        point.display_time = tod.lstrip("0")
     return points
 
 

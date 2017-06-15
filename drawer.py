@@ -58,7 +58,7 @@ def path_print(points):
     t = str(timeutil.timestamp(ms=True)).replace(".", "-")
     log.info("Drawing path...")
     ctx = drawing.Context(3000, int(3000 / RATIO), relative=True, flip=True, hsv=True)
-    ctx.image("basemap/basemap.png")
+    # ctx.image("basemap/basemap.png")
     midline = sum([point.x for point in points]) / len(points)
     poss = []
     for p in range(len(points)):
@@ -67,34 +67,24 @@ def path_print(points):
             x2, y2 = points[p+1].x, points[p+1].y        
             ctx.line(x1, y1, x2, y2, stroke=(0., 0., .5, 1.), thickness=5.0)
         ctx.arc(x1, y1, 15 / ctx.width, 15 / ctx.height, fill=(0., 0., 0., 1.), thickness=0.0)
-        if p == 0:
-            tod = "Wake"
-        else:
-            tod = timeutil.seconds_to_string(points[p].period * 10 * 60, show_seconds=False, pm=True).lstrip("0").replace(" ", "")
-        print(tod)
         flip = False
         if x1 < midline:
             flip = True
         for pos in poss:
             dist_x = abs(x1 - pos[0]) * ctx.height
             dist_y = abs(y1 - pos[1]) * ctx.height
-            # print(dist_x, dist_y)
             if dist_y <= 100 and dist_x <= 400:
-                # print("flipping")
                 flip = not flip
-        # print()
         if not flip:
             x = x1 + (30 / ctx.width)
         else:
-            if len(tod) == 6:
-                x = x1 - (160 / ctx.width)
-            else:
-                x = x1 - (180 / ctx.width)
+            x = x1 - (50 / ctx.width)
         y = y1 - (12 / ctx.height)
         poss.append((x, y))
-        ctx.label(x, y, tod, stroke=(0., 0., 0., 1.), font="Monaco", size=36)
-        if p == len(points) - 1:
-            ctx.label(x, y - (40 / ctx.height), "Sleep", stroke=(0., 0., 0., 1.), font="Monaco", size=36)
+        ctx.label(x, y, str(p+1), stroke=(0., 0., 0., 1.), font="Monaco", size=36)        
+    for p, point in enumerate(points):
+        label = "%d) %s %s%s" % (p+1, "Wake up at" if p == 0 else "%s," % point.display_time, point.address, "" if p != (len(points) - 1) else " ... sleep")
+        ctx.label((200 / ctx.width), 1.0 - ((200 + (40*p)) / ctx.height), label, stroke=(0., 0., 0., 1.), font="Monaco", size=36)
     ctx.output("images/%s_path.png" % t)    
     log.info("--> done")
 

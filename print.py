@@ -30,8 +30,10 @@ def trim(day):
             d += 1
         else:
             d += 1
-            break   
-    day = day[:d]
+            break       
+    if day[d].period < 24 or day[d].period > 120:   # 4am, 8pm
+        d += 1
+    day = day[:d]        
     return day
 
 day = trim(day)
