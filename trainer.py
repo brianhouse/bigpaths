@@ -75,7 +75,6 @@ X, y, period_refs = generate_input()
 log.info("Creating model...")
 model = Sequential()
 model.add(LSTM(512, return_sequences=True, input_shape=(MEMORY, CATEGORIES), dropout=0.2, recurrent_dropout=0.2))
-model.add(LSTM(512, return_sequences=True, dropout=0.2, recurrent_dropout=0.2))
 model.add(LSTM(512, return_sequences=False, dropout=0.2, recurrent_dropout=0.2))
 model.add(Dense(CATEGORIES, activation="softmax"))
 if WEIGHTS is not None:
