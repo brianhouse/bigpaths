@@ -29,6 +29,8 @@ try:
 except FileNotFoundError as e:
     log.warning(e)
 
+CHARMAP = "0123456789bcdefghjkmnpqrstuvwxyz"    # base32
+
 
 class Point():
 
@@ -63,13 +65,15 @@ class GeneratedPoint(Point):
         self.period = period
         self.duration = duration
         self.grid = locations[self.location]
-        self.lon, self.lat = geo.geohash_decode(self.grid)
+        self.unhash()
         x, y = geo.project((self.lon, self.lat))
         self.x = (x - MIN_X) / (MAX_X - MIN_X)
         self.y = (y - MIN_Y) / (MAX_Y - MIN_Y)   
         self.address = None
         self.display_time = None     
 
+    def unhash(self):
+        self.lon, self.lat = geo.geohash_decode("%s%s%s" % (self.grid, CHARMAP[random.randint(0, len(CHARMAP) - 1)], CHARMAP[random.randint(0, len(CHARMAP) - 1)]))                
 
 
 def get_user(user_ids):

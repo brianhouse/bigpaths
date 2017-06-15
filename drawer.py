@@ -58,7 +58,7 @@ def path_print(points):
     t = str(timeutil.timestamp(ms=True)).replace(".", "-")
     log.info("Drawing path...")
     ctx = drawing.Context(3000, int(3000 / RATIO), relative=True, flip=True, hsv=True)
-    # ctx.image("basemap/basemap.png")
+    ctx.image("basemap/basemap.png")
     midline = sum([point.x for point in points]) / len(points)
     poss = []
     for p in range(len(points)):

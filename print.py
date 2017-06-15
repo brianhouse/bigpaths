@@ -12,6 +12,9 @@ from points import *
 
 days = util.load("data/1497313211_10_7_house_0.25_output.pkl")
 index = random.choice(range(len(days)))
+index = 21
+
+print("INDEX", index)
 
 day = days[index] + days[index+1]
 
@@ -23,6 +26,8 @@ def trim(day):
         else:
             d += 1
             break    
+    while day[d].period < 24 or day[d].period > 120:   # 4am, 8pm
+        d += 1
     day = day[d:]
     d = 0
     while True:
@@ -31,7 +36,7 @@ def trim(day):
         else:
             d += 1
             break       
-    if day[d].period < 24 or day[d].period > 120:   # 4am, 8pm
+    while day[d].period < 24 or day[d].period > 120:   # 4am, 8pm
         d += 1
     day = day[:d]        
     return day
@@ -40,12 +45,12 @@ day = trim(day)
 
 geocode(day)
 format_times(day)
-
-print()
-print()
 for point in day:
-    print("%s: %s" % (point.display_time, point.address))
+    point.unhash()
 
+for p, point in enumerate(day):
+    label = "%d) %s %s%s" % (p+1, "Wake up at" if p == 0 else "%s," % point.display_time, point.address, "" if p != (len(day) - 1) else " ... sleep")
+    print(label)
 
 drawer.path_print(day)
 
