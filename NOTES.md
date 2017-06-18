@@ -11,3 +11,5 @@
 - eliminating dropout. unless we're hitting 100% on accuracy, overfitting isnt a problem, because there is no validation set. and even then, temperature will prevent it from reproducing exact training paths. they will be amalgamations, as desired, and the stochastics will further fuzz it.
 
 - basing this on training accuracy. if it can learn to predict accurately over the training set, it's a valid claim that's it's learned from the data and the subsequent generations reflect that.
+
+- good description of batch_size: https://stackoverflow.com/questions/35158365/will-larger-batch-size-make-computation-time-less-in-machine-learning
