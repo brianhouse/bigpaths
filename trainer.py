@@ -10,7 +10,6 @@ from keras.layers.core import Dense, Activation, Dropout
 from keras.utils import to_categorical
 from keras.callbacks import ModelCheckpoint
 from points import *
-from progress import *
 
 
 # assign constants
