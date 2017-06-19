@@ -76,7 +76,6 @@ log.info("Creating model...")
 model = Sequential()
 model.add(GRU(1024, return_sequences=True, input_shape=(MEMORY, CATEGORIES)))   # no dropout, we dont really care about overfitting
 model.add(GRU(1024, return_sequences=True))
-model.add(GRU(1024, return_sequences=True))
 model.add(GRU(1024, return_sequences=False))
 model.add(Dense(CATEGORIES, activation="softmax"))
 if WEIGHTS is not None:
