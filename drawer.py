@@ -19,7 +19,6 @@ def map(points, user_id=None):
 
 def strips(points, user_id=None):
     log.info("Drawing strips for user %s..." % user_id)
-    t = str(timeutil.timestamp(ms=True)).replace(".", "-")
     lines = []
     q = 0
     for p, point in enumerate(points):
@@ -35,7 +34,7 @@ def strips(points, user_id=None):
     for line in lines:
         line[1] = line[3] = (((line[1] / (q + 2))) * ((q + 2) * 10)) + 6
         ctx.line(*line)
-    ctx.output("images/%s_%s_strips.png" % (t, user_id), True)
+    ctx.output("images/%s_strips.png" % user_id, True)
 
 
 def path(points):
