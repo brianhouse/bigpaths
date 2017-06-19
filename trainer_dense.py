@@ -3,14 +3,14 @@
 import random, sys
 import numpy as np
 import drawer
-from housepy import config, log, geo, strings, util
+from housepy import config, log, geo, strings
 from keras.models import Sequential
 from keras.layers.recurrent import LSTM, GRU
 from keras.layers.core import Dense, Activation, Dropout
+from keras.layers.wrappers import TimeDistributed
 from keras.utils import to_categorical
 from keras.callbacks import ModelCheckpoint
 from points import *
-from progress import *
 
 
 # assign constants
@@ -74,8 +74,8 @@ X, y, period_refs = generate_input()
 # create model
 log.info("Creating model...")
 model = Sequential()
-model.add(GRU(512, return_sequences=True, input_shape=(MEMORY, CATEGORIES)))   # no dropout, we dont really care about overfitting
-model.add(GRU(512, return_sequences=True))
+model.add(TimeDistributed(Dense(100), input_shape=(MEMORY, CATEGORIES)))
+model.add(GRU(512, return_sequences=True))   # no dropout, we dont really care about overfitting
 model.add(GRU(512, return_sequences=False))
 model.add(Dense(CATEGORIES, activation="softmax"))
 if WEIGHTS is not None:
