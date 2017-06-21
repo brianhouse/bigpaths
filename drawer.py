@@ -8,11 +8,11 @@ from points import *
 
 def map(points, user_id=None):
     log.info("Drawing map for user %s..." % user_id)
-    ctx = drawing.Context(1000, int(1000 / RATIO), relative=True, flip=True, hsv=False)
+    ctx = drawing.Context(3000, int(3000 / RATIO), relative=True, flip=True, hsv=False)
     ctx.image("basemap/basemap.png")
     for point in points:
         color = colors[point.location % len(colors)]
-        ctx.arc(point.x, point.y, 3 / ctx.width, 3 / ctx.height, fill=color, thickness=0.0)
+        ctx.arc(point.x, point.y, 6 / ctx.width, 6 / ctx.height, fill=color, thickness=0.0)
     ctx.output("images/%d_map.png" % user_id, False)
     log.info("--> done")
 
@@ -40,7 +40,7 @@ def strips(points, user_id=None):
 def path(points):
     t = str(timeutil.timestamp(ms=True)).replace(".", "-")
     log.info("Drawing path...")
-    ctx = drawing.Context(1000, int(1000 / RATIO), relative=True, flip=True, hsv=True)
+    ctx = drawing.Context(3000, int(3000 / RATIO), relative=True, flip=True, hsv=True)
     ctx.image("basemap/basemap.png")
     for p in range(len(points)):
         x1, y1 = points[p].x, points[p].y

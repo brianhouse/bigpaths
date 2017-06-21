@@ -75,6 +75,7 @@ X, y, period_refs = generate_input()
 log.info("Creating model...")
 model = Sequential()
 model.add(TimeDistributed(Dense(100), input_shape=(MEMORY, CATEGORIES)))
+model.add(LSTM(512, return_sequences=True))
 model.add(LSTM(512, return_sequences=True))   # no dropout, we dont really care about overfitting
 model.add(LSTM(512, return_sequences=False))
 model.add(Dense(CATEGORIES, activation="softmax"))

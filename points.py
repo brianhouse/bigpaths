@@ -244,4 +244,4 @@ def main(user_ids, draw=False):
 
 if __name__ == "__main__":
     users = util.load("data/user_ids.pkl")
-    main(users, False)
+    main(users, True)
