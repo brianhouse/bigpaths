@@ -32,6 +32,7 @@ log.info("--> %d categories" % CATEGORIES)
 def generate_input():
     log.info("Generating input sequences...")
     points = util.load("data/points_%d_%d.pkl" % (PERIOD_SIZE, GRID_SIZE))
+    points = [:len(points) // 2]
     cells = []
     for point in points:
         cells.append(point.location)
