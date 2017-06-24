@@ -73,9 +73,9 @@ X, y, period_refs = generate_input()
 # create model
 log.info("Creating model...")
 model = Sequential()
-model.add(LSTM(512, return_sequences=True, input_shape=(MEMORY, CATEGORIES)))   # no dropout, we dont really care about overfitting
-model.add(LSTM(512, return_sequences=True))
-model.add(LSTM(512, return_sequences=False))
+model.add(LSTM(1024, return_sequences=True, input_shape=(MEMORY, CATEGORIES)))   # no dropout, we dont really care about overfitting
+model.add(LSTM(1024, return_sequences=True))
+model.add(LSTM(1024, return_sequences=False))
 model.add(Dense(CATEGORIES, activation="softmax"))
 if WEIGHTS is not None:
     model.load_weights(WEIGHTS)
