@@ -11,3 +11,5 @@ THOUGHTS.md
 model.png
 *.pem
 logs
+output
+*.pxm
