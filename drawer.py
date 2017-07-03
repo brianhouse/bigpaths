@@ -53,7 +53,7 @@ def path(points):
     log.info("--> done")
 
 
-def path_print(points):
+def path_print(points, index):
     t = str(timeutil.timestamp(ms=True)).replace(".", "-")
     log.info("Drawing path...")
     ctx = drawing.Context(3000, int(3000 / RATIO), relative=True, flip=True, hsv=True)
@@ -84,7 +84,7 @@ def path_print(points):
     for p, point in enumerate(points):
         label = "%d) %s %s%s" % (p+1, "Wake up at" if p == 0 else "%s," % point.display_time, point.address, "" if p != (len(points) - 1) else " ... sleep")
         ctx.label((200 / ctx.width), 1.0 - ((200 + (40*p)) / ctx.height), label, stroke=(0., 0., 0., 1.), font="Monaco", size=36)
-    ctx.output("images/%s_path.png" % t)    
+    ctx.output("images/%s_path.png" % (index,))    
     log.info("--> done")
 
 

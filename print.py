@@ -6,13 +6,10 @@ import drawer
 from housepy import config, log, geo
 from points import *
 
-# days = util.load("data/1497307838_10_6_house_0.25_output.pkl")
-# drawer.strips([point for day in days for point in day])
-
-
-days = util.load("data/1497313211_10_7_house_0.25_output.pkl")
+# days = util.load("data/1497313211_10_7_house_0.25_output.pkl")
+# days = util.load("data/1498344519_10_7_ct-30-0.9313_0.25_output.pkl")
+days = util.load("data/1498344519_10_7_ct-30-0.9313_0.01_output.pkl")
 index = random.choice(range(len(days)))
-index = 21
 
 print("INDEX", index)
 
@@ -52,5 +49,5 @@ for p, point in enumerate(day):
     label = "%d) %s %s%s" % (p+1, "Wake up at" if p == 0 else "%s," % point.display_time, point.address, "" if p != (len(day) - 1) else " ... sleep")
     print(label)
 
-drawer.path_print(day)
+drawer.path_print(day, index)
 
