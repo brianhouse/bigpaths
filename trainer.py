@@ -27,12 +27,24 @@ log.info("Data size (%d[%d], %d[%d])..." % (PERIODS, PERIOD_SIZE, LOCATIONS, GRI
 CATEGORIES = PERIODS + LOCATIONS
 log.info("--> %d categories" % CATEGORIES)
 
+# create model
+log.info("Creating model...")
+model = Sequential()
+model.add(LSTM(1024, return_sequences=True, input_shape=(MEMORY, CATEGORIES)))   # no dropout, we dont really care about overfitting
+model.add(LSTM(1024, return_sequences=True))
+model.add(LSTM(1024, return_sequences=False))
+model.add(Dense(CATEGORIES, activation="softmax"))
+if WEIGHTS is not None:
+    model.load_weights(WEIGHTS)
+model.compile(loss="categorical_crossentropy", optimizer="rmsprop", metrics=['accuracy'])
+model.summary()
+log.info("--> done")
+
 
 # generate inputs
 def generate_input():
     log.info("Generating input sequences...")
     points = util.load("data/points_%d_%d.pkl" % (PERIOD_SIZE, GRID_SIZE))
-    # points = points[:len(points) // 2]
     cells = []
     for point in points:
         cells.append(point.location)
@@ -69,21 +81,6 @@ def generate_input():
     log.info("--> shape: %s" % (X[0].shape,))
     return X, y, period_refs
 X, y, period_refs = generate_input()
-
-
-# create model
-log.info("Creating model...")
-model = Sequential()
-model.add(LSTM(1024, return_sequences=True, input_shape=(MEMORY, CATEGORIES)))   # no dropout, we dont really care about overfitting
-model.add(LSTM(1024, return_sequences=True))
-model.add(LSTM(1024, return_sequences=False))
-model.add(Dense(CATEGORIES, activation="softmax"))
-if WEIGHTS is not None:
-    model.load_weights(WEIGHTS)
-model.compile(loss="categorical_crossentropy", optimizer="rmsprop", metrics=['accuracy'])
-model.summary()
-log.info("--> done")
-
 
 # train
 train = True
@@ -160,13 +157,11 @@ if not config['autonomous']:
     k = input("Generate how many examples? [10]: ")
     n = int(k.lower()) if len(k) else 10
 else:
-    n = 50
+    n = 100
 log.info("Generating %d examples..." % n)
 points = []
 for i in range(n):    
     day = generate()
-    drawer.path(day)
     points.append(day)
-drawer.strips([point for day in points for point in day])
 util.save("data/%s_%s_output.pkl" % (MODEL, TEMPERATURE), points)
 log.info("--> done")

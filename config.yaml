@@ -20,9 +20,9 @@ bounds:
 period_size: 10
 grid_size: 7
 
-temperature: 0.25
+temperature: 0.01
 memory: 32
 
 epochs: 100
 checkpoints: True
-autonomous: True
+autonomous: False

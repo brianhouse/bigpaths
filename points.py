@@ -222,9 +222,6 @@ def main(user_ids, draw=False):
             if draw:
                 drawer.map(points, user_id)
                 drawer.strips(points, user_id)
-                # for i in range(5):
-                #     index = random.choice(range(len(points)))
-                #     drawer.path(points[index:index + 5])
 
             log.info("--> total points for user %s: %d" % (user_id, len(points)))
             data = data + points
