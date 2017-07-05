@@ -28,3 +28,6 @@ checkpoints: True
 
 autonomous: False
 
+users: data/user_ids.pkl
+locations: data/locations_7_10.pkl
+points: data/points_7_10.pkl

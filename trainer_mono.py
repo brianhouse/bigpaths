@@ -41,7 +41,7 @@ log.info("--> done")
 
 
 # input generator
-data = util.load("data/points_%d_%d.pkl" % (PERIOD_SIZE, GRID_SIZE))
+data = util.load(config['points'])
 epoch_size = len(data) - MEMORY
 def generate_input():
     points = []
@@ -112,9 +112,9 @@ if not config['autonomous']:
 else:
     n = 100
 log.info("Generating %d examples..." % n)
-points = []
+sets = []
 for i in range(n):    
-    day = generate()
-    # points.append(day)
-# util.save("data/%s_%s_output.pkl" % (MODEL, config['temperature']), points)
-# log.info("--> done")
+    locations = generate()
+    sets.append(locations)
+util.save("data/%s_%s_output.pkl" % (MODEL, config['temperature']), sets)
+log.info("--> done")

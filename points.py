@@ -24,7 +24,7 @@ RATIO = (MAX_X - MIN_X) / (MAX_Y - MIN_Y)
 location = {'$geoWithin': {'$geometry': {'type': "Polygon", 'coordinates': [[ [LON_1, LAT_1], [LON_2, LAT_1], [LON_2, LAT_2], [LON_1, LAT_2], [LON_1, LAT_1] ]]}}}
 
 try:
-    locations = util.load("data/locations_%d_%d.pkl" % (PERIOD_SIZE, GRID_SIZE))
+    locations = util.load(config['locations'])
     LOCATIONS = len(locations)
 except FileNotFoundError as e:
     log.warning(e)
@@ -240,5 +240,5 @@ def main(user_ids, draw=False):
 
 
 if __name__ == "__main__":
-    users = util.load("data/user_ids.pkl")
+    users = util.load(config['users'])
     main(users, False)
