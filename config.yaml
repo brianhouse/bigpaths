@@ -20,9 +20,11 @@ bounds:
 period_size: 10
 grid_size: 7
 
+epochs: 100
+batch_size: 64
 temperature: 0.01
 memory: 32
-
-epochs: 100
 checkpoints: True
+
 autonomous: False
+

@@ -42,6 +42,7 @@ log.info("--> done")
 
 
 # generate inputs
+### rewrite as a generator and use model.fit_generator(data_generator, steps_per_epoch, epochs).
 def generate_input():
     log.info("Generating input sequences...")
     points = util.load("data/points_%d_%d.pkl" % (PERIOD_SIZE, GRID_SIZE))

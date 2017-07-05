@@ -8,7 +8,8 @@ from points import *
 
 # days = util.load("data/1497313211_10_7_house_0.25_output.pkl")
 # days = util.load("data/1498344519_10_7_ct-30-0.9313_0.25_output.pkl")
-days = util.load("data/1498344519_10_7_ct-30-0.9313_0.01_output.pkl")
+# days = util.load("data/1498344519_10_7_ct-30-0.9313_0.01_output.pkl")
+days = util.load("data/1498344519_10_7_ct-30-0.9313_0.95_output.pkl")
 index = random.choice(range(len(days)))
 
 print("INDEX", index)
