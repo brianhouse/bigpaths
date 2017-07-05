@@ -62,21 +62,16 @@ log.info("--> done")
 def generate_input():
     log.info("Generating input sequences...")
     points = util.load(config['points'])
-    cells = []
-    for point in points:
-        cells.append(point.location)
-        cells.append(LOCATIONS + point.duration)
+    cells = [point.location for point in points]
     inputs = []
     outputs = []
-    period_refs = []
     for i in range(0, len(cells[:]) - MEMORY):
         inputs.append(cells[i:i + MEMORY])
         outputs.append(cells[i + MEMORY])
-        period_refs.append(points[(i + MEMORY)//2].period)    # the period of the target, which we'll use to reconstruct the point when generating
     cells = None
     log.info("--> %d points into %s sequences" % (len(points), len(inputs)))    
     log.info("Making categorical inputs (%s memory required)..." % strings.format_size(len(inputs) * MEMORY * CATEGORIES))
-    input_length = (len(inputs) // BATCH_SIZE) * BATCH_SIZE # we need inputs to be a multiple of batch_size so we dont train on multiple users in the same batch
+    input_length = (len(inputs) // config['batch_size']) * config['batch_size'] # we need inputs to be a multiple of batch_size so we dont train on multiple users in the same batch
     X = np.zeros((input_length, MEMORY, CATEGORIES), dtype=np.bool)
     y = np.zeros((input_length, CATEGORIES), dtype=np.bool)
     last_percent = 0
@@ -96,8 +91,8 @@ def generate_input():
         y[o][output] = 1
     log.info("--> %d input vectors" % len(X))
     log.info("--> shape: %s" % (X[0].shape,))
-    return X, y, period_refs
-X, y, period_refs = generate_input()
+    return X, y
+X, y = generate_input()
 
 
 # train
