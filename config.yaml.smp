@@ -23,7 +23,6 @@ location_size: 7
 epochs: 100
 batch_size: 64
 temperature: 0.01
-memory: 32
 checkpoints: True
 
 autonomous: False

@@ -125,16 +125,16 @@ else:
 
 # generate outputs
 def generate():
-    locations = []
+    day = []
     index = random.choice(range(len(X)))
     x = X[index]
-    for i in range(MEMORY):
+    for i in range(PERIODS):
         distribution = model.predict(np.array([x[-MEMORY:]]), verbose=0, batch_size=1)[0]
         y = sample(distribution, config['temperature'])
         x = np.append(x, to_categorical(y, CATEGORIES), axis=0)
-        locations.append(y)
-    log.debug(locations)
-    return locations
+        day.append(y)
+    log.debug(day)
+    return day
 
 def sample(distribution, temperature): # thx gene
     a = np.log(distribution) / temperature
@@ -148,9 +148,9 @@ if not config['autonomous']:
 else:
     n = 100
 log.info("Generating %d examples..." % n)
-sets = []
+days = []
 for i in range(n):    
-    locations = generate()
-    sets.append(locations)
-util.save("data/%s_%s_output.pkl" % (MODEL, config['temperature']), sets)
+    day = generate()
+    days.append(day)
+util.save("data/%s_%s_output.pkl" % (MODEL, config['temperature']), days)
 log.info("--> done")

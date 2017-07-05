@@ -161,5 +161,5 @@ def main(user_ids, draw=False):
 
 if __name__ == "__main__":
     users = util.load(config['users'])
-    # main(users, True)
-    main([1], True)
+    main(users, True)
+    # main([1], True)
