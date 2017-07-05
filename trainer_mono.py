@@ -30,7 +30,7 @@ if MODEL is not None:
 log.info("Creating model...")
 model = Sequential()
 model.add(LSTM(1024, return_sequences=True, input_shape=(MEMORY, CATEGORIES)))   # no dropout, basically trying to overfit
-model.add(LSTM(1024, return_sequences=True))
+# model.add(LSTM(1024, return_sequences=True))
 model.add(LSTM(1024, return_sequences=False))
 model.add(Dense(CATEGORIES, activation="softmax"))
 if MODEL is not None:
@@ -43,19 +43,19 @@ log.info("--> done")
 # input generator
 data = util.load(config['points'])
 epoch_size = len(data) - MEMORY
-def generate_input():
+def input_generator():
     points = []
     X = []
     y = []
-    for point in data:
+    for p, point in enumerate(data):
         points.append(point)
         if len(points) < MEMORY + 1:
             continue
-        X.append(to_categorical(points[:-1], CATEGORIES))
-        y.append(to_categorical(points[-1].location, CATEGORIES))
-        points = points[-1:]
+        X.append(to_categorical([point.location for point in points[:-1]], CATEGORIES))
+        y.append(to_categorical(points[-1].location, CATEGORIES)[0])
+        points = points[1:]
         if len(y) == config['batch_size']:
-            yield X, y
+            yield np.array(X), np.array(y)
             X = []
             y = []
 
@@ -76,7 +76,7 @@ if train:
             callbacks = [ModelCheckpoint(filepath="models/%s-{epoch:02d}-{acc:.4f}.hdf5" % MODEL.strip("models/").strip(".hdf5"), verbose=1, save_best_only=True, monitor="acc", mode="max")]
         else:
             callbacks = None
-        model.fit_generator(generate_input, epoch_size, epochs=config['epochs'], callbacks=callbacks)
+        model.fit_generator(input_generator(), epoch_size, epochs=config['epochs'], callbacks=callbacks)
     except KeyboardInterrupt:
         print()
 if config['autonomous']:
