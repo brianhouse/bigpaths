@@ -18,7 +18,7 @@ bounds:
     - 40.538534
 
 period_size: 10
-grid_size: 7
+location_size: 7
 
 epochs: 100
 batch_size: 64
@@ -28,6 +28,6 @@ checkpoints: True
 
 autonomous: False
 
-users: data/user_ids.pkl
+users: data/user_ids_filtered.pkl
 locations: data/locations_10_7.pkl
 points: data/points_10_7.pkl

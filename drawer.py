@@ -6,6 +6,14 @@ from colors import colors
 from points import *
 
 
+def days(days, user_id=None):
+    ctx = drawing.Context(1000, len(days) * 10, relative=True, flip=False, hsv=False, background=(0., 0., 0., 1.))    
+    for d, day in enumerate(days):
+        for period, point in enumerate(day):
+            color = colors[point.location % len(colors)]        
+            ctx.line(period / PERIODS, (d / len(days)) + 5/ctx.height, (period + 1) / PERIODS, (d / len(days)) + 5/ctx.height, stroke=color, thickness=8)
+    ctx.output("images/%s_days.png" % user_id, False)
+
 def map(points, user_id=None):
     log.info("Drawing map for user %s..." % user_id)
     ctx = drawing.Context(3000, int(3000 / RATIO), relative=True, flip=True, hsv=False)
