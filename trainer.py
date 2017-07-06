@@ -120,7 +120,7 @@ if config['autonomous']:
 else:
     k = input("Save? y/[n]: ")
     if k.lower() == "y":
-        model.save(MODEL)
+        model.save("data/%s.hdf5" % MODEL)
 
 
 # generate outputs
