@@ -29,9 +29,9 @@ if MODEL is not None:
 # create model
 log.info("Creating model...")
 model = Sequential()
-model.add(LSTM(1024, return_sequences=True, input_shape=(MEMORY, CATEGORIES)))   # no dropout, basically trying to overfit
+model.add(LSTM(256, return_sequences=True, input_shape=(MEMORY, CATEGORIES)))   # no dropout, basically trying to overfit
 # model.add(LSTM(1024, return_sequences=True))
-model.add(LSTM(1024, return_sequences=False))
+# model.add(LSTM(1024, return_sequences=False))
 model.add(Dense(CATEGORIES, activation="softmax"))
 if MODEL is not None:
     model.load_weights(MODEL)
@@ -116,11 +116,11 @@ if train:
     except KeyboardInterrupt:
         print()
 if config['autonomous']:
-    model.save(MODEL)
+    model.save("models/%s.hdf5" % MODEL)
 else:
     k = input("Save? y/[n]: ")
     if k.lower() == "y":
-        model.save("data/%s.hdf5" % MODEL)
+        model.save("models/%s.hdf5" % MODEL)
 
 
 # generate outputs
