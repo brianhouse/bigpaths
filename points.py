@@ -3,6 +3,7 @@
 import random, datetime, json, math, requests, json
 import numpy as np
 from housepy import geo, config, log, util, timeutil
+from sklearn.cluster import Birch
 from mongo import db
 import drawer
 
@@ -33,6 +34,7 @@ class Point():
         self.y = (y - MIN_Y) / (MAX_Y - MIN_Y)
         self.t = t        
         self.geohash = geo.geohash_encode((self.lon, self.lat), precision=LOCATION_SIZE)
+        self.cluster = None
         self.location = None
         dt = timeutil.t_to_dt(self.t, tz="America/New_York")    # not sure why, honestly.        
         self.period = ((dt.hour * 60) + (dt.minute)) // PERIOD_SIZE
@@ -63,23 +65,24 @@ class Point():
 
 
 
-class GeneratedPoint(Point):
 
-    def __init__(self, location, period, duration):
-        self.location = location
-        self.period = period
-        self.duration = duration
-        self.geohash = geohashes[self.location]
-        self.unhash()
-        x, y = geo.project((self.lon, self.lat))
-        self.x = (x - MIN_X) / (MAX_X - MIN_X)
-        self.y = (y - MIN_Y) / (MAX_Y - MIN_Y)   
-        self.address = None
-        self.display_time = None     
+# class GeneratedPoint(Point):
 
-    def unhash(self):
-        CHARMAP = "0123456789bcdefghjkmnpqrstuvwxyz"    # base32
-        self.lon, self.lat = geo.geohash_decode("%s%s%s" % (self.geohash, CHARMAP[random.randint(0, len(CHARMAP) - 1)], CHARMAP[random.randint(0, len(CHARMAP) - 1)]))                
+#     def __init__(self, location, period, duration):
+#         self.location = location
+#         self.period = period
+#         self.duration = duration
+#         self.geohash = geohashes[self.location]
+#         self.unhash()
+#         x, y = geo.project((self.lon, self.lat))
+#         self.x = (x - MIN_X) / (MAX_X - MIN_X)
+#         self.y = (y - MIN_Y) / (MAX_Y - MIN_Y)   
+#         self.address = None
+#         self.display_time = None     
+
+#     def unhash(self):
+#         CHARMAP = "0123456789bcdefghjkmnpqrstuvwxyz"    # base32
+#         self.lon, self.lat = geo.geohash_decode("%s%s%s" % (self.geohash, CHARMAP[random.randint(0, len(CHARMAP) - 1)], CHARMAP[random.randint(0, len(CHARMAP) - 1)]))                
 
 
 
@@ -100,7 +103,41 @@ def get_geohash_list(points):
     log.info("--> found %d locations" % len(geohashes))       
     return geohashes
 
+def cluster(points):
 
+    log.info("Clustering...")
+
+    # find clusters within ~100ft
+    ct = Birch(n_clusters=None, threshold=0.01)
+    ct.fit(np.array([(point.x, point.y) for point in points]))
+    centroids = ct.subcluster_centers_
+    cluster_labels = ct.subcluster_labels_ # just consecutive
+    labels = ct.labels_
+    log.info("--> %d clusters" % len(centroids))    
+
+    for p, point in enumerate(points):
+        x, y = centroids[labels[p]]
+        x = (x * (MAX_X - MIN_X)) + MIN_X
+        y = (y * (MAX_Y - MIN_Y)) + MIN_Y
+        point.cluster = geo.unproject((x, y))
+        point.geohash = geo.geohash_encode((x, y), precision=LOCATION_SIZE)
+
+    # # get the size of each cluster
+    # cluster_sizes = [np.sum(labels == cluster_label) for cluster_label in cluster_labels]
+
+    # # get the order of clusters by size
+    # cluster_order = [(cluster_label, cluster_size) for (cluster_label, cluster_size) in enumerate(cluster_sizes)]
+    # cluster_order.sort(key=lambda x: x[1], reverse=True)
+    # cluster_order = [c[0] for c in cluster_order]
+    # cluster_order = [cluster_order.index(cluster_label) for cluster_label in cluster_labels]
+
+    # # store clusters
+    # clusters = {}
+    # for c, cluster_label in enumerate(cluster_labels):
+    #     clusters[cluster_label] = cluster_order[c]
+
+    # for p, point in enumerate(points):
+    #     point.cluster = clusters[labels[p]]
 
 
 def main(user_ids, draw=False):
@@ -110,11 +147,6 @@ def main(user_ids, draw=False):
     for (user_id, points) in get_user(user_ids):        
         if points is None or not len(points):
             continue
-
-        # generate location list
-        geohashes = get_geohash_list(points)     
-        for point in points:
-            point.location = geohashes.index(point.geohash)     
 
         # distribute points to all periods
         days = []
@@ -137,16 +169,27 @@ def main(user_ids, draw=False):
             if p == len(points):
                 break
             days.append(day)
+
+        # toss points that were too quick
+        points = [point for day in days for point in day]
+
+        # cluster the rest
+        cluster(points)
+
+        geohashes = get_geohash_list(points)     
+        for point in points:
+            point.location = geohashes.index(point.geohash)     
+
+        # output
+        for day in days:
             output = " ".join([str(point.location) for point in day])
             print(output)
             print()
-
-        if draw:
-            drawer.days(days, user_id)
+        # if draw:
+        #     drawer.days(days, user_id)
 
         log.info("--> total days for user %s: %d" % (user_id, len(days)))
         data += [point for day in days for point in day]
-
 
     # regenerate location labels globally
     geohashes = get_geohash_list(data)
@@ -154,6 +197,9 @@ def main(user_ids, draw=False):
     log.info("Labeling...")
     for point in data:
         point.location = geohashes.index(point.geohash)         
+
+    drawer.map(data, 2)
+    drawer.days(days, 2)
 
     util.save("data/points_%d_%d.pkl" % (PERIOD_SIZE, LOCATION_SIZE), data)
     log.info("--> done")

@@ -7,21 +7,22 @@ from points import *
 
 
 def days(days, user_id=None):
-    ctx = drawing.Context(1000, len(days) * 10, relative=True, flip=False, hsv=False, background=(0., 0., 0., 1.))    
+    ctx = drawing.Context(1000, len(days) * 10, relative=True, flip=False, hsv=True, background=(0., 0., 0., 1.))    
     for d, day in enumerate(days):
         for period, point in enumerate(day):
-            color = colors[point.location % len(colors)]        
+            # color = colors[point.location % len(colors)]   
+            color = point.location / 100, 1., 1., 1.     
             ctx.line(period / PERIODS, (d / len(days)) + 5/ctx.height, (period + 1) / PERIODS, (d / len(days)) + 5/ctx.height, stroke=color, thickness=8)
-    ctx.output("images/%s_days.png" % user_id, False)
+    ctx.output("images/%s_days.png" % user_id, True)
 
 def map(points, user_id=None):
     log.info("Drawing map for user %s..." % user_id)
-    ctx = drawing.Context(3000, int(3000 / RATIO), relative=True, flip=True, hsv=False)
+    ctx = drawing.Context(3000, int(3000 / RATIO), relative=True, flip=True, hsv=True)
     ctx.image("basemap/basemap.png")
     for point in points:
-        color = colors[point.location % len(colors)]
+        color = point.location / 100, 1., 1., 1.
         ctx.arc(point.x, point.y, 6 / ctx.width, 6 / ctx.height, fill=color, thickness=0.0)
-    ctx.output("images/%d_map.png" % user_id, False)
+    ctx.output("images/%d_map.png" % user_id, True)
     log.info("--> done")
 
 
