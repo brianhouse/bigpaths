@@ -29,7 +29,7 @@ if MODEL is not None:
 # create model
 log.info("Creating model...")
 model = Sequential()
-model.add(LSTM(256, return_sequences=False, stateful=True, shuffle=False, batch_input_shape=(1, MEMORY, CATEGORIES), input_shape=(MEMORY, CATEGORIES)))   # no dropout, basically trying to overfit
+model.add(LSTM(256, return_sequences=False, stateful=True, batch_input_shape=(1, MEMORY, CATEGORIES), input_shape=(MEMORY, CATEGORIES)))   # no dropout, basically trying to overfit
 # model.add(LSTM(1024, return_sequences=True))
 # model.add(LSTM(1024, return_sequences=False))
 model.add(Dense(CATEGORIES, activation="softmax"))
@@ -112,7 +112,7 @@ if train:
         else:
             callbacks = None
         # model.fit_generator(input_generator(), epoch_size, epochs=config['epochs'], callbacks=callbacks)
-        model.fit(X, y, epochs=config['epochs'], batch_size=config['batch_size'], callbacks=callbacks)
+        model.fit(X, y, epochs=config['epochs'], batch_size=config['batch_size'], callbacks=callbacks, shuffle=False)
     except KeyboardInterrupt:
         print()
 if config['autonomous']:
