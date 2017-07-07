@@ -65,7 +65,7 @@ def generate_input():
     cells = [point.location for point in points]
     inputs = []
     outputs = []
-    for i in range(0, len(cells[:]) - MEMORY):
+    for i in range(0, len(cells[:]) - MEMORY, MEMORY):
         inputs.append(cells[i:i + MEMORY])
         outputs.append(cells[i + MEMORY])
     cells = None
