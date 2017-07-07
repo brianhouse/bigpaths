@@ -29,7 +29,7 @@ if MODEL is not None:
 # create model
 log.info("Creating model...")
 model = Sequential()
-model.add(LSTM(256, return_sequences=False, input_shape=(MEMORY, CATEGORIES)))   # no dropout, basically trying to overfit
+model.add(LSTM(256, return_sequences=False, stateful=True, input_shape=(MEMORY, CATEGORIES)))   # no dropout, basically trying to overfit
 # model.add(LSTM(1024, return_sequences=True))
 # model.add(LSTM(1024, return_sequences=False))
 model.add(Dense(CATEGORIES, activation="softmax"))
