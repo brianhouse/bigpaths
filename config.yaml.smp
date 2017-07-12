@@ -19,7 +19,6 @@ bounds:
     - -73.699264
     - 40.538534
 
-corpus: wonderland.txt
 sequence_length: 20
 epochs: 100
 batch_size: 64

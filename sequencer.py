@@ -5,9 +5,13 @@ import numpy as np
 from housepy import config, log, util
 
 
-slug = config['corpus'].split('_')[0].split('.')[0]
+if len(sys.argv) != 2:
+    print("[corpus]")
+    exit()
+path = sys.argv[1]
+slug = path.split('_')[0].split('.')[0]
 log.info("Loading corpus %s..." % slug)
-corpus = open("data/%s" % config['corpus']).read().lower()
+corpus = open("data/%s" % path).read().lower()
 characters = list(set(corpus))
 log.info("--> %d unique characters" % len(characters))
 

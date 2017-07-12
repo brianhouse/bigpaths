@@ -9,12 +9,14 @@ from keras.layers.core import Dense, Activation, Dropout
 from keras.callbacks import ModelCheckpoint
 from keras.utils import to_categorical
 
-PATH = "1499874653_train_144.pkl"
-PATH = "wonderland_train_20.pkl"
-MODEL = None
 
-slug = PATH.split('_')[0].split('.')[0].replace("_train", "")
-log.info("Loading training data from %s..." % PATH)
+if len(sys.argv) < 2:
+    print("[train] [model]")
+    exit()
+path = sys.argv[1]
+model_path = sys.argv[2] if len(sys.argv > 2) else None
+slug = path.split('_')[0].split('.')[0].replace("_train", "")
+log.info("Loading training data from %s..." % path)
 X, y, characters, (character_to_label, label_to_character) = util.load("data/%s" % PATH)
 sequence_length = len(X[0])
 log.info("--> loaded")
@@ -32,9 +34,9 @@ model.summary()
 log.info("--> ready")
 
 
-if MODEL is not None:
-    log.info("Loading saved weights %s..." % MODEL)
-    model.load_weights(MODEL)
+if model_path is not None:
+    log.info("Loading saved weights %s..." % model_path)
+    model.load_weights(model_path)
     log.info("--> done")
 
 
