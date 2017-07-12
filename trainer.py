@@ -69,7 +69,11 @@ def sample(distribution, temperature): # thx gene
     choices = range(len(distribution))
     return np.random.choice(choices, p=p)
 
-output = generate(sequence_length * 10)
+output = []
+for i in range(10):
+    output.append(generate(sequence_length))
+output = "".join(output)
 path = "data/%s_%s_output.txt" % (slug, config['temperature'])
-util.save(path, output)
+with open(path, 'w') as f:
+    f.write(output)
 log.info("--> saved %s" % path)
