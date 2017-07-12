@@ -19,13 +19,11 @@ model_path = sys.argv[2] if len(sys.argv) > 2 else None
 slug = path.split('.')[0].replace("_input", "")
 log.info("Loading training data from %s..." % path)
 with h5py.File("data/%s" % path) as f:
-    # X = f['X'][:]
-    # y = f['y'][:]
+    X = f['X'][:]
+    y = f['y'][:]
     categories = int(f['categories'][:])
-    print(categories)
     label_to_character = list(f['label_to_character'][:])
     label_to_character = [ch.decode() for ch in label_to_character]
-    print(label_to_character)
 sequence_length = len(X[0])
 log.info("--> loaded")
 
