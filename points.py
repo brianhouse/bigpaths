@@ -111,12 +111,12 @@ def main(user_ids, period_size, location_size, draw=False):
     # flatten into text
     output = ".".join([";".join(day) for day in all_days])
 
-    with open("data/%d_train_%d_%d.txt" % (t, period_size, location_size), 'w') as f:
+    with open("data/%d_corpus_%d_%d_%d.txt" % (t, period_size, location_size, len(user_ids)), 'w') as f:
         f.write(output)
     log.info("--> done")
 
 
 if __name__ == "__main__":
-    users = util.load("data/user_ids_filtered.pkl")
-    main(users, 20, 6, False)
-    # main([1], 20, 6, False)
+    user_ids = util.load("data/user_ids_filtered.pkl")
+    main(user_ids, 20, 6, False)
+    # main([1], 20, 6, True)
