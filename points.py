@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import random, datetime, json, math, requests, json
+import random, datetime
 import numpy as np
 from housepy import geo, config, log, util, timeutil
 from sklearn.cluster import Birch

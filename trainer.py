@@ -15,7 +15,7 @@ if len(sys.argv) < 2:
     exit()
 path = sys.argv[1]
 model_path = sys.argv[2] if len(sys.argv) > 2 else None
-slug = path.split('_')[0].split('.')[0].replace("_train", "")
+slug = path.split('.')[0].replace("_train", "")
 log.info("Loading training data from %s..." % path)
 X, y, characters, (character_to_label, label_to_character) = util.load("data/%s" % path)
 sequence_length = len(X[0])
@@ -69,4 +69,5 @@ def sample(distribution, temperature): # thx gene
     choices = range(len(distribution))
     return np.random.choice(choices, p=p)
 
-print(generate(sequence_length * 10))
+output = generate(sequence_length * 100)
+util.save("data/%s_%s_output.txt" % (slug, config['temperature']), output)

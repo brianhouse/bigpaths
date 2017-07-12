@@ -19,7 +19,7 @@ bounds:
     - -73.699264
     - 40.538534
 
-sequence_length: 20
+sequence_length: 144
 epochs: 100
 batch_size: 64
-temperature: 0.5
+temperature: 0.2
