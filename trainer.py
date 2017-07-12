@@ -61,7 +61,7 @@ def generate(n):
         y = sample(distribution, config['temperature'])
         x = np.append(x, to_categorical(y, len(characters)), axis=0)
         result.append(label_to_character[y])
-    return result
+    return "".join(result)
 
 def sample(distribution, temperature): # thx gene
     a = np.log(distribution) / temperature
