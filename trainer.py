@@ -17,7 +17,7 @@ path = sys.argv[1]
 model_path = sys.argv[2] if len(sys.argv) > 2 else None
 slug = path.split('_')[0].split('.')[0].replace("_train", "")
 log.info("Loading training data from %s..." % path)
-X, y, characters, (character_to_label, label_to_character) = util.load("data/%s" % PATH)
+X, y, characters, (character_to_label, label_to_character) = util.load("data/%s" % path)
 sequence_length = len(X[0])
 log.info("--> loaded")
 
