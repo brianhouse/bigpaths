@@ -9,7 +9,6 @@ from keras.layers.recurrent import LSTM
 from keras.layers.core import Dense, Activation
 from keras.utils import to_categorical
 from keras.callbacks import ModelCheckpoint
-from points import *
 
 
 # assign constants

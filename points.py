@@ -106,13 +106,17 @@ def main(user_ids, period_size, location_size, draw=False):
 
     t = timeutil.timestamp()
     X_train = np.array(all_days)
-    drawer.days(X_train[:1000], t)  # cairo has limits
+    # drawer.days(X_train[:1000], t)  # cairo has limits
 
-    util.save("data/%d_train_%d_%d.pkl" % (t, period_size, location_size), X_train)
+    # flatten into text
+    output = ".".join([";".join(day) for day in all_days])
+
+    with open("data/%d_train_%d_%d.txt" % (t, period_size, location_size), 'w') as f:
+        f.write(output)
     log.info("--> done")
 
 
 if __name__ == "__main__":
     users = util.load("data/user_ids_filtered.pkl")
     main(users, 20, 6, False)
-    # main([1], 20, 6, True)
+    # main([1], 20, 6, False)
