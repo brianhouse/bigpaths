@@ -8,7 +8,7 @@ from keras.layers.recurrent import LSTM
 from keras.layers.core import Dense, Activation, Dropout
 from keras.callbacks import ModelCheckpoint
 from keras.utils import to_categorical
-
+from tqdm import tqdm
 
 if len(sys.argv) < 2:
     print("[train] [model]")
@@ -56,7 +56,7 @@ def generate(n):
     result = []
     index = random.choice(range(len(X) - sequence_length))
     x = X[index]
-    for i in range(n):
+    for i in tqdm(range(n)):
         log.info(i)
         distribution = model.predict(np.array([x[-sequence_length:]]), verbose=0, batch_size=1)[0]
         y = sample(distribution, config['temperature'])
@@ -70,5 +70,5 @@ def sample(distribution, temperature): # thx gene
     choices = range(len(distribution))
     return np.random.choice(choices, p=p)
 
-output = generate(sequence_length * 100)
+output = generate(sequence_length * 10)
 util.save("data/%s_%s_output.txt" % (slug, config['temperature']), output)
