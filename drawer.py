@@ -12,7 +12,7 @@ def days(days, prefix=None, open_file=True):
     locations.sort()
     for d, day in enumerate(days):
         for period, location in enumerate(day):
-            color = locations.index(location) / 100, 1., 1., 1.                 
+            color = locations.index(location) / len(locations), 1., 1., 1.                 
             ctx.line(period / len(day), (d / len(days)) + 5/ctx.height, (period + 1) / len(day), (d / len(days)) + 5/ctx.height, stroke=color, thickness=8)
     ctx.output("images/%s_days.png" % prefix, open_file)
     log.info("--> done")
@@ -25,7 +25,7 @@ def map(days, prefix=None, open_file=True):
     locations.sort()    
     for d, day in enumerate(days):
         for period, location in enumerate(day):
-            color = locations.index(location) / 100, 1., 1., 1.
+            color = locations.index(location) / len(locations), 1., 1., 1.
             lonlat = geo.geohash_decode("dr" + location)
             x, y = geo.project(lonlat)
             x = (x - MIN_X) / (MAX_X - MIN_X)
