@@ -10,7 +10,9 @@ from keras.callbacks import ModelCheckpoint
 
 PATH = "1499874653_train_144.pkl"
 PATH = "wonderland_train_20.pkl"
+MODEL = None
 
+slug = PATH.split('_')[0].split('.')[0].replace("_train", "")
 log.info("Loading training data from %s..." % PATH)
 X, y, characters, (character_to_label, label_to_character) = util.load("data/%s" % PATH)
 log.info("--> loaded")
@@ -28,11 +30,17 @@ model.summary()
 log.info("--> ready")
 
 
-# log.info("Training...")
-# try:
-#     callbacks = [ModelCheckpoint(filepath="models/%s-{epoch:02d}-{loss:.4f}.hdf5" % slug, verbose=1, save_best_only=True, monitor="loss", mode="min")]
-#     model.fit(X, y, epochs=config['epochs'], batch_size=config['batch_size'], callbacks=callbacks)
-# except KeyboardInterrupt:
-#     print()
-# log.info("--> done")
+if MODEL is not None:
+    log.info("Loading saved weights %s..." % MODEL)
+    model.load_weights(MODEL)
+    log.info("--> done")
+
+
+log.info("Training...")
+try:
+    callbacks = [ModelCheckpoint(filepath="models/%s-{epoch:02d}-{loss:.4f}.hdf5" % slug, verbose=1, save_best_only=True, monitor="loss", mode="min")]
+    model.fit(X, y, epochs=config['epochs'], batch_size=config['batch_size'], callbacks=callbacks)
+except KeyboardInterrupt:
+    print()
+log.info("--> done")
 
