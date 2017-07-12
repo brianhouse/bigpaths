@@ -36,7 +36,7 @@ log.info("--> ready")
 
 if model_path is not None:
     log.info("Loading saved weights %s..." % model_path)
-    model.load_weights(model_path)
+    model.load_weights("models/%s" % model_path)
     log.info("--> done")
 
 
