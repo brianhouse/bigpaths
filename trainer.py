@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-import sys, random
+import sys, random, h5py
 import numpy as np
-from housepy import config, log, util
+from housepy import config, log
 from keras.models import Sequential
 from keras.layers.recurrent import LSTM
 from keras.layers.core import Dense, Activation, Dropout
@@ -10,14 +10,22 @@ from keras.callbacks import ModelCheckpoint
 from keras.utils import to_categorical
 from tqdm import tqdm
 
+
 if len(sys.argv) < 2:
-    print("[train] [model]")
+    print("[input] [model]")
     exit()
 path = sys.argv[1]
 model_path = sys.argv[2] if len(sys.argv) > 2 else None
-slug = path.split('.')[0].replace("_train", "")
+slug = path.split('.')[0].replace("_input", "")
 log.info("Loading training data from %s..." % path)
-X, y, characters, (character_to_label, label_to_character) = util.load("data/%s" % path)
+with h5py.File("data/%s" % path) as f:
+    # X = f['X'][:]
+    # y = f['y'][:]
+    categories = int(f['categories'][:])
+    print(categories)
+    label_to_character = list(f['label_to_character'][:])
+    label_to_character = [ch.decode() for ch in label_to_character]
+    print(label_to_character)
 sequence_length = len(X[0])
 log.info("--> loaded")
 
@@ -28,7 +36,7 @@ model.add(LSTM(512, return_sequences=True, input_shape=X[0].shape))
 model.add(Dropout(0.2))
 model.add(LSTM(512, return_sequences=False))
 model.add(Dropout(0.2))
-model.add(Dense(len(characters), activation=('softmax')))
+model.add(Dense(categories, activation=('softmax')))
 model.compile(loss='categorical_crossentropy', optimizer='rmsprop')
 model.summary()
 log.info("--> ready")
@@ -59,7 +67,7 @@ def generate(n):
     for i in tqdm(range(n)):
         distribution = model.predict(np.array([x[-sequence_length:]]), verbose=0, batch_size=1)[0]
         y = sample(distribution, config['temperature'])
-        x = np.append(x, to_categorical(y, len(characters)), axis=0)
+        x = np.append(x, to_categorical(y, categories), axis=0)
         result.append(label_to_character[y])
     return "".join(result)
 
@@ -73,7 +81,7 @@ output = []
 for i in range(10):
     output.append(generate(sequence_length))
 output = "".join(output)
-path = "data/%s_%s_output.txt" % (slug, config['temperature'])
+path = "data/%s_%s.txt" % (slug.replace("_", "_output"), config['temperature'])
 with open(path, 'w') as f:
     f.write(output)
 log.info("--> saved %s" % path)
