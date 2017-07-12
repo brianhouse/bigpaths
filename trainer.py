@@ -34,19 +34,20 @@ model.summary()
 log.info("--> ready")
 
 
+if model_path is None:
+    log.info("Training...")
+    try:
+        callbacks = [ModelCheckpoint(filepath="models/%s-{epoch:02d}-{loss:.4f}.hdf5" % slug, verbose=1, save_best_only=True, monitor="loss", mode="min")]
+        model.fit(X, y, epochs=config['epochs'], batch_size=config['batch_size'], callbacks=callbacks)
+    except KeyboardInterrupt:
+        print()
+    log.info("--> done")
+
+
 if model_path is not None:
     log.info("Loading saved weights %s..." % model_path)
     model.load_weights("models/%s" % model_path)
     log.info("--> done")
-
-
-log.info("Training...")
-try:
-    callbacks = [ModelCheckpoint(filepath="models/%s-{epoch:02d}-{loss:.4f}.hdf5" % slug, verbose=1, save_best_only=True, monitor="loss", mode="min")]
-    model.fit(X, y, epochs=config['epochs'], batch_size=config['batch_size'], callbacks=callbacks)
-except KeyboardInterrupt:
-    print()
-log.info("--> done")
 
 
 log.info("Generating...")
