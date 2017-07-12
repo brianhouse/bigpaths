@@ -57,6 +57,7 @@ def generate(n):
     index = random.choice(range(len(X) - sequence_length))
     x = X[index]
     for i in range(n):
+        log.info(i)
         distribution = model.predict(np.array([x[-sequence_length:]]), verbose=0, batch_size=1)[0]
         y = sample(distribution, config['temperature'])
         x = np.append(x, to_categorical(y, len(characters)), axis=0)
