@@ -70,4 +70,6 @@ def sample(distribution, temperature): # thx gene
     return np.random.choice(choices, p=p)
 
 output = generate(sequence_length * 10)
-util.save("data/%s_%s_output.txt" % (slug, config['temperature']), output)
+path = "data/%s_%s_output.txt" % (slug, config['temperature'])
+util.save(path, output)
+log.info("--> saved %s" % path)
