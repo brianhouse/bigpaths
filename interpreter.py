@@ -17,9 +17,10 @@ with open("data/%s" % path) as f:
     data = f.read()
 
 days = data.split(".")
-for d, day in enumerate(days):
+d = 0
+while d < len(days):
+    day = days[d]
     day = day.split(";")
-    valid = True
     for l, location in enumerate(day):
         if len(location) != LOCATION_SIZE - 2:
             log.warning("Bad geohash: %s" % location)
@@ -28,13 +29,15 @@ for d, day in enumerate(days):
             else:
                 day[l] = None
     day = [location for location in day if location is not None]
-    # if len(day) != PERIODS:
-    #     log.warning("Bad day length (%d)" % len(day))
-    #     valid = False        
-    if not valid:
+    if len(day) > PERIODS:
+        days[d] = day[:PERIODS]
+        days.insert(d + 1, ";".join(day[PERIODS:]))
+    elif len(day) != PERIODS:
+        log.warning("Bad day length (%d)" % len(day))
         days[d] = None
     else:
         days[d] = day
+    d += 1
 days = [day for day in days if day is not None]
 log.info("--> found %d valid days" % len(days))
 if len(days):

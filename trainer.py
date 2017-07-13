@@ -10,6 +10,8 @@ from keras.callbacks import ModelCheckpoint
 from keras.utils import to_categorical
 from tqdm import tqdm
 
+EPOCHS = 100
+BATCH_SIZE = 64
 
 if len(sys.argv) < 2:
     print("[input] [model]")
@@ -44,7 +46,7 @@ if model_path is None:
     log.info("Training...")
     try:
         callbacks = [ModelCheckpoint(filepath="models/%s-{epoch:02d}-{loss:.4f}.hdf5" % slug, verbose=1, save_best_only=True, monitor="loss", mode="min")]
-        model.fit(X, y, epochs=config['epochs'], batch_size=config['batch_size'], callbacks=callbacks)
+        model.fit(X, y, epochs=EPOCHS, batch_size=64, callbacks=callbacks)
     except KeyboardInterrupt:
         print()
     log.info("--> done")
@@ -58,11 +60,11 @@ if model_path is not None:
 
 log.info("Generating...")
 
-def generate(n):
+def generate():
     result = []
     index = random.choice(range(len(X) - sequence_length))
     x = X[index]
-    for i in tqdm(range(n)):
+    for i in tqdm(range(sequence_length)):
         distribution = model.predict(np.array([x[-sequence_length:]]), verbose=0, batch_size=1)[0]
         y = sample(distribution, config['temperature'])
         x = np.append(x, to_categorical(y, categories), axis=0)
@@ -77,9 +79,9 @@ def sample(distribution, temperature): # thx gene
 
 output = []
 for i in range(10):
-    output.append(generate(sequence_length))
-output = "".join(output)
-path = "data/%s_%s.txt" % (slug.replace("_", "_output"), config['temperature'])
+    output.append(generate())
+output = ".".join(output)
+path = "data/%s_%s.txt" % (slug.replace("_", "_output_"), config['temperature'])
 with open(path, 'w') as f:
     f.write(output)
 log.info("--> saved %s" % path)
