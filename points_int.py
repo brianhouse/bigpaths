@@ -2,10 +2,10 @@
 
 import random, datetime
 import numpy as np
-from housepy import geo, config, log, util, timeutil
+from housepy import geo, config, log, util, timeutil, util
 from sklearn.cluster import Birch
 from mongo import db
-import drawer
+import drawer_int as drawer
 
 
 LON_1, LAT_1 = config['bounds']['NW']
@@ -36,6 +36,7 @@ class Point():
         self.y = (y - MIN_Y) / (MAX_Y - MIN_Y)        
         dt = timeutil.t_to_dt(t, tz="America/New_York")
         self.period = ((dt.hour * 60) + (dt.minute)) // period_size
+        self.geohash = None
         self.location = None
 
 
@@ -62,7 +63,7 @@ def main(user_ids, period_size, location_size, draw=False):
             lon, lat = geo.unproject((x, y))
             point.lon = lon
             point.lat = lat
-            point.location = geo.geohash_encode((point.lon, point.lat), precision=location_size).lstrip('dr')
+            point.geohash = geo.geohash_encode((point.lon, point.lat), precision=location_size)
 
         # distribute points to all periods, toss transients (temporal low-pass)
         periods = int(1440 / period_size)
@@ -87,35 +88,39 @@ def main(user_ids, period_size, location_size, draw=False):
                 break
             days.append(day)
 
-        # flatten to location
+        # flatten to geohash
         for day in days:
             for p, point in enumerate(day):
-                day[p] = point.location
-
-        # monitor output
-        for day in days:
-            output = " ".join([location for period, location in enumerate(day)])
-            print(output)
-            print()
-        if draw:
-            drawer.days(days, "user_%d" % user_id)
-            drawer.map(days, "user_%d" % user_id)
+                day[p] = point.geohash
 
         log.info("--> total days for user %s: %d" % (user_id, len(days)))
         all_days += days
 
     t = timeutil.timestamp()
-    # drawer.days(all_days[:1000], t)  # cairo has limits
+    path = "data/%d_corpus_%d_%d_%d_i" % (t, period_size, location_size, len(user_ids))
 
-    # flatten into text
-    output = ".".join([";".join(day) for day in all_days])
+    geohashes = list(set([geohash for day in days for geohash in day]))
+    geohashes.sort()
+    util.save("%s_geohashes.pkl" % path, geohashes)
 
-    with open("data/%d_corpus_%d_%d_%d.txt" % (t, period_size, location_size, len(user_ids)), 'w') as f:
+    # convert to location label
+    for day in all_days:
+        for g, geohash in enumerate(day):
+            day[g] = geohashes.index(geohash)
+
+    if draw:
+        # drawer.days(days)
+        drawer.map(days, geohashes)
+
+    # flatten to text
+    output = ".".join([str(location) for day in all_days for location in day])
+
+    with open("%s.txt" % path, 'w') as f:
         f.write(output)
     log.info("--> done")
 
 
 if __name__ == "__main__":
-    user_ids = util.load("data/user_ids_filtered.pkl")
-    main(user_ids, 20, 6, False)
-    # main([1], 20, 6, True)
+    # user_ids = util.load("data/user_ids_filtered.pkl")
+    # main(user_ids, 20, 6, False)
+    main([1], 20, 6, True)

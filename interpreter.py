@@ -29,10 +29,11 @@ while d < len(days):
             else:
                 day[l] = None
     day = [location for location in day if location is not None]
-    if len(day) > PERIODS:
-        days[d] = day[:PERIODS]
-        days.insert(d + 1, ";".join(day[PERIODS:]))
-    elif len(day) != PERIODS:
+    # if len(day) > PERIODS:
+    #     days[d] = day[:PERIODS]
+    #     days.insert(d + 1, ";".join(day[PERIODS:]))
+    # elif len(day) != PERIODS:
+    if len(day) != PERIODS:    
         log.warning("Bad day length (%d)" % len(day))
         days[d] = None
     else:
