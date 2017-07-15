@@ -9,7 +9,7 @@ if len(sys.argv) != 2:
 
 slug = sys.argv[1].split('/')[-1].split('.')[0]
 
-log.info("--> using checkpoint %s" % slug)
+log.info("--> using model %s" % slug)
 
 root = os.path.abspath(os.path.dirname(__file__))
 
@@ -23,7 +23,7 @@ p = subprocess.run(["th", "sample.lua",
                 cwd=config['torch-rnn'],
                 stdout=subprocess.PIPE
                 )
-output = p.stdout.read()
+output = str(p.stdout)
 path = os.path.join(root, "data", "%s.txt" % slug.replace("model", "output"))
 with open(path, 'w') as f:
     r.write(output)
