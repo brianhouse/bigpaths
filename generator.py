@@ -26,5 +26,5 @@ p = subprocess.run(["th", "sample.lua",
 output = str(p.stdout)
 path = os.path.join(root, "data", "%s.txt" % slug.replace("model", "output"))
 with open(path, 'w') as f:
-    r.write(output)
+    f.write(output)
 log.info("--> done")
