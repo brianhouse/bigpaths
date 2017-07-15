@@ -5,8 +5,8 @@ import numpy as np
 from housepy import geo, config, log, util, timeutil
 import drawer
 
-PERIODS = 72
-LOCATION_SIZE = 6
+PERIODS = 144
+LOCATION_SIZE = 7
 
 if len(sys.argv) != 2:
     print("[output]")
