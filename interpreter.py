@@ -17,7 +17,7 @@ log.info("Loading generated output %s..." % path)
 with open("data/%s" % path) as f:
     data = f.read()
 
-days = data.split(";00")
+days = data.split("000")
 d = 0
 while d < len(days):
     day = days[d]
