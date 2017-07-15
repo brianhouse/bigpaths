@@ -6,10 +6,8 @@ mongo:
     port: 27017
     database: bigpaths
 
-# start_date: "2013-01-01"
-# stop_date: "2014-01-01"
-start_date: "2011-08-01"
-stop_date: "2012-08-01"
+start_date: "2012-01-01"
+stop_date: "2017-01-01"
 
 bounds:
   NW:
@@ -19,4 +17,5 @@ bounds:
     - -73.699264
     - 40.538534
 
-temperature: 0.2
+torch-rnn: ../torch-rnn
+gpu: False

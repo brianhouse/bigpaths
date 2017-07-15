@@ -1,87 +1,42 @@
 #!/usr/bin/env python3
 
-import sys, random, h5py
-import numpy as np
+import subprocess, os, sys, glob, shutil
 from housepy import config, log
-from keras.models import Sequential
-from keras.layers.recurrent import LSTM
-from keras.layers.core import Dense, Activation, Dropout
-from keras.callbacks import ModelCheckpoint
-from keras.utils import to_categorical
-from tqdm import tqdm
 
-EPOCHS = 100
-BATCH_SIZE = 64
-
-if len(sys.argv) < 2:
-    print("[input] [model]")
+if len(sys.argv) != 3:
+    print("[corpus] [batch_size]")
     exit()
-path = sys.argv[1]
-model_path = sys.argv[2] if len(sys.argv) > 2 else None
-slug = path.split('.')[0].replace("_input", "")
-log.info("Loading training data from %s..." % path)
-with h5py.File("data/%s" % path) as f:
-    X = f['X'][:]
-    y = f['y'][:]
-    categories = int(f['categories'][:])
-    label_to_character = list(f['label_to_character'][:])
-    label_to_character = [ch.decode() for ch in label_to_character]
-sequence_length = len(X[0])
-log.info("--> loaded")
 
+corpus = sys.argv[1].split('/')[-1].split('.')[0]
+batch_size = sys.argv[2]
 
-log.info("Creating model...")
-model = Sequential()
-model.add(LSTM(512, return_sequences=True, input_shape=X[0].shape))
-model.add(Dropout(0.2))
-model.add(LSTM(512, return_sequences=False))
-model.add(Dropout(0.2))
-model.add(Dense(categories, activation=('softmax')))
-model.compile(loss='categorical_crossentropy', optimizer='rmsprop')
-model.summary()
-log.info("--> ready")
+log.info("--> using corpus %s" % corpus)
 
+root = os.path.abspath(os.path.dirname(__file__))
 
-if model_path is None:
-    log.info("Training...")
-    try:
-        callbacks = [ModelCheckpoint(filepath="models/%s-{epoch:02d}-{loss:.4f}.hdf5" % slug, verbose=1, save_best_only=True, monitor="loss", mode="min")]
-        model.fit(X, y, epochs=EPOCHS, batch_size=64, callbacks=callbacks)
-    except KeyboardInterrupt:
-        print()
-    log.info("--> done")
+log.info("Pre-processing...")
+subprocess.run(["python", "scripts/preprocess.py", 
+                "--input_txt", os.path.join(root, "data", "%s.txt" % corpus),
+                "--output_h5", os.path.join(root, "data", "%s.h5" % corpus),
+                "--output_json", os.path.join(root, "data", "%s.json" % corpus),
+                ], cwd=config['torch-rnn'])
+log.info("--> done")
 
+log.info("Training...")
+subprocess.run(["time", "th", "train.lua",
+                "-input_h5", os.path.join(root, "data", "%s.h5" % corpus),
+                "-input_json", os.path.join(root, "data", "%s.json" % corpus),
+                "-batch_size", batch_size,
+                "-seq_length", "50", 
+                "-max_epochs", "100",
+                "-gpu", "0" if config['gpu'] else "-1"
+                ], cwd=config['torch-rnn'])
+log.info("--> done")
 
-if model_path is not None:
-    log.info("Loading saved weights %s..." % model_path)
-    model.load_weights("models/%s" % model_path)
-    log.info("--> done")
+log.info("Copying model...")
+path = os.path.join(config['torch-rnn'], "cv")
+newest_checkpoint = max(glob.iglob(os.path.join(path, "*.t7")), key=os.path.getctime)
+slug = corpus.split("_")[0]
+shutil.copy(newest_checkpoint, os.path.join(root, "data", "%s_model_b%s.t7" % (slug, batch_size)))
+log.info("--> done")
 
-
-log.info("Generating...")
-
-def generate():
-    result = []
-    index = random.choice(range(len(X) - sequence_length))
-    x = X[index]
-    for i in tqdm(range(sequence_length)):
-        distribution = model.predict(np.array([x[-sequence_length:]]), verbose=0, batch_size=1)[0]
-        y = sample(distribution, config['temperature'])
-        x = np.append(x, to_categorical(y, categories), axis=0)
-        result.append(label_to_character[y])
-    return "".join(result)
-
-def sample(distribution, temperature): # thx gene
-    a = np.log(distribution) / temperature
-    p = np.exp(a) / np.sum(np.exp(a))
-    choices = range(len(distribution))
-    return np.random.choice(choices, p=p)
-
-output = []
-for i in range(10):
-    output.append(generate())
-output = ".".join(output)
-path = "data/%s_%s.txt" % (slug.replace("_", "_output_"), config['temperature'])
-with open(path, 'w') as f:
-    f.write(output)
-log.info("--> saved %s" % path)

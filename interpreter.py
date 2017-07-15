@@ -5,7 +5,7 @@ import numpy as np
 from housepy import geo, config, log, util, timeutil
 import drawer
 
-PERIODS = 72
+PERIODS = 73
 LOCATION_SIZE = 6
 
 if len(sys.argv) != 2:
@@ -16,18 +16,21 @@ log.info("Loading generated output %s..." % path)
 with open("data/%s" % path) as f:
     data = f.read()
 
-days = data.split(".")
+days = data.split("00")
 d = 0
 while d < len(days):
     day = days[d]
     day = day.split(";")
     for l, location in enumerate(day):
+        location = location.split(":")[-1]
         if len(location) != LOCATION_SIZE - 2:
             log.warning("Bad geohash: %s" % location)
             if l > 0:
                 day[l] = day[l-1]
             else:
                 day[l] = None
+        else:
+            day[l] = location
     day = [location for location in day if location is not None]
     # if len(day) > PERIODS:
     #     days[d] = day[:PERIODS]

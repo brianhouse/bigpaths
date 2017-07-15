@@ -7,10 +7,11 @@ models/*
 housepy
 papers
 dev
-THOUGHTS.md
+NOTES.md
 model.png
 *.pem
 logs
 output
 *.pxm
 config.yaml
+refs

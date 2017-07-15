@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import random, datetime
+import random, datetime, sys
 import numpy as np
 from housepy import geo, config, log, util, timeutil
 from sklearn.cluster import Birch
@@ -108,14 +108,27 @@ def main(user_ids, period_size, location_size, draw=False):
     # drawer.days(all_days[:1000], t)  # cairo has limits
 
     # flatten into text
-    output = ".".join([";".join(day) for day in all_days])
+    for day in all_days:
+        for period, location in enumerate(day):
+            day[period] = "%s:%s;" % (str(period).zfill(2), location)
+    output = "".join(["".join(day) for day in all_days])
 
-    with open("data/%d_corpus_%d_%d_%d.txt" % (t, period_size, location_size, len(user_ids)), 'w') as f:
+    with open("data/%d_corpus_%d_%d_%s.txt" % (t, period_size, location_size, "all" if len(user_ids) > 1 else "1"), 'w') as f:
         f.write(output)
     log.info("--> done")
 
 
 if __name__ == "__main__":
     user_ids = util.load("data/user_ids_filtered.pkl")
-    main(user_ids, 20, 6, False)
-    # main([1], 20, 6, True)
+    try:
+        period_size = sys.argv[1]
+        location_size = sys.argv[2]
+        draw = sys.argv[3].lower() == "true"
+        if sys.argv[4] == "1":
+            user_ids = [1]
+            config['start_date'] = config['start_date_1']
+            config['stop_date'] = config['stop_date_1']
+    except IndexError:
+        print("[period_size] [location_size] [draw] [all|1]")
+        exit()    
+    main(user_ids, period_size, location_size, draw)    
