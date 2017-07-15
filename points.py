@@ -98,8 +98,8 @@ def main(user_ids, period_size, location_size, draw=False):
             print(output)
             print()
         if draw:
-            drawer.days(days, "user_%d" % user_id)
-            drawer.map(days, "user_%d" % user_id)
+            drawer.days(days, "user_%d_%d_%d" % (user_id, period_size, location_size))
+            drawer.map(days, "user_%d_%d_%d" % (user_id, period_size, location_size))
 
         log.info("--> total days for user %s: %d" % (user_id, len(days)))
         all_days += days
@@ -110,7 +110,7 @@ def main(user_ids, period_size, location_size, draw=False):
     # flatten into text
     for day in all_days:
         for period, location in enumerate(day):
-            day[period] = "%s:%s;" % (str(period).zfill(2), location)
+            day[period] = "%s:%s;" % (str(period).zfill(3), location)
     output = "".join(["".join(day) for day in all_days])
 
     with open("data/%d_corpus_%d_%d_%s.txt" % (t, period_size, location_size, "all" if len(user_ids) > 1 else "1"), 'w') as f:
@@ -121,8 +121,8 @@ def main(user_ids, period_size, location_size, draw=False):
 if __name__ == "__main__":
     user_ids = util.load("data/user_ids_filtered.pkl")
     try:
-        period_size = sys.argv[1]
-        location_size = sys.argv[2]
+        period_size = int(sys.argv[1])
+        location_size = int(sys.argv[2])
         draw = sys.argv[3].lower() == "true"
         if sys.argv[4] == "1":
             user_ids = [1]
