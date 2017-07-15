@@ -16,8 +16,7 @@ root = os.path.abspath(os.path.dirname(__file__))
 log.info("Generating output...")
 p = subprocess.run(["th", "sample.lua", 
                 "-checkpoint", os.path.join(root, "data", "%s.t7" % slug),
-                # "-length 100000",
-                "-length", "1000",                
+                "-length 100000",
                 "-gpu", "0" if config['gpu'] else "-1"
                 ], 
                 cwd=config['torch-rnn'],
