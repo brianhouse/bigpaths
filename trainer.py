@@ -38,6 +38,6 @@ log.info("Copying model...")
 path = os.path.join(config['torch-rnn'], "cv")
 newest_checkpoint = max(glob.iglob(os.path.join(path, "*.t7")), key=os.path.getctime)
 slug = corpus.split("_")[0]
-shutil.copy(newest_checkpoint, os.path.join(root, "data", "%s_model_b%s.t7" % (slug, batch_size)))
+shutil.copy(newest_checkpoint, os.path.join(root, "data", "%s_model_b%s_s%s.t7" % (slug, batch_size, sequence_length)))
 log.info("--> done")
 
