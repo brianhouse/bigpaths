@@ -29,7 +29,7 @@ subprocess.run(["time", "th", "train.lua",
                 "-input_json", os.path.join(root, "data", "%s.json" % corpus),
                 "-batch_size", batch_size,
                 "-seq_length", sequence_length, 
-                "-max_epochs", "100",
+                "-max_epochs", "50",
                 "-gpu", "0" if config['gpu'] else "-1"
                 ], cwd=config['torch-rnn'])
 log.info("--> done")
