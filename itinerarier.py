@@ -27,8 +27,8 @@ class Point():
             self.geohash = Point.geohashes[geohash]
         else:
             self.geohash = ["dr", geohash]
-            for i in range(9 - len(geohash) - 2): # if we approximated upstream, get it down here to a single building (geohash 9)
-                self.geohash.append(random.choice("0123456789bcdefghjkmnpqrstuvwxyz"))
+            # for i in range(9 - len(geohash) - 2): # if we approximated upstream, get it down here to a single building (geohash 9)
+            #     self.geohash.append(random.choice("0123456789bcdefghjkmnpqrstuvwxyz"))
             self.geohash = str("".join(self.geohash))
             Point.geohashes[geohash] = self.geohash
         self.lon, self.lat = geo.geohash_decode(self.geohash)

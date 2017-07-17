@@ -30,6 +30,7 @@ subprocess.run(["time", "th", "train.lua",
                 "-batch_size", batch_size,
                 "-seq_length", sequence_length, 
                 "-max_epochs", "50",
+                "-checkpoint_every", "10000",
                 "-gpu", "0" if config['gpu'] else "-1"
                 ], cwd=config['torch-rnn'])
 log.info("--> done")

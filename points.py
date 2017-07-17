@@ -48,7 +48,7 @@ def main(user_ids, period_size, location_size, draw=False):
             continue
 
         # cluster the points
-        ct = Birch(n_clusters=None, threshold=0.01)                 # clusters of points within ~100ft are likely the same location
+        ct = Birch(n_clusters=None, threshold=0.001)                 # clusters of points within ~100ft are likely the same location
         ct.fit(np.array([(point.x, point.y) for point in points]))  # need to do this on normalized x,y
         centroids = ct.subcluster_centers_
         labels = ct.labels_
