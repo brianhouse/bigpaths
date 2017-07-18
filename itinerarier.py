@@ -21,22 +21,26 @@ class Point():
     geohashes = {}
     addresses = {}
 
-    def __init__(self, period, geohash):
+    def __init__(self, period, geohash, resolve=True):
         self.period = period
         if geohash in Point.geohashes:
             self.geohash = Point.geohashes[geohash]
         else:
             self.geohash = ["dr", geohash]
-            # for i in range(9 - len(geohash) - 2): # if we approximated upstream, get it down here to a single building (geohash 9)
-            #     self.geohash.append(random.choice("0123456789bcdefghjkmnpqrstuvwxyz"))
+            for i in range(9 - len(geohash[1]) - 2): # rather than assume it's always the center of the geohash, let's add some stochastics
+                self.geohash.append(random.choice("0123456789bcdefghjkmnpqrstuvwxyz"))
             self.geohash = str("".join(self.geohash))
             Point.geohashes[geohash] = self.geohash
         self.lon, self.lat = geo.geohash_decode(self.geohash)
         x, y = geo.project((self.lon, self.lat))
         self.x = (x - MIN_X) / (MAX_X - MIN_X)
         self.y = (y - MIN_Y) / (MAX_Y - MIN_Y) 
+        if resolve:
+            self.resolve()
+
+    def resolve(self):
         self.address = self.degeocode()
-        self.display_time = self.format_time()
+        self.display_time = self.format_time()        
 
     def degeocode(self):
         if self.geohash in Point.addresses:
@@ -83,7 +87,7 @@ def trim(day):
 
     # fast forward to the first point of the next clock day
     end_d = start_d
-    while end_d < len(day) and day[end_d].period < day[end_d+1].period:
+    while end_d < len(day) - 1 and day[end_d].period < day[end_d+1].period:
         end_d += 1
     end_d += 1
     log.debug("clock day ends %d %s" % (end_d, day[end_d].period))
@@ -109,18 +113,21 @@ if __name__ == "__main__":
         data = f.read()
     days = parse(data)
 
-    index = random.choice(range(len(days) - 1))
-    log.info("INDEX: %s" % index)
-    day = days[index] + days[index+1]
-    day = [Point(period % 144, geohash) for (period, geohash) in enumerate(day)]
-    day = collapse(day)
-    for p, point in enumerate(day):
-        log.debug("%d %s %s" % (p, (point.period * 10) / 60, point.address))
-    day = trim(day)
+    for index in range(len(days) - 1):
+        if index < 3:
+            continue
+        # index = random.choice(range(len(days) - 1))
+        log.info("INDEX: %s" % index)
+        day = days[index] + days[index+1] + days[index+2]
+        day = [Point(period % 144, geohash) for (period, geohash) in enumerate(day)]
+        day = collapse(day)
+        for p, point in enumerate(day):
+            log.debug("%d %s %s" % (p, (point.period * 10) / 60, point.address))
+        day = trim(day)
 
-    for p, point in enumerate(day):
-        label = "%d) %s %s%s" % (p+1, "Wake up at" if p == 0 else "%s," % point.display_time, point.address, "" if p != (len(day) - 1) else " ... sleep")
-        log.info(label)
+        for p, point in enumerate(day):
+            label = "%d) %s %s%s" % (p+1, "Wake up at" if p == 0 else "%s," % point.display_time, point.address, "" if p != (len(day) - 1) else " ... sleep")
+            log.info(label)
 
-    drawer.itinerary(day, slug, index)
+        drawer.itinerary(day, slug, index, False)
 

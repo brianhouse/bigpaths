@@ -34,7 +34,7 @@ def map(days, prefix=None, open_file=True):
     ctx.output("images/%s_map.png" % prefix, open_file)
     log.info("--> done")
 
-def itinerary(points, slug, index):
+def itinerary(points, slug, index, open_file=True):
     t = str(timeutil.timestamp(ms=True)).replace(".", "-")
     log.info("Drawing path...")
     ctx = drawing.Context(3000, int(3000 / RATIO), relative=True, flip=True, hsv=True)
@@ -65,5 +65,5 @@ def itinerary(points, slug, index):
     for p, point in enumerate(points):
         label = "%d) %s %s%s" % (p+1, "Wake up at" if p == 0 else "%s," % point.display_time, point.address, "" if p != (len(points) - 1) else " ... sleep")
         ctx.label((200 / ctx.width), 1.0 - ((200 + (40*p)) / ctx.height), label, stroke=(0., 0., 0., 1.), font="Monaco", size=36)
-    ctx.output("images/%s_%s_path.png" % (slug, index))    
+    ctx.output("images/%s_%s_path.png" % (slug, index), open_file)    
     log.info("--> done")
