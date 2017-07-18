@@ -1,0 +1,36 @@
+<!doctype html> 
+<html> 
+<head>     
+    <title>{% block title %}Following Piece{% endblock title %}</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g=" crossorigin="anonymous"></script>    
+    <script type="text/javascript">
+
+        function generateLocation() {
+            console.log("generateLocation");
+            navigator.geolocation.getCurrentPosition(receiveLocation);
+            $('#status').text("Getting your current location...");
+        }
+
+        function receiveLocation(location) {
+            console.log("receiveLocation");
+            generateNext(location.coords.latitude, location.coords.longitude);
+            $('#spinner').show();
+        }
+
+        function generateNext(lat, lon) {
+            $('#status').text("Generating next location...");
+        }
+
+    </script>
+    {% block head %}
+    {% endblock head %}
+</head>
+<body>
+{% block body %}
+{% endblock body %}
+</body>
+</html>
