@@ -1,0 +1,1 @@
+ssh -i server/walking.pem ubuntu@34.231.114.136

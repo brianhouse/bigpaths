@@ -46,11 +46,15 @@ def generate(geohash):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("[model] [geohash]")
-        exit()
+    if 'model' in config:
+        model_path = config['model']            
+    else:    
+        if len(sys.argv) < 2:
+            print("[model] [geohash]")
+            exit()
+        model_path = sys.argv[1]
 
-    slug = sys.argv[1].split('/')[-1].split('.')[0]
+    slug = model_path.split('/')[-1].split('.')[0]
     log.info("--> using model %s" % slug)
     root = os.path.abspath(os.path.dirname(__file__))
 
