@@ -50,7 +50,7 @@ class Point():
             result = requests.get(url).json()
             time.sleep(0.25)
             address = result['results'][0]['formatted_address']
-            address = address.split(", NY ")[0].replace(", New York", "")
+            address = ", ".join(address.split(",")[:2])
             log.debug(address)
             Point.addresses[self.geohash] = address
             return address

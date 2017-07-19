@@ -1,8 +1,8 @@
 var current = "";
 var next = "";
 
-function generateLocation() {
-    console.log("generateLocation");
+function getLocation() {
+    console.log("getLocation");
     navigator.geolocation.getCurrentPosition(receiveLocation);
     $('#status').html("Getting your current location...<span id='spinner'></span>");
 }
@@ -49,5 +49,8 @@ var n = 0;
 function rotate() {
     $('#spinner').text(steps[n % steps.length]);
     n++;
-};
-setInterval(rotate, 100);
+}
+
+$(document).ready(function () {
+    setInterval(rotate, 100);
+});
