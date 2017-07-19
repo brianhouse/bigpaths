@@ -2,67 +2,39 @@
 
 import time, math
 from housepy import drawing, util, log, config, geo, timeutil
-from colors import colors
-from points import *
+from points import RATIO, MIN_X, MAX_X, MIN_Y, MAX_Y
 
 
-def days(days, user_id=None):
+def days(days, prefix=None, open_file=True):
+    log.info("Drawing %d days for %s..." % (len(days), prefix))
     ctx = drawing.Context(1000, len(days) * 10, relative=True, flip=False, hsv=True, background=(0., 0., 0., 1.))    
+    locations = list(set([location for day in days for location in day]))
+    locations.sort()
     for d, day in enumerate(days):
-        for period, point in enumerate(day):
-            # color = colors[point.location % len(colors)]   
-            color = point.location / 100, 1., 1., 1.     
-            ctx.line(period / PERIODS, (d / len(days)) + 5/ctx.height, (period + 1) / PERIODS, (d / len(days)) + 5/ctx.height, stroke=color, thickness=8)
-    ctx.output("images/%s_days.png" % user_id, True)
-
-def map(points, user_id=None):
-    log.info("Drawing map for user %s..." % user_id)
-    ctx = drawing.Context(3000, int(3000 / RATIO), relative=True, flip=True, hsv=True)
-    ctx.image("basemap/basemap.png")
-    for point in points:
-        color = point.location / 100, 1., 1., 1.
-        ctx.arc(point.x, point.y, 6 / ctx.width, 6 / ctx.height, fill=color, thickness=0.0)
-    ctx.output("images/%d_map.png" % user_id, True)
+        for period, location in enumerate(day):
+            color = locations.index(location) / len(locations), 1., 1., 1.                 
+            ctx.line(period / len(day), (d / len(days)) + 5/ctx.height, (period + 1) / len(day), (d / len(days)) + 5/ctx.height, stroke=color, thickness=8)
+    ctx.output("images/%s_days.png" % prefix, open_file)
     log.info("--> done")
 
-
-def strips(points, user_id=None):
-    log.info("Drawing strips for user %s..." % user_id)
-    lines = []
-    q = 0
-    for p, point in enumerate(points):
-        prev = points[p-1] if p > 0 else None
-        if prev is not None and point.period < prev.period:
-            q += 1
-        color = colors[point.location % len(colors)]        
-        lines.append([(point.period/PERIODS) * 1000, q, ((point.period + point.duration)/PERIODS) * 1000, q, color, 8.0])
-        if point.period + point.duration > PERIODS:
-            overflow = (point.period + point.duration) - PERIODS
-            lines.append([0, q+1, (overflow/PERIODS) * 1000, q+1, color, 8.0])
-    ctx = drawing.Context(1000, ((q + 2) * 10) + 2, relative=False, flip=False, hsv=False, background=(0., 0., 0., 1.))
-    for line in lines:
-        line[1] = line[3] = (((line[1] / (q + 2))) * ((q + 2) * 10)) + 6
-        ctx.line(*line)
-    ctx.output("images/%s_strips.png" % user_id, False)
-
-
-def path(points):
-    t = str(timeutil.timestamp(ms=True)).replace(".", "-")
-    log.info("Drawing path...")
+def map(days, prefix=None, open_file=True):
+    log.info("Drawing map for %s..." % prefix)
     ctx = drawing.Context(3000, int(3000 / RATIO), relative=True, flip=True, hsv=True)
     ctx.image("basemap/basemap.png")
-    for p in range(len(points)):
-        x1, y1 = points[p].x, points[p].y
-        color = points[p].period / PERIODS, 1., 1., 1.
-        ctx.arc(x1, y1, 5 / ctx.width, 5 / ctx.height, fill=color, thickness=0.0)
-        if p < len(points) - 1:
-            x2, y2 = points[p+1].x, points[p+1].y        
-            ctx.line(x1, y1, x2, y2, stroke=color, thickness=1.0)
-    ctx.output("images/%s_path.png" % t)    
+    locations = list(set([location for day in days for location in day]))
+    locations.sort()    
+    for d, day in enumerate(days):
+        for period, location in enumerate(day):
+            color = locations.index(location) / len(locations), 1., 1., 1.
+            lonlat = geo.geohash_decode("dr" + location)
+            x, y = geo.project(lonlat)
+            x = (x - MIN_X) / (MAX_X - MIN_X)
+            y = (y - MIN_Y) / (MAX_Y - MIN_Y)                    
+            ctx.arc(x, y, 30 / ctx.width, 30 / ctx.height, fill=color, thickness=0.0)
+    ctx.output("images/%s_map.png" % prefix, open_file)
     log.info("--> done")
 
-
-def path_print(points, index):
+def itinerary(points, slug, index, open_file=True):
     t = str(timeutil.timestamp(ms=True)).replace(".", "-")
     log.info("Drawing path...")
     ctx = drawing.Context(3000, int(3000 / RATIO), relative=True, flip=True, hsv=True)
@@ -93,20 +65,5 @@ def path_print(points, index):
     for p, point in enumerate(points):
         label = "%d) %s %s%s" % (p+1, "Wake up at" if p == 0 else "%s," % point.display_time, point.address, "" if p != (len(points) - 1) else " ... sleep")
         ctx.label((200 / ctx.width), 1.0 - ((200 + (40*p)) / ctx.height), label, stroke=(0., 0., 0., 1.), font="Monaco", size=36)
-    ctx.output("images/%s_path.png" % (index,))    
+    ctx.output("images/%s_%s_path.png" % (slug, index), open_file)    
     log.info("--> done")
-
-
-def gradient_test():
-    ctx = drawing.Context(1000, 250, relative=True, flip=True, hsv=True)
-    for x in range(1440):
-        # c = ((x/288) * 0.35) + .3
-        # c = ((x/288) * 0.35) + .0
-        c = ((x/1440) * 0.65) + .0
-        c = x/1440
-        ctx.line(x / 1440, 0, x / 1440, 1, stroke=(c, 1., 1., 1.), thickness=(ctx.width/1440) + 1)
-    ctx.output("gradient.png")
-
-
-if __name__ == "__main__":
-    gradient_test()

@@ -1,21 +1,12 @@
 #!/usr/bin/env python3
 
-import random, datetime, json, math, requests, json
+import random, datetime, sys
 import numpy as np
 from housepy import geo, config, log, util, timeutil
 from sklearn.cluster import Birch
 from mongo import db
 import drawer
 
-
-PERIOD_SIZE = config['period_size']
-PERIODS = int(1440 / PERIOD_SIZE)
-LOCATION_SIZE = config['location_size']
-try:
-    geohashes = util.load(config['locations'])
-    LOCATIONS = len(geohashes)
-except FileNotFoundError as e:
-    log.warning(e)
 
 LON_1, LAT_1 = config['bounds']['NW']
 LON_2, LAT_2 = config['bounds']['SE']
@@ -24,145 +15,71 @@ MAX_X, MIN_Y = geo.project((LON_2, LAT_2))
 RATIO = (MAX_X - MIN_X) / (MAX_Y - MIN_Y)
 
 
-class Point():
-
-    def __init__(self, lon, lat, t):
-        self.lon = lon
-        self.lat = lat
-        x, y = geo.project((self.lon, self.lat))
-        self.x = (x - MIN_X) / (MAX_X - MIN_X)
-        self.y = (y - MIN_Y) / (MAX_Y - MIN_Y)
-        self.t = t        
-        self.geohash = geo.geohash_encode((self.lon, self.lat), precision=LOCATION_SIZE)
-        self.cluster = None
-        self.location = None
-        dt = timeutil.t_to_dt(self.t, tz="America/New_York")    # not sure why, honestly.        
-        self.period = ((dt.hour * 60) + (dt.minute)) // PERIOD_SIZE
-        self.address = None
-        self.display_time = None
-
-    def get_distance(self, pt):
-        return geo.distance((self.lon, self.lat), (pt.lon, pt.lat))
-
-    def geocode(self):
-        try:
-            url = "https://maps.googleapis.com/maps/api/geocode/json?latlng=%s,%s" % (self.lat, self.lon)
-            result = requests.get(url).json()
-            self.address = result['results'][0]['formatted_address']
-            self.address = self.address.split(", NY ")[0].replace(", New York", "")
-        except Exception as e:
-            log.error(log.exc(e))
-            log.debug(json.dumps(result, indent=4))
-
-    def format_time(self):
-        tod = timeutil.seconds_to_string(self.period * 10 * 60, show_seconds=False, pm=True).replace(" ", "")
-        if not (tod[3] == "0" or tod[3] == "3"):
-            tod = tod[:4] + str(random.randint(0, 9)) + tod[5:]
-        self.display_time = tod.lstrip("0")
-
-    def __str__(self):
-        return "[%s] (%s)" % (self.location, self.period)
-
-
-
-
-# class GeneratedPoint(Point):
-
-#     def __init__(self, location, period, duration):
-#         self.location = location
-#         self.period = period
-#         self.duration = duration
-#         self.geohash = geohashes[self.location]
-#         self.unhash()
-#         x, y = geo.project((self.lon, self.lat))
-#         self.x = (x - MIN_X) / (MAX_X - MIN_X)
-#         self.y = (y - MIN_Y) / (MAX_Y - MIN_Y)   
-#         self.address = None
-#         self.display_time = None     
-
-#     def unhash(self):
-#         CHARMAP = "0123456789bcdefghjkmnpqrstuvwxyz"    # base32
-#         self.lon, self.lat = geo.geohash_decode("%s%s%s" % (self.geohash, CHARMAP[random.randint(0, len(CHARMAP) - 1)], CHARMAP[random.randint(0, len(CHARMAP) - 1)]))                
-
-
-
-def get_user(user_ids):
+# generator for retrieving user points from mongo
+def get_user_points(user_ids, period_size):
     location = {'$geoWithin': {'$geometry': {'type': "Polygon", 'coordinates': [[ [LON_1, LAT_1], [LON_2, LAT_1], [LON_2, LAT_2], [LON_1, LAT_2], [LON_1, LAT_1] ]]}}}
     for u, user_id in enumerate(user_ids):
         log.info("USER %s..." % user_id)
         cursor = db.entries.find({'user_id': user_id, 'location': location, 't': {'$gt': timeutil.timestamp(timeutil.string_to_dt(config['start_date'], tz="America/New_York")), '$lt': timeutil.timestamp(timeutil.string_to_dt(config['stop_date'], tz="America/New_York"))}}).sort('t')
-        points = [Point(point['location']['coordinates'][0], point['location']['coordinates'][1], point['t']) for point in cursor]
+        points = [Point(point['location']['coordinates'][0], point['location']['coordinates'][1], point['t'], period_size) for point in cursor]
         log.info("--> %d points" % len(points))
         yield user_id, points
     yield (None, None)
 
-def get_geohash_list(points):
-    geohashes = [point.geohash for point in points]
-    geohashes = list(set(geohashes))
-    geohashes.sort()
-    log.info("--> found %d locations" % len(geohashes))       
-    return geohashes
 
-def cluster(points):
-
-    log.info("Clustering...")
-
-    # find clusters within ~100ft
-    ct = Birch(n_clusters=None, threshold=0.01)
-    ct.fit(np.array([(point.x, point.y) for point in points]))
-    centroids = ct.subcluster_centers_
-    cluster_labels = ct.subcluster_labels_ # just consecutive
-    labels = ct.labels_
-    log.info("--> %d clusters" % len(centroids))    
-
-    for p, point in enumerate(points):
-        x, y = centroids[labels[p]]
-        x = (x * (MAX_X - MIN_X)) + MIN_X
-        y = (y * (MAX_Y - MIN_Y)) + MIN_Y
-        point.cluster = geo.unproject((x, y))
-        point.geohash = geo.geohash_encode((x, y), precision=LOCATION_SIZE)
-
-    # # get the size of each cluster
-    # cluster_sizes = [np.sum(labels == cluster_label) for cluster_label in cluster_labels]
-
-    # # get the order of clusters by size
-    # cluster_order = [(cluster_label, cluster_size) for (cluster_label, cluster_size) in enumerate(cluster_sizes)]
-    # cluster_order.sort(key=lambda x: x[1], reverse=True)
-    # cluster_order = [c[0] for c in cluster_order]
-    # cluster_order = [cluster_order.index(cluster_label) for cluster_label in cluster_labels]
-
-    # # store clusters
-    # clusters = {}
-    # for c, cluster_label in enumerate(cluster_labels):
-    #     clusters[cluster_label] = cluster_order[c]
-
-    # for p, point in enumerate(points):
-    #     point.cluster = clusters[labels[p]]
+class Point():
+    def __init__(self, lon, lat, t, period_size):
+        self.lon = lon
+        self.lat = lat
+        x, y = geo.project((self.lon, self.lat))
+        self.x = (x - MIN_X) / (MAX_X - MIN_X)
+        self.y = (y - MIN_Y) / (MAX_Y - MIN_Y)        
+        dt = timeutil.t_to_dt(t, tz="America/New_York")
+        self.period = ((dt.hour * 60) + (dt.minute)) // period_size
+        self.location = None
 
 
-def main(user_ids, draw=False):
+def main(user_ids, period_size, location_size, draw=False):
 
-    data = []
+    all_days = []
 
-    for (user_id, points) in get_user(user_ids):        
+    for (user_id, points) in get_user_points(user_ids, period_size):        
         if points is None or not len(points):
             continue
 
-        # distribute points to all periods
+        # cluster the points
+        ct = Birch(n_clusters=None, threshold=0.001)                 # clusters of points within ~100ft are likely the same location
+        ct.fit(np.array([(point.x, point.y) for point in points]))  # need to do this on normalized x,y
+        centroids = ct.subcluster_centers_
+        labels = ct.labels_
+        log.info("--> %d clusters" % len(centroids))    
+
+        # reassign point properties to cluster properties (spatial low-pass)
+        for p, point in enumerate(points):
+            point.x, point.y = centroids[labels[p]]
+            x = (point.x * (MAX_X - MIN_X)) + MIN_X
+            y = (point.y * (MAX_Y - MIN_Y)) + MIN_Y
+            lon, lat = geo.unproject((x, y))
+            point.lon = lon
+            point.lat = lat
+            point.location = geo.geohash_encode((point.lon, point.lat), precision=location_size).lstrip('dr')
+
+        # distribute points to all periods, toss transients (temporal low-pass)
+        periods = int(1440 / period_size)
         days = []
         p = 0
         mod = 0
         while True:
-            day = [None] * PERIODS
-            for period in range(PERIODS):
+            day = [None] * periods
+            for period in range(periods):
                 # take the most recent point in this period or earlier
                 # if two locations are visited within PERIOD, the first is supressed (good)
-                while points[p].period + mod <= period + (len(days) * PERIODS):
+                while points[p].period + mod <= period + (len(days) * periods):
                     p += 1
                     if p == len(points):
                         break
                     if points[p].period < points[p-1].period:
-                        mod += PERIODS
+                        mod += periods
                 if p == len(points):
                     break
                 day[period] = points[p-1 if p > 0 else 0]
@@ -170,42 +87,48 @@ def main(user_ids, draw=False):
                 break
             days.append(day)
 
-        # toss points that were too quick
-        points = [point for day in days for point in day]
-
-        # cluster the rest
-        cluster(points)
-
-        geohashes = get_geohash_list(points)     
-        for point in points:
-            point.location = geohashes.index(point.geohash)     
-
-        # output
+        # flatten to location
         for day in days:
-            output = " ".join([str(point.location) for point in day])
+            for p, point in enumerate(day):
+                day[p] = point.location
+
+        # monitor output
+        for day in days:
+            output = " ".join([location for period, location in enumerate(day)])
             print(output)
             print()
-        # if draw:
-        #     drawer.days(days, user_id)
+        if draw:
+            drawer.days(days, "user_%d_%d_%d" % (user_id, period_size, location_size))
+            drawer.map(days, "user_%d_%d_%d" % (user_id, period_size, location_size))
 
         log.info("--> total days for user %s: %d" % (user_id, len(days)))
-        data += [point for day in days for point in day]
+        all_days += days
 
-    # regenerate location labels globally
-    geohashes = get_geohash_list(data)
-    util.save("data/locations_%d_%d.pkl" % (PERIOD_SIZE, LOCATION_SIZE), geohashes)    
-    log.info("Labeling...")
-    for point in data:
-        point.location = geohashes.index(point.geohash)         
+    t = timeutil.timestamp()
+    # drawer.days(all_days[:1000], t)  # cairo has limits
 
-    drawer.map(data, 2)
-    drawer.days(days, 2)
+    # flatten into text
+    for day in all_days:
+        for period, location in enumerate(day):
+            day[period] = "%s:%s;" % (str(period).zfill(3), location)
+    output = "".join(["".join(day) for day in all_days])
 
-    util.save("data/points_%d_%d.pkl" % (PERIOD_SIZE, LOCATION_SIZE), data)
+    with open("data/%d_corpus_%d_%d_%s.txt" % (t, period_size, location_size, "all" if len(user_ids) > 1 else "1"), 'w') as f:
+        f.write(output)
     log.info("--> done")
 
 
 if __name__ == "__main__":
-    # users = util.load(config['users'])
-    # main(users, False)
-    main([1], True)
+    user_ids = util.load("data/user_ids_filtered.pkl")
+    try:
+        period_size = int(sys.argv[1])
+        location_size = int(sys.argv[2])
+        draw = sys.argv[3].lower() == "true"
+        if sys.argv[4] == "1":
+            user_ids = [1]
+            config['start_date'] = config['start_date_1']
+            config['stop_date'] = config['stop_date_1']
+    except IndexError:
+        print("[period_size] [location_size] [draw] [all|1]")
+        exit()    
+    main(user_ids, period_size, location_size, draw)    

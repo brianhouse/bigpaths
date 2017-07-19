@@ -1,4 +1,4 @@
-log: True
+log: False
 tail: True
 
 mongo:
@@ -17,16 +17,5 @@ bounds:
     - -73.699264
     - 40.538534
 
-period_size: 10
-location_size: 7
-
-epochs: 100
-batch_size: 64
-temperature: 0.01
-checkpoints: True
-
-autonomous: False
-
-users: data/user_ids_filtered.pkl
-locations: data/locations_10_7.pkl
-points: data/points_10_7.pkl
+torch-rnn: ../torch-rnn
+gpu: False

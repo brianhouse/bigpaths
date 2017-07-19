@@ -46,7 +46,9 @@ max_x, min_y = geo.project((max_lon, min_lat))
 
 ratio = (max_x - min_x) / (max_y - min_y)
 
-ctx = drawing.Context(1000, int(1000 / ratio), relative=True, flip=True, hsv=True)
+# ctx = drawing.Context(1000, int(1000 / ratio), relative=True, flip=True, hsv=True)
+ctx = drawing.Context(21600, int(21600 / ratio), relative=True, flip=True, hsv=True)
+SIZE = 5
 log.info("Drawing %d %d..." % (ctx.width, ctx.height))
 
 for point in points:
@@ -59,7 +61,11 @@ for point in points:
     x = (x - min_x) / (max_x - min_x)
     y = (y - min_y) / (max_y - min_y)
 
-    ctx.arc(x, y, SIZE / ctx.width, SIZE / ctx.height, fill=(colors[int(point[2]) % len(colors)]), thickness=0.0)
+    # ctx.arc(x, y, SIZE / ctx.width, SIZE / ctx.height, fill=(colors[int(point[2]) % len(colors)]), thickness=0.0)
+    ctx.arc(x, y, SIZE / ctx.width, SIZE / ctx.height, fill=(0., 0., 0., 0.5), thickness=0.0)
 
 ctx.output("cities")
 
+
+
+# 21,600 pixels 
