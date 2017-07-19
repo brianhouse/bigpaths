@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
 import subprocess, os, sys, datetime, urllib.parse
-from housepy import config, log, timeutil, geo
+from housepy import config, log, timeutil, geo, process
 from itinerarier import Point
 
+process.secure_pid(os.path.abspath(os.path.join(os.path.dirname(__file__), "run")))
 
 def generate(geohash):
     try:
