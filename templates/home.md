@@ -1,5 +1,5 @@
-# Following piece
-<span id="status"><a href="javascript:generateLocation();">Generate next location</a></span>  
+## FOLLOWING AI PIECE
+<div id="status"><a href="javascript:generateLocation();">Generate next location</a></div>  
 
 <div id="spinner" class="spinner"></div>
 

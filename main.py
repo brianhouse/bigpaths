@@ -20,20 +20,21 @@ class Home(server.Handler):
             lonlat = lonlat.split(',')
             lonlat.reverse()
             lonlat = [float(coord.strip()) for coord in lonlat]
-            current_geohash = [geo.geohash_encode(lonlat)]
-            for i in range(8 - len(current_geohash[0])):
-                current_geohash.append(random.choice("0123456789bcdefghjkmnpqrstuvwxyz"))            
-            current_geohash = str("".join(current_geohash))
+            current_geohash = geo.geohash_encode(lonlat, 8)
+            log.info("Got location: %s" % current_geohash)
             job_id = str(random.randint(0, 1000000))
             self.jobs.add(tube="generate", data={'job_id': job_id, 'geohash': current_geohash})
+            log.info("Sent job, waiting for generator...") 
             result = []
             def on_job(data):
                 if data['job_id'] == job_id:
-                    result.append(data['point'])
+                    result.append(data['point'])            
             while not len(result):
                 self.jobs.process(handler=on_job, tube="receive", num_jobs=1)    
             point = result.pop()                
-            return self.text("%s,%s" % (point.display_time, point.address))                
+            log.info("--> %s" % point.address)                                
+            text = "%s*%s" % (point.address, point.display_time)
+            return self.text(text)
         except Exception as e:
             log.error(log.exc(e))
         return self.text("OK")
