@@ -1,11 +1,17 @@
 body {
     font-family: "Menlo", "monaco", monospace;
     margin: 50px;
+    margin-top: 0px;
 }
 
 h2 {
-    padding-top: 30px;
-    margin-bottom: 50px;
+    margin-top: 50px;
+    margin-bottom: 30px;
+}
+
+h3 {
+    margin-top: 50px;
+    margin-bottom: 30px;
 }
 
 div {
