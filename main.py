@@ -29,7 +29,7 @@ class Home(server.Handler):
             log.info("Sent job, waiting for generator (%s)..." % job_id) 
             result = []
             def on_job(data):
-                log.info("--> got %s" % job_id)
+                log.info("--> got %s" % data['job_id'])
                 if data['job_id'] == job_id:
                     result.append(data['point'])            
             while not len(result):
