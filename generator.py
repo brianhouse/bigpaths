@@ -17,7 +17,7 @@ def generate(geohash):
         seed = "".join(["%s:%s;" % (current_period - (2 - i), current_geohash) for i in range(3)])        
         log.info("Seed: %s" % seed)
         log.info("Generating output...")
-        p = subprocess.run(["th", "sample.lua", 
+        p = subprocess.run([config['torch-bin'], "sample.lua", 
                         "-checkpoint", os.path.join(root, "data", "%s.t7" % slug),
                         "-length", str((3 + 1 + 6 + 1) * 144),  # next 24 hours
                         "-gpu", "0" if config['gpu'] else "-1",

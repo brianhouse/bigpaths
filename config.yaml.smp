@@ -1,6 +1,15 @@
 log: False
 tail: True
 
+server:
+  port: 8000
+
+beanstalk:
+    address: 0.0.0.0
+    port: 11300
+    bin: /usr/local/bin/beanstalkd
+    pid: /Users/house/Projects/bigpaths/run/beanstalkd.pid
+
 mongo:
     host: localhost
     port: 27017
@@ -19,3 +28,4 @@ bounds:
 
 torch-rnn: ../torch-rnn
 gpu: False
+torch-bin: th
