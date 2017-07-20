@@ -6,8 +6,6 @@ import drawer
 from housepy import config, log, geo, timeutil
 from interpreter import parse
 
-random.seed(42)
-
 LON_1, LAT_1 = config['bounds']['NW']
 LON_2, LAT_2 = config['bounds']['SE']
 MIN_X, MAX_Y = geo.project((LON_1, LAT_1))
