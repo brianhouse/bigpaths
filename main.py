@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 
 import subprocess, os, sys, datetime, urllib.parse, random, markdown
-from housepy import config, log, timeutil, geo, server, jobs, process
+from housepy import config, log, timeutil, geo, server, jobs
 from itinerarier import Point
-
-process.secure_pid(os.path.abspath(os.path.join(os.path.dirname(__file__), "run")))
 
 class Home(server.Handler):
 
