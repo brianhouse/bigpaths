@@ -26,9 +26,10 @@ class Home(server.Handler):
             log.info("Got location: %s" % current_geohash)
             job_id = str(random.randint(0, 1000000))
             self.jobs.add(tube="generate", data={'job_id': job_id, 'geohash': current_geohash})
-            log.info("Sent job, waiting for generator...") 
+            log.info("Sent job, waiting for generator (%s)..." % job_id) 
             result = []
             def on_job(data):
+                log.info("--> got %s" % job_id)
                 if data['job_id'] == job_id:
                     result.append(data['point'])            
             while not len(result):
