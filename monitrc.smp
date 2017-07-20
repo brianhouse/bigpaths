@@ -1,0 +1,14 @@
+set logfile /home/ubuntu/bigpaths/logs/monit.log
+
+set daemon 120
+
+set httpd port 2812 and use address localhost
+  allow localhost
+
+check process main_bigpaths with pidfile /var/run/bigpaths_web.pid
+  start program = "/home/ubuntu/bigpaths/start_web.sh start"
+  stop program = "/home/ubuntu/bigpaths/start_web.sh stop"
+
+check process main_generator with pidfile /var/run/bigpaths_generator.pid
+  start program = "/home/ubuntu/bigpaths/start_generator.sh start"
+  stop program = "/home/ubuntu/bigpaths/start_generator.sh stop"
