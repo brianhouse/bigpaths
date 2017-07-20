@@ -60,7 +60,7 @@ if __name__ == "__main__":
     root = os.path.abspath(os.path.dirname(__file__))
 
     if len(sys.argv) == 3:
-        point = generate(geohash)
+        point = generate(sys.argv[2])
         if point is not None:
             result = "Next location: %s at %s" % (point.address, point.display_time)
             log.debug(result)
