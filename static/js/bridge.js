@@ -24,11 +24,15 @@ function receiveLocation(location) {
 function generateNext(lat, lon) {
     $('#status').html(current + "  <br /><br />Generating next location...<span id='spinner'></span>");
     $.get("/" + lat + "," + lon, function(data) {
-        data = data.split('*')
-        var location = data[0];
-        var time = data[1];
-        next = "AI next location: <a href='https://www.google.com/maps/place/" + location + "' target='_blank'>" + location + "</a> at " + time;
-        $('#status').html(current + "<br /><br />" + next);
+        if (data == "NA") {
+            $('#status').html("Only works within NYC, sorry.");
+        } else {
+            data = data.split('*')
+            var location = data[0];
+            var time = data[1];
+            next = "AI next location: <a href='https://www.google.com/maps/place/" + location + "' target='_blank'>" + location + "</a> at " + time;
+            $('#status').html(current + "<br /><br />" + next);
+        }
     });            
 }
 

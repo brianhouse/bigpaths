@@ -4,6 +4,9 @@ import subprocess, os, sys, datetime, urllib.parse, random, markdown
 from housepy import config, log, timeutil, geo, server, jobs
 from itinerarier import Point
 
+LON_1, LAT_1 = config['bounds']['NW']
+LON_2, LAT_2 = config['bounds']['SE']
+
 class Home(server.Handler):
 
     def get(self, lonlat=None):
@@ -20,6 +23,9 @@ class Home(server.Handler):
             lonlat = lonlat.split(',')
             lonlat.reverse()
             lonlat = [float(coord.strip()) for coord in lonlat]
+            lon, lat = lonlat
+            if lon < LON_1 or lon > LON_2 or lat > LAT_1 or lat < LAT_2:
+                return self.text("NA")
             current_geohash = geo.geohash_encode(lonlat, 8)
             log.info("Got location: %s" % current_geohash)
             job_id = str(random.randint(0, 1000000))
