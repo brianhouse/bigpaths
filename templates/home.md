@@ -19,9 +19,9 @@ I used these data to train a deep learning algorithm, producing an AI that when 
 
 /
 
-The plan, from here, is to use this for a durational performance in NYC. I'll follow the AI for a week, riffing (again) on its rhythms. Taking a cue from [Sophie Calle](http://www.artcritical.com/2015/07/16/emmalea-russo-on-sophie-calle/), I'll get as close as I can to the individuals behind it -- I'll photograph what might be their workplace, their favorite coffee shop or dreaded clinic, or imagine that they might live behind this unmarked door -- while simultaneously (re-)inscribing these locations with my own experiences.
+The plan, from here, is to use this for a durational performance in NYC. I'll follow the AI for a week, riffing (again) on its rhythms. Taking a cue from [Sophie Calle](http://www.artcritical.com/2015/07/16/emmalea-russo-on-sophie-calle/), I'll get as close as I can to the individuals behind it -- I'll photograph what might be their workplace, their favorite coffee shop or dreaded clinic, or imagine that they might live behind this unmarked door -- while simultaneously (re-)inscribing these locations with my own lived experiences.
 
-I'm rehearsing with an ensemble that might be obfuscated but which is neither abstract nor neutral. As Vito says, "I am almost not an 'I' anymore; I put myself in the service of this scheme." He consciously surrendered control. As AI moves into everyday life, will we?
+I'm rehearsing with an ensemble that might be obfuscated but which is neither abstract nor neutral. Vito said, "I am almost not an 'I' anymore; I put myself in the service of this scheme." He consciously surrendered control. As AI moves into everyday life, do we?
 
 
 ### Technical
