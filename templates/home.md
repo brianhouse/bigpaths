@@ -3,7 +3,7 @@
 
 ### Concept
 
-Over a period of one year, I continuously track the GPS location of 107 anonymous volunteers in NYC, at all times, via a custom mobile app. 
+Over a period of one year, I continuously track the GPS location of ~1000 anonymous volunteers in NYC, at all times, via a custom mobile app. 
 
 I use these data to train a deep neural network, an artificial intelligence algorithm similar to what is used for self-driving cars, realistic computer voices, predictive policing, and myriad other emerging applications. 
 
