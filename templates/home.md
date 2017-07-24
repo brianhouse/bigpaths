@@ -16,6 +16,11 @@ The intelligence of AI is not spontaneous, but enculturated. It is uncanny not b
 A dataset of movement around the city means that trace is literal. In following it, I experience something neither abstract nor neutral, but a repetition, with difference, of what came before.
 
 
+### Output
+
+I'd like to exhibit the documentation (photography / journal text) of the performance in a traditional format, more or less inspired by Calle: [1](https://static1.squarespace.com/static/538a508ee4b00fa9a361f222/53d40ccce4b0463ccf67ea9b/53d41327e4b08d13cf408100/1406414027616/watchmen2014_sophie_calle_theshadow_web.jpg), [2](http://www.dailyserving.com/wp-content/uploads/2013/11/Lourdes-SC-PCG-534-2013_3_SP.jpg)
+
+
 ### Tech
 
 Data was collected via a project on the [OpenPaths](https://openpaths.cc) platform. **
