@@ -9,7 +9,7 @@ I use these data to train a deep neural network, an artificial intelligence algo
 
 This algorithm is subsequently able to generate new paths around NYC that synthesize the daily behaviors of the volunteers. 
 
-In the spirit of Vito Acconci's [Following Piece](http://www.metmuseum.org/art/collection/search/283737) or Sophie Calle's [Suite Vénitienne](http://www.artcritical.com/2015/07/16/emmalea-russo-on-sophie-calle/), I then follow this path through the city for one week, documenting as I go the daily life I encounter, and (re-)inscribing these times and places with my own lived experience.
+In the spirit of Vito Acconci's [Following Piece](https://www.moma.org/collection/works/146947) or Sophie Calle's [Suite Vénitienne](http://www.artcritical.com/2015/07/16/emmalea-russo-on-sophie-calle/), I then follow this path through the city for one week, documenting as I go the daily life I encounter, and (re-)inscribing these times and places with my own lived experience.
 
 The intelligence of AI is not spontaneous, but enculturated. It is uncanny not because it acts _as if_ it were human, but because it _is_ humans. AI is an ensemble of embodied experiences. These may be subsumed into the whole, but the whole is a trace of its parts.
 
