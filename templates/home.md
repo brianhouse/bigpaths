@@ -20,7 +20,7 @@ A dataset of movement around the city means that trace is literal. In following 
 
 Data was collected via a project on the [OpenPaths](https://openpaths.cc) platform. **
 
-The model was trained using [Torch](http://torch.ch/) and a two-layer recurrent neural network ([LSTM](https://en.wikipedia.org/wiki/Long_short-term_memory)) running on an Amazon EC2 instance with GPU acceleration (NVIDIA K80). Training took about a day. It has a sequence history of around two hours, meaning that it readily demonstrates a concept of "home" and "work", for example, but it won't remember where these places were the prior day, or even before lunch.
+The model was trained using [Torch](http://torch.ch/) and a two-layer recurrent neural network ([LSTM](https://en.wikipedia.org/wiki/Long_short-term_memory)) running on an Amazon EC2 instance with GPU acceleration (NVIDIA TESLA K80). Training took about a day. It has a sequence history of around two hours, meaning that it readily demonstrates a concept of "home" and "work", for example, but it won't remember where these places were the prior day, or even before lunch.
 
 This service is running on a (lower-powered) EC2 instance via nginx/Tornado with a message queue for LuaJIT generation from the trained model.
 
