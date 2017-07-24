@@ -3,37 +3,29 @@
 
 ### Concept
 
-An AI often uses data from a large group of people to learn how to behave. 
+Over a period of one year, I continuously track the GPS location of 107 anonymous volunteers in NYC, at all times, via a custom mobile app. 
 
-The specifics of those people -- who they are, their individual experiences, their collective biases -- are obscured. An AI seems like a "black box" without a body, and gives the impression that its intelligence is spontaneous, rather than enculturated.
+I use these data to train a deep neural network, an artificial intelligence algorithm similar to what is used for self-driving cars, realistic computer voices, predictive policing, and myriad other emerging applications. 
 
-But the uncanniness of an AI is not that it acts _as if_ it were human, but that it _is_ human. It is an ensemble of embodied experiences whose parts may be subsumed into the whole, but of which that whole is still a trace.
+This algorithm is subsequently able to generate new paths around NYC that synthesize the daily behaviors of the volunteers. 
 
-That trace might become literal, given a dataset of movement around the city. In 1969, Vito Acconci [followed](http://www.metmuseum.org/art/collection/search/283737) stangers around NYC streets, surrendering to their logics of navigating public space. What if I did the same with an AI? That is, follow an AI that is itself following hundreds of people, at once, having amalgamated their tracks into its own "novel" idea of NYC life?
+In the spirit of Vito Acconci's [Following Piece](http://www.metmuseum.org/art/collection/search/283737) or Sophie Calle's [Suite Vénitienne](http://www.artcritical.com/2015/07/16/emmalea-russo-on-sophie-calle/), I then follow this path through the city for one week, documenting as I go the daily life I encounter, and (re-)inscribing these times and places with my own lived experience.
 
-/
+The intelligence of AI is not spontaneous, but enculturated. It is uncanny not because it acts _as if_ it were human, but because it _is_ humans. AI is an ensemble of embodied experiences. These may be subsumed into the whole, but the whole is a trace of its parts.
 
-Using a mobile app, I collected continuous location data on 606 anonymous volunteers living in NYC over a three year period. Whenever any of them moved further than 100ft I logged a point. Segmenting them into "days" -- the path of a single individual over a 24-hour period -- gave me a training set of half a million examples of daily routines.  
-
-I used these data to train a deep learning algorithm, producing an AI that when given a location knows where (and when) to go next.
-
-/
-
-The plan, from here, is to use this for a durational performance in NYC. I'll follow the AI for a week, riffing (again) on its rhythms. Taking a cue from [Sophie Calle](http://www.artcritical.com/2015/07/16/emmalea-russo-on-sophie-calle/), I'll get as close as I can to the individuals behind it -- I'll photograph what might be their workplace, their favorite coffee shop or dreaded clinic, or imagine that they might live behind this unmarked door -- while simultaneously (re-)inscribing these locations with my own lived experiences.
-
-I'm rehearsing with an ensemble that might be obfuscated but which is neither abstract nor neutral. Vito said, "I am almost not an 'I' anymore; I put myself in the service of this scheme." He consciously surrendered control. As AI moves into everyday life, do we?
+A dataset of movement around the city means that trace is literal. In following it, I experience something neither abstract nor neutral, but a repetition, with difference, of what came before.
 
 
-### Technical
+### Tech
 
 Data was collected via a project on the [OpenPaths](https://openpaths.cc) platform. **
 
-The model was trained using [Torch](http://torch.ch/) and a two-layer recurrent neural network ([LSTM](https://en.wikipedia.org/wiki/Long_short-term_memory)) running on an Amazon EC2 instance with GPU acceleration (NVIDIA K80). Training took about a day.  
+The model was trained using [Torch](http://torch.ch/) and a two-layer recurrent neural network ([LSTM](https://en.wikipedia.org/wiki/Long_short-term_memory)) running on an Amazon EC2 instance with GPU acceleration (NVIDIA K80). Training took about a day. It has a sequence history of around two hours, meaning that it readily demonstrates a concept of "home" and "work", for example, but it won't remember where these places were the prior day, or even before lunch.
 
 This service is running on a (lower-powered) EC2 instance via nginx/Tornado with a message queue for LuaJIT generation from the trained model.
 
 
-### Etc
+### Who
 
 Research by [Brian House](http://brianhouse.net).
 
