@@ -29,6 +29,7 @@ def generate(geohash):
         result = result.replace(seed, "")
 
         tokens = result.split(';')
+        log.debug(tokens)
         points = [token.split(':') for token in tokens]
         points = [Point(int(point[0]), point[1], False) for point in points if len(point) == 2 and len(point[1]) == 6]
 
