@@ -34,7 +34,7 @@ def generate(geohash):
         points = [Point(int(point[0]), point[1], False) for point in points if len(point) == 2 and len(point[1]) == 6]
 
         i = 0
-        while i < len(points) - 1 and points[i].geohash == "dr" + current_geohash:
+        while i < len(points) - 1 and points[i].geohash[:-1] == "dr" + current_geohash[:-1]:
             i += 1
         point = points[i]
         log.info("--> %s" % point.geohash)
