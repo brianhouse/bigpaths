@@ -27,7 +27,7 @@ class Point():
             self.geohash = ["dr", geohash]
             for i in range(7 - len(geohash)): # rather than assume it's always the center of the geohash, let's add some stochastics
                 self.geohash.append(random.choice("0123456789bcdefghjkmnpqrstuvwxyz"))
-            self.geohash = str("".join(self.geohash))[:-1]
+            self.geohash = str("".join(self.geohash))
             Point.geohashes[geohash] = self.geohash
         self.lon, self.lat = geo.geohash_decode(self.geohash)
         x, y = geo.project((self.lon, self.lat))
