@@ -30,7 +30,6 @@ class Point():
             self.geohash = str("".join(self.geohash))
             Point.geohashes[geohash] = self.geohash
         self.lon, self.lat = geo.geohash_decode(self.geohash)
-        self.geohash = self.geohash[:-1]
         x, y = geo.project((self.lon, self.lat))
         self.x = (x - MIN_X) / (MAX_X - MIN_X)
         self.y = (y - MIN_Y) / (MAX_Y - MIN_Y) 
