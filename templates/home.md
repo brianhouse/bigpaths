@@ -1,5 +1,5 @@
-## FOLLOWING PIECE
-<div id="status"><a href="javascript:getLocation();">Generate next location</a></div>  
+## EVERYTHING THAT HAPPENS WILL HAPPEN TODAY
+<!-- <div id="status"><a href="javascript:getLocation();">Generate next location</a></div>   -->
 
 ### Concept
 
@@ -35,3 +35,5 @@ This service is running on a (lower-powered) EC2 instance via nginx/tornado with
 Research by [Brian House](http://brianhouse.net).
 
 ** Incidentally, I co-founded OP and coded the platform, but Ive not been directly involved since 2012. It is unfortunately rotting away, but still collects good data from a large number (8k+) of users. I would love for it or an alternative to be revived for art/research like this.
+
+*** Apologies to David Byrne and Brian Eno for the title
