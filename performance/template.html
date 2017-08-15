@@ -10,33 +10,40 @@
 {% for entry in entries %}
 
 
-    <div class="entry">
-        <div class="caption">
-            {{ entry.time }}<br />
-            {{ entry.address }}: {{ entry.place }}<br />
+    <!-- <div class="entry"> -->
+    <div class="entry caption">
+        {{ entry.time }}<br />
+        {{ entry.address }}: {{ entry.place }}<br />
+        {% if entry.action != 'SKIP' %}
+        <br />
+        {{ entry.action }}
+        {% endif %}
+        {% if entry.observation != 'SKIP' %}
             <br />
-            {{ entry.action }}
-            {% if entry.observation != 'SKIP' %}
-                <br />
-                <br />
-                {{ entry.observation }}
-            {% endif %}
-        </div>
-    {% for image in entry.images %}
-        <img src="images/{{ image }}" {% if not loop.last %}style="margin-bottom: 20px;"{% endif %} />        
-    {% endfor %}
+            <br />
+            {{ entry.observation }}
+        {% endif %}
     </div>
 
-    <div class="entry">
-        <div class="caption">
+    {% for image in entry.images %}
+        {% if image is not none %}
+        <img class="entry" src="images/{{ image }}" {% if not loop.last %}style="margin-bottom: 20px;"{% endif %} />        
+        {% endif %}
+    {% endfor %}
+
+    {% if entry.transition != "SLEEP" %}
+
+        <div class="entry caption">
             At {{ entry.transition.time }} {{ entry.transition.mode }}
         </div>
+
         {% for image in entry.transition.images %}
             {% if image is not none %}
-                <img src="images/{{ image }}" {% if not loop.last %}style="margin-bottom: 20px;"{% endif %} />        
+                <img class="entry" src="images/{{ image }}" />        
             {% endif %}
         {% endfor %}
-    </div>
+
+    {% endif %}
 
 {% endfor %}
 

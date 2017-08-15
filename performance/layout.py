@@ -24,6 +24,7 @@ def adjust(text):
 
 def parse(days):
     output = []
+    previous_time = None
     for day in days:
         entries = days[day]
         for entry in entries:
@@ -33,20 +34,28 @@ def parse(days):
                     error = field
                     break
             try:
-                entry['time'] = entry['time'].strftime("%A, %I:%M%p").replace(" 0", " ").replace("AM", "am").replace("PM", "pm")
+                if entry['time'] == "WAKE":
+                    if previous_time.hour < 8:
+                        entry['time'] = previous_time.strftime("%A")
+                    else:
+                        entry['time'] = (previous_time + datetime.timedelta(days=1)).strftime("%A")
+                else:
+                    previous_time = entry['time']
+                    entry['time'] = entry['time'].strftime("%A, %I:%M%p").replace(" 0", " ").replace("AM", "am").replace("PM", "pm")                    
             except Exception as e:
                 error = e
             if not error:
-                for field in transition_fields:
-                    if field not in entry['transition'] or entry['transition'][field] is None or not len(str(entry['transition'][field]).strip()):
-                        error = "transition " + field
-                        break
-            try:
-                entry['transition']['time'] = entry['transition']['time'].strftime("%I:%M%p").lstrip("0").replace("AM", "am").replace("PM", "pm")
-            except Exception as e:
-                error = e                
+                if entry['transition'] != "SLEEP":
+                    for field in transition_fields:
+                        if field not in entry['transition'] or entry['transition'][field] is None or not len(str(entry['transition'][field]).strip()):
+                            error = "transition " + field
+                            break
+                    try:
+                        entry['transition']['time'] = entry['transition']['time'].strftime("%I:%M%p").lstrip("0").replace("AM", "am").replace("PM", "pm")
+                    except Exception as e:
+                        error = e                
             if error:
-                print(json.dumps(entry, indent=4))
+                print(json.dumps(entry, indent=4, default=lambda x: str(x)))
                 print("Missing %s" % error)
                 return output
             print(json.dumps(entry, indent=4))

@@ -1,23 +1,23 @@
 body {
-    margin-top: 50px;
-    /*font-family: 'Source Code Pro', monospace;*/
+    margin-top: 20px;
+    margin-left: 20px;
     font-family: monospace;    
-    /*line-height: 16px;*/
-}
-
-.caption {
-    padding: 20px;
-    width: 260px;
 }
 
 .entry {
-    display: inline-block;
+    display: relative;
+    float: left;
     padding: 0px;
-    border: 1px solid black;
     min-width: 300px;
     max-width: 400px;
-    margin-bottom: 50px;
-    margin-right: 50px;
+    margin-right: 20px;
+    margin-bottom: 20px;
+}
+
+.caption {
+    border: 1px solid black;
+    padding: 20px;
+    width: 358px;
 }
 
 img {
