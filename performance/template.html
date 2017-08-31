@@ -6,17 +6,19 @@
 </head>
 <body>
 
+<h1>Everything That Happens Will Happen Today</h1>
 
 {% for entry in entries %}
 
 
     <!-- <div class="entry"> -->
     <div class="entry caption">
-        {{ entry.time }}<br />
-        {{ entry.address }}: {{ entry.place }}<br />
+        {{ entry.time }}
+        {% if entry.address != 'SKIP' %}<br />{{ entry.address }}: {{ entry.place }}{% endif %}
         {% if entry.action != 'SKIP' %}
-        <br />
-        {{ entry.action }}
+            <br />
+            <br />
+            {{ entry.action }}
         {% endif %}
         {% if entry.observation != 'SKIP' %}
             <br />
@@ -31,19 +33,29 @@
         {% endif %}
     {% endfor %}
 
+    <div class="spacer"></div>
+
     {% if entry.transition != "SLEEP" %}
 
-        <div class="entry caption">
+        <div class="entry">
             At {{ entry.transition.time }} {{ entry.transition.mode }}
-        </div>
 
         {% for image in entry.transition.images %}
             {% if image is not none %}
-                <img class="entry" src="images/{{ image }}" />        
+                <img src="images/{{ image }}" />        
+                {% if not loop.last %}
+                <br /><br />
+                {% endif %}
             {% endif %}
         {% endfor %}
 
+        </div>
+
+
+
     {% endif %}
+
+    <div class="spacer"></div>
 
 {% endfor %}
 

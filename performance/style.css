@@ -5,22 +5,33 @@ body {
 }
 
 .entry {
-    display: relative;
+/*    display: relative;
     float: left;
-    padding: 0px;
-    min-width: 300px;
-    max-width: 400px;
-    margin-right: 20px;
-    margin-bottom: 20px;
+*/    padding: 0px;
+/*    min-width: 300px;
+    max-width: 420px;
+*/    /*margin-right: 20px;*/
+    /*margin-bottom: 20px;*/
+        float: left;
 }
 
 .caption {
     border: 1px solid black;
     padding: 20px;
-    width: 358px;
+    width: 448px;
+    height: 308px;
 }
 
 img {
-    max-width: 400px;
-    max-height: 400px;
+    height: 350px;
+    margin-right: 20px;
+/*    max-width: 420px;
+    max-height: 420px;
+*/    /*max-height: 300px;*/
+    /*display: none;*/
+}
+
+.spacer {
+    clear: both;
+    height: 50px;
 }

@@ -5,6 +5,7 @@ import yaml, json, datetime, jinja2
 fields = ['time', 'address', 'place', 'action', 'observation', 'images', 'transition']
 transition_fields = ['time', 'mode', 'images']
 
+images = []
 
 def render(template_name, template_values=None, **kwargs):
     if type(template_values) == dict:
@@ -16,10 +17,11 @@ def render(template_name, template_values=None, **kwargs):
     return output        
 
 def adjust(text):
-    text = text.replace(" -- ", "&mdash;")
+    text = text.replace(" -- ", "&mdash;&mdash;")
     text = text.replace("'", "&rsquo;")
     text = text.replace(".JPG", ".jpg")
     text = text.replace(".TIF", ".jpg")
+    text = text.replace(".dng", ".jpg")
     return text
 
 def parse(days):
@@ -39,6 +41,7 @@ def parse(days):
                         entry['time'] = previous_time.strftime("%A")
                     else:
                         entry['time'] = (previous_time + datetime.timedelta(days=1)).strftime("%A")
+                    entry['address'] = 'SKIP'
                 else:
                     previous_time = entry['time']
                     entry['time'] = entry['time'].strftime("%A, %I:%M%p").replace(" 0", " ").replace("AM", "am").replace("PM", "pm")                    
@@ -60,8 +63,13 @@ def parse(days):
                 return output
             print(json.dumps(entry, indent=4))
             print("GOOD")
+            for image in entry['images']:
+                images.append(image)
+            if 'images' in entry['transition']:
+                for image in entry['transition']['images']:
+                    images.append(image)
             output.append(json.loads(adjust(json.dumps(entry))))
-    return output
+    return output, images
 
 
 with open("master_narrative.yaml") as f:
@@ -70,8 +78,13 @@ with open("master_narrative.yaml") as f:
     except yaml.parser.ParserError as e:
         print(e)
         exit()
-output = parse(days)
+output, images = parse(days)
 
 result = render("template.html", entries=output)
 with open("index.html", 'w') as f:
     f.write(result)
+
+with open("used_images.txt", 'w') as f:
+    for image in images:
+        if image is not None:
+            f.write(adjust(image) + "\n")
